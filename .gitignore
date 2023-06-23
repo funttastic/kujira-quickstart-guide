@@ -1,0 +1,21 @@
+# Client
+shared/client/conf/**
+!shared/client/conf/connectors
+!shared/client/conf/strategies
+!/shared/client/conf/strategies/kujira_pmm_strategy_example.yml
+
+shared/client/logs/**
+!shared/client/logs/.keep
+
+shared/client/data/**
+!shared/client/data/.keep
+
+# Common
+shared/common/certs/**
+
+# Gateway
+shared/gateway/conf/**
+!shared/gateway/conf/.keep
+
+shared/gateway/logs/**
+!shared/gateway/logs/.keep
