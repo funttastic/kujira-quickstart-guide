@@ -168,15 +168,15 @@ RUN <<-EOF
 	/var/lib/gateway
 EOF
 
-#RUN <<-EOF
-#	apt autoremove -y
-#
-#	apt clean autoclean
-#
-#	rm -rf \
-#		/var/lib/apt/lists/* \
-#		/etc/apt/sources.list \
-#		/etc/apt/sources.list.d/*
-#EOF
+RUN <<-EOF
+	apt autoremove -y
+
+	apt clean autoclean
+
+	rm -rf \
+		/var/lib/apt/lists/* \
+		/etc/apt/sources.list \
+		/etc/apt/sources.list.d/*
+EOF
 
 CMD /root/miniconda3/envs/hummingbot/bin/python3 /root/bin/hummingbot_quickstart.py

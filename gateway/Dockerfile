@@ -52,15 +52,15 @@ RUN cp -R /root/src/templates/* /root/conf/
 RUN yarn
 RUN yarn build
 
-#RUN <<-EOF
-#	apt autoremove -y
-#
-#	apt clean autoclean
-#
-#	rm -rf \
-#		/var/lib/apt/lists/* \
-#		/etc/apt/sources.list \
-#		/etc/apt/sources.list.d/*
-#EOF
+RUN <<-EOF
+	apt autoremove -y
+
+	apt clean autoclean
+
+	rm -rf \
+		/var/lib/apt/lists/* \
+		/etc/apt/sources.list \
+		/etc/apt/sources.list.d/*
+EOF
 
 CMD ["yarn", "start"]

@@ -19,8 +19,8 @@ Run:
 
 to create a Client instance. Follow the instructions on the screen.
 
-Important: it is needed to be located in the scripts folders, seeing the client folder, otherwise the Dockerfile
-will not be able to copy the required files.
+**Important**: it is needed to be located in the scripts folders, seeing the client folder, otherwise the Dockerfile
+will not be able to copy the required files and attach to the required folders.
 
 ### Configuration
 
@@ -42,8 +42,8 @@ Run:
 to create a Gateway instance. Follow the instructions on the screen
 and enter the same passphrase created when configuring the Client.
 
-Important: it is needed to be located in the scripts folders, seeing the gateway folder, otherwise the Dockerfile
-will not be able to copy the required files.
+**Important**: it is needed to be located in the scripts folders, seeing the client folder, otherwise the Dockerfile
+will not be able to copy the required files and attach to the required folders.
 
 ### Configuration
 
@@ -67,8 +67,8 @@ After the wallet configuration check if it is working with:
 
 You should see the balances of each token you have in your wallet.
 
-Important: before running the script, check if you have a minimal balance in the two tokens
-for the target market. For example, if the market is DEMO-USK, it is needed to have a minimal
+**Important**: before running the script, check if you have a minimal balance in the base and quote tokens
+of the market. For example, if the market is DEMO-USK, it is needed to have a minimal
 amount in DEMO and USK tokens. Also, it is needed to have a minimum amount of KUJI tokens
 to pay the transaction fees.
 
@@ -90,18 +90,23 @@ Or try this link:
 
 Then you can use the following command there:
 
-> !faucet <change to your kujira wallet address here>
+> !faucet &lt;change to your kujira wallet address here&gt;
 
 After that you should receive some Kujira tokens on your balance.
+
+If you need more you can contact us here:
+
+> https://discord.gg/6CxA7PWV
 
 ### How to use Testnet instead of Mainnet? (optional)
 
 If you would like to start with testnet, which is the recommended, instead of mainnet, 
-you can change this configuration in this file below:
+you can change the network in the file below:
 
 > shared/gateway/conf/kujira.yml
 
 You can also use your preferred RPC if you want.
+In this case you'll need to set the "nodeURL" property accordingly.
 
 ### Running a PMM Script
 
@@ -122,7 +127,7 @@ It is possible to check the logs on the right side of the Client screen or by th
 > tail -f shared/client/logs/* shared/gateway/logs/*
 
 It's also a good idea to check from the Kujira Fin app if the orders are being created and replaced there
-(make sure you're checking the correct RPC and network (mainnet or testnet)):
+(make sure you're checking the correct network (mainnet or testnet) and the correct RPC (usually located in the bottom of the page)):
 
 > https://fin.kujira.app/
 
@@ -151,6 +156,6 @@ It is possible to check the logs on the right side of the Client screen or by th
 > tail -f shared/client/logs/* shared/gateway/logs/*
 
 It's also a good idea to check from the Kujira Fin app if the orders are being created and replaced there
-(make sure you're checking the correct RPC and network (mainnet or testnet)):
+(make sure you're checking the correct network (mainnet or testnet) and the correct RPC (usually located in the bottom of the page)):
 
 > https://fin.kujira.app/
