@@ -7,7 +7,7 @@ It's very recommended to watch this video from the Hummingbot Foundation and the
  - https://docs.hummingbot.org/quickstart/
 
 ## Prerequisites:
-- Docker
+- [Docker](how-to-install-docker.md)
 
 ## Client
 
