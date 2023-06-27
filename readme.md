@@ -96,7 +96,7 @@ After that you should receive some Kujira tokens on your balance.
 
 If you need more you can contact us here:
 
-> https://discord.gg/6CxA7PWV
+> [https://www.funttastic.com/discord](https://www.funttastic.com/discord)
 
 ### How to use Testnet instead of Mainnet? (optional)
 
