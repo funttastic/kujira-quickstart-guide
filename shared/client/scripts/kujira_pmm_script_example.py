@@ -48,7 +48,7 @@ class KujiraPMMExample(ScriptStrategyBase):
                 "chain": "kujira",
                 "network": "testnet",
                 "connector": "kujira",
-                "owner_address": os.environ["TEST_KUJIRA_WALLET_PUBLIC_KEY"],
+                "owner_address": None,
                 "markets": {
                     "kujira_kujira_testnet": [  # Only one market can be used for now
                         # "KUJI-DEMO",  # "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
@@ -155,8 +155,8 @@ class KujiraPMMExample(ScriptStrategyBase):
             # self._connector: GatewayCLOBSPOT = self.connectors[self._connector_id]
             self._gateway: GatewayHttpClient = GatewayHttpClient.get_instance()
 
-            # self._owner_address = self._connector.address
-            self._owner_address = self._configuration["owner_address"]
+            self._owner_address = self._connector.address
+            # self._owner_address = os.environ["TEST_KUJIRA_WALLET_PUBLIC_KEY"]
 
             self._market = await self._get_market()
 
