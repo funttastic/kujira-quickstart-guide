@@ -1,7 +1,6 @@
 import asyncio
 import copy
 import math
-import os
 import time
 import traceback
 from decimal import Decimal
@@ -13,7 +12,6 @@ from typing import Any, Dict, List, Union
 
 import jsonpickle
 import numpy as np
-
 from hummingbot.client.hummingbot_application import HummingbotApplication
 from hummingbot.connector.gateway.clob_spot.data_sources.kujira.kujira_constants import KUJIRA_NATIVE_TOKEN
 from hummingbot.connector.gateway.clob_spot.data_sources.kujira.kujira_helpers import (
