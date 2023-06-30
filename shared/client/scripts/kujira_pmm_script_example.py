@@ -143,8 +143,8 @@ class KujiraPMMExample(ScriptStrategyBase):
 
             self.logger().setLevel(self._configuration["logger"].get("level", "INFO"))
 
-            # await super().initialize(start_command)
-            # self.initialized = False
+            await super().initialize(start_command)
+            self.initialized = False
 
             self._connector_id = next(iter(self._configuration["markets"]))
 
@@ -152,7 +152,7 @@ class KujiraPMMExample(ScriptStrategyBase):
             self._market_name = convert_hb_trading_pair_to_market_name(self._hb_trading_pair)
 
             # noinspection PyTypeChecker
-            # self._connector: GatewayCLOBSPOT = self.connectors[self._connector_id]
+            self._connector: GatewayCLOBSPOT = self.connectors[self._connector_id]
             self._gateway: GatewayHttpClient = GatewayHttpClient.get_instance()
 
             self._owner_address = self._connector.address
@@ -282,7 +282,7 @@ class KujiraPMMExample(ScriptStrategyBase):
             if used_price is None or used_price <= self._decimal_zero:
                 raise ValueError(f"Invalid price: {used_price}")
 
-            tick_size = Decimal(self._market["tickSize"])
+            tick_size = Decimal(self._market["minimumPriceIncrement"])
             min_order_size = Decimal(self._market["minimumOrderSize"])
 
             client_id = 1
@@ -689,7 +689,7 @@ class KujiraPMMExample(ScriptStrategyBase):
                         "side": OrderSide.from_hummingbot(candidate.order_side).value[0],
                         "price": str(candidate.price),
                         "amount": str(candidate.amount),
-                        "type": self._configuration["strategy"].get("kujira_order_type", OrderType.LIMIT).value,
+                        "type": self._configuration["strategy"].get("kujira_order_type", OrderType.LIMIT).value[0],
                     })
 
                 request = {
