@@ -12,6 +12,7 @@ ENV COMMIT_BRANCH=${BRANCH}
 ENV COMMIT_SHA=${COMMIT}
 ENV BUILD_DATE=${DATE}
 ENV GATEWAY_PASSPHRASE=""
+ENV CLONE_BRANCH="production"
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ="Etc/GMT"
@@ -31,7 +32,7 @@ RUN \
 		git
 
 RUN <<-EOF
-	git clone -b development https://github.com/Team-Kujira/gateway.git temporary
+	git clone -b $CLONE_BRANCH https://github.com/funttastic/gateway.git temporary
 	cp -r temporary/* .
 	rm -rf temporary
 EOF

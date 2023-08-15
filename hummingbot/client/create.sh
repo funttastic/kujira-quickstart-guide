@@ -13,31 +13,31 @@ then
 	docker stop temp-hb-client
 	docker rm temp-hb-client
 	docker rmi temp-hb-client
-	docker commit hummingbot-client temp-hb-client
+	docker commit hb-client temp-hb-client
 fi
 
 CUSTOMIZE=$1
 
-# Customize the Client image to be used?
+# Customize the image to be used?
 if [ "$CUSTOMIZE" == "--customize" ]
 then
   RESPONSE="$IMAGE_NAME"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Enter Hummingbot image you want to use (default = \"hummingbot-client\") >>> " RESPONSE
+    read -p "   Enter the image you want to use (default = \"hb-client\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
-    IMAGE_NAME="hummingbot-client"
+    IMAGE_NAME="hb-client"
   else
     IMAGE_NAME="$RESPONSE"
   fi
 
-  # Specify a Hummingbot version?
+  # Specify a version?
   RESPONSE="$TAG"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Enter Hummingbot version you want to use [latest/development] (default = \"latest\") >>> " TAG
+    read -p "   Enter the version you want to use [latest/development] (default = \"latest\") >>> " TAG
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -46,11 +46,11 @@ then
     TAG=$RESPONSE
   fi
 
-  # Create a new Client image?
+  # Create a new image?
   RESPONSE="$BUILD_CACHE"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Do you want to use an existing Hummingbot Client image (\"y/N\") >>> " RESPONSE
+    read -p "   Do you want to use an existing image (\"y/N\") >>> " RESPONSE
   fi
   if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]
   then
@@ -60,15 +60,15 @@ then
     BUILD_CACHE=""
   fi
 
-  # Create a new Client instance?
+  # Create a new instance?
   RESPONSE="$INSTANCE_NAME"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Enter a name for your new Hummingbot instance (default = \"hummingbot-client\") >>> " RESPONSE
+    read -p "   Enter a name for your new instance (default = \"hb-client\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
-    INSTANCE_NAME="hummingbot-client"
+    INSTANCE_NAME="hb-client"
   else
     INSTANCE_NAME=$RESPONSE
   fi
@@ -78,7 +78,7 @@ then
   if [ "$RESPONSE" == "" ]
   then
     FOLDER_SUFFIX="shared"
-    read -p "   Enter a folder name where your Hummingbot files will be saved (default = \"$FOLDER_SUFFIX\") >>> " RESPONSE
+    read -p "   Enter a folder name where your files will be saved (default = \"$FOLDER_SUFFIX\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -87,6 +87,18 @@ then
     FOLDER=$PWD/$RESPONSE
   else
     FOLDER=$RESPONSE
+  fi
+
+  RESPONSE="$CLONE_BRANCH"
+  if [ "$RESPONSE" == "" ]
+  then
+    read -p "   Enter the branch to be cloned from the repository (default = \"production\") >>> " RESPONSE
+  fi
+  if [ "$RESPONSE" == "" ]
+  then
+    CLONE_BRANCH="production"
+  else
+    CLONE_BRANCH="$RESPONSE"
   fi
 else
 	if [ ! "$DEBUG" == "" ]
@@ -98,36 +110,43 @@ else
 		FOLDER_SUFFIX="shared"
 		FOLDER=$PWD/$FOLDER_SUFFIX
 		ENTRYPOINT="--entrypoint=/bin/bash"
+		CLONE_BRANCH="production"
 	else
-		IMAGE_NAME="hummingbot-client"
+		IMAGE_NAME="hb-client"
 		TAG="latest"
 		BUILD_CACHE="--no-cache"
-		INSTANCE_NAME="hummingbot-client"
+		INSTANCE_NAME="hb-client"
 		FOLDER_SUFFIX="shared"
 		FOLDER=$PWD/$FOLDER_SUFFIX
+		CLONE_BRANCH="production"
 	fi
 fi
 
-CONF_FOLDER="$FOLDER/client/conf"
-LOGS_FOLDER="$FOLDER/client/logs"
-DATA_FOLDER="$FOLDER/client/data"
-SCRIPTS_FOLDER="$FOLDER/client/scripts"
-PMM_SCRIPTS_FOLDER="$FOLDER/client/pmm_scripts"
-CERTS_FOLDER="$FOLDER/common/certs"
+COMMON_FOLDER="$FOLDER/common"
+CERTS_FOLDER="$COMMON_FOLDER/certs"
+CLIENT_FOLDER="$FOLDER/hummingbot/client"
+CONF_FOLDER="$CLIENT_FOLDER/conf"
+LOGS_FOLDER="$CLIENT_FOLDER/logs"
+DATA_FOLDER="$CLIENT_FOLDER/data"
+SCRIPTS_FOLDER="$CLIENT_FOLDER/scripts"
+PMM_SCRIPTS_FOLDER="$CLIENT_FOLDER/pmm_scripts"
 
 echo
 echo "ℹ️  Confirm below if the instance and its folders are correct:"
 echo
 printf "%30s %5s\n" "Instance name:" "$INSTANCE_NAME"
-printf "%30s %5s\n" "Version:" "hummingbot/hummingbot:$TAG"
+printf "%30s %5s\n" "Version:" "$TAG"
+printf "%30s %5s\n" "Repository branch:" "$CLONE_BRANCH"
 echo
-printf "%30s %5s\n" "Main folder:" "$FOLDER"
-printf "%30s %5s\n" "Config files:" "├── $CONF_FOLDER"
-printf "%30s %5s\n" "Log files:" "├── $LOGS_FOLDER"
-printf "%30s %5s\n" "Trade and data files:" "├── $DATA_FOLDER"
-printf "%30s %5s\n" "PMM scripts files:" "├── $PMM_SCRIPTS_FOLDER"
-printf "%30s %5s\n" "Scripts files:" "├── $SCRIPTS_FOLDER"
-printf "%30s %5s\n" "Cert files:" "├── $CERTS_FOLDER"
+printf "%30s %5s\n" "Base folder:"          " $FOLDER"
+printf "%30s %5s\n" "Common folder:"        " $COMMON_FOLDER"
+printf "%30s %5s\n" "Cert files:"           " $CERTS_FOLDER"
+printf "%30s %5s\n" "Client folder:"        " $CLIENT_FOLDER"
+printf "%30s %5s\n" "Config files:"         " $CONF_FOLDER"
+printf "%30s %5s\n" "Log files:"            " $LOGS_FOLDER"
+printf "%30s %5s\n" "Trade and data files:" " $DATA_FOLDER"
+printf "%30s %5s\n" "PMM scripts files:"    " $PMM_SCRIPTS_FOLDER"
+printf "%30s %5s\n" "Scripts files:"        " $SCRIPTS_FOLDER"
 echo
 
 prompt_proceed () {
@@ -142,10 +161,11 @@ prompt_proceed () {
 # Execute docker commands
 create_instance () {
   echo
-  echo "Creating Hummingbot instance..."
+  echo "Creating instance..."
   echo
   # 1) Create main folder for your new instance
   mkdir -p $FOLDER
+  mkdir -p $CLIENT_FOLDER
   # 2) Create subfolders for hummingbot files
   mkdir -p $CONF_FOLDER
   mkdir -p $CONF_FOLDER/connectors
@@ -159,14 +179,14 @@ create_instance () {
   # 3) Set required permissions to save hummingbot password the first time
   chmod a+rw $CONF_FOLDER
 
-  # 4) Create a new image for hummingbot
+  # 4) Create a new image?
   BUILT=true
   if [ ! "$BUILD_CACHE" == "" ]
   then
     BUILT=$(DOCKER_BUILDKIT=1 docker build $BUILD_CACHE -t $IMAGE_NAME -f client/Dockerfile .)
   fi
 
-  # 5) Launch a new gateway instance of hummingbot
+  # 5) Launch a new instance
   $BUILT \
   && docker run \
     -it \
@@ -182,10 +202,12 @@ create_instance () {
     --mount type=bind,source=$CERTS_FOLDER,target=/root/certs \
     --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
     -e CONF_FOLDER="/root/conf" \
+    -e LOGS_FOLDER="/root/logs" \
     -e DATA_FOLDER="/root/data" \
     -e SCRIPTS_FOLDER="/root/scripts" \
     -e PMM_SCRIPTS_FOLDER="/root/pmm_scripts" \
     -e CERTS_FOLDER="/root/certs" \
+    -e CLONE_BRANCH="$CLONE_BRANCH" \
     $ENTRYPOINT \
     $IMAGE_NAME:$TAG
 }

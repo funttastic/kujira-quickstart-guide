@@ -13,6 +13,7 @@ ENV COMMIT_SHA=${COMMIT}
 ENV COMMIT_BRANCH=${BRANCH}
 ENV BUILD_DATE=${DATE}
 
+ENV CLONE_BRANCH="production"
 ENV STRATEGY=${STRATEGY}
 ENV CONFIG_FILE_NAME=${CONFIG_FILE_NAME}
 ENV WALLET=${WALLET}
@@ -49,7 +50,7 @@ RUN <<-EOF
 EOF
 
 RUN <<-EOF
-	git clone -b development https://github.com/Team-Kujira/hummingbot.git temporary
+	git clone -b $CLONE_BRANCH https://github.com/funttastic/hummingbot-client.git temporary
 	cp -r temporary/* .
 	rm -rf temporary
 EOF

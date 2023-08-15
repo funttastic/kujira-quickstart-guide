@@ -2,7 +2,7 @@
 
 echo
 echo
-echo "===============  CREATE A NEW FUNTTASTIC HUMMINGBOT CLIENT INSTANCE ==============="
+echo "===============  CREATE A NEW FUNTTASTIC CLIENT INSTANCE ==============="
 echo
 echo
 echo "ℹ️  Press [ENTER] for default values:"
@@ -10,10 +10,10 @@ echo
 
 if [ ! "$DEBUG" == "" ]
 then
-	docker stop temp-fun-client
-	docker rm temp-fun-client
-	docker rmi temp-fun-client
-	docker commit fun-hb-client temp-fun-client
+	docker stop temp-fun-hb-client
+	docker rm temp-fun-hb-client
+	docker rmi temp-fun-hb-client
+	docker commit fun-hb-client temp-fun-hb-client
 fi
 
 CUSTOMIZE=$1
@@ -64,7 +64,7 @@ then
   RESPONSE="$INSTANCE_NAME"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Enter a name for your new Funttastic Hummingbot Client instance (default = \"fun-hb-client\") >>> " RESPONSE
+    read -p "   Enter a name for your new Funttastic Client instance (default = \"fun-hb-client\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -88,6 +88,18 @@ then
   else
     FOLDER=$RESPONSE
   fi
+
+  RESPONSE="$CLONE_BRANCH"
+  if [ "$RESPONSE" == "" ]
+  then
+    read -p "   Enter the branch to be cloned from the repository (default = \"production\") >>> " RESPONSE
+  fi
+  if [ "$RESPONSE" == "" ]
+  then
+    CLONE_BRANCH="production"
+  else
+    CLONE_BRANCH="$RESPONSE"
+  fi
 else
 	if [ ! "$DEBUG" == "" ]
 	then
@@ -98,6 +110,7 @@ else
 		FOLDER_SUFFIX="shared"
 		FOLDER=$PWD/$FOLDER_SUFFIX
 		ENTRYPOINT="--entrypoint=/bin/bash"
+		CLONE_BRANCH="production"
 	else
 		IMAGE_NAME="fun-hb-client"
 		TAG="latest"
@@ -105,6 +118,7 @@ else
 		INSTANCE_NAME="fun-hb-client"
 		FOLDER_SUFFIX="shared"
 		FOLDER=$PWD/$FOLDER_SUFFIX
+		CLONE_BRANCH="production"
 	fi
 fi
 
@@ -119,6 +133,7 @@ echo "ℹ️  Confirm below if the instance and its folders are correct:"
 echo
 printf "%30s %5s\n" "Instance name:" "$INSTANCE_NAME"
 printf "%30s %5s\n" "Version:" "$TAG"
+printf "%30s %5s\n" "Repository branch:" "$CLONE_BRANCH"
 echo
 printf "%30s %5s\n" "Main folder:" "$FOLDER"
 printf "%30s %5s\n" "Resources:" "├── $RESOURCES_FOLDER"
@@ -168,6 +183,7 @@ create_instance () {
     --network host \
     --mount type=bind,source=$RESOURCES_FOLDER,target=/root/resources \
     -e RESOURCES_FOLDER="/root/resources" \
+    -e CLONE_BRANCH="$CLONE_BRANCH" \
     $ENTRYPOINT \
     $IMAGE_NAME:$TAG
 }

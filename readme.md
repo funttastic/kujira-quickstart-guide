@@ -15,7 +15,7 @@ It's very recommended to watch this video from the Hummingbot Foundation and the
 
 Run:
 
-> ./client/create-client.sh
+> ./hb-client/create-hb-client.sh
 
 to create a Client instance. Follow the instructions on the screen.
 
@@ -37,7 +37,7 @@ for creating the certificates. Take note about the passphrase used, it is needed
 
 Run:
 
-> ./gateway/create-gateway.sh
+> ./hb-gateway/create-hb-gateway.sh
 
 to create a Gateway instance. Follow the instructions on the screen
 and enter the same passphrase created when configuring the Client.

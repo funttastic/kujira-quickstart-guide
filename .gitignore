@@ -1,24 +1,33 @@
-# Client
-shared/client/conf/**
-!shared/client/conf/connectors
-!shared/client/conf/strategies
-!/shared/client/conf/strategies/kujira_pmm_strategy_example.yml
+# Hummingbot
+## Client
+shared/hummingbot/client/conf/**
+!shared/hummingbot/client/conf/connectors
+!shared/hummingbot/client/conf/strategies
+!/shared/hummingbot/client/conf/strategies/kujira_pmm_strategy_example.yml
 
-shared/client/logs/**
-!shared/client/logs/.keep
+shared/hummingbot/client/logs/**
+!shared/hummingbot/client/logs/.keep
 
-shared/client/data/**
-!shared/client/data/.keep
+shared/hummingbot/client/data/**
+!shared/hummingbot/client/data/.keep
+
+## Gateway
+shared/hummingbot/gateway/conf/**
+!shared/hummingbot/gateway/conf/.keep
+
+shared/hummingbot/gateway/logs/**
+!shared/hummingbot/gateway/logs/.keep
+
+# Funttastic
+## Client
+shared/funttastic/client/resources/**
+!shared/funttastic/client/resources/configuration/.keep
+!shared/funttastic/client/resources/logs/.keep
+!shared/funttastic/client/resources/strategies/.keep
 
 # Common
-shared/common/certs/**
+shared/common/certificates/**
+!shared/common/certificates/.keep
 
-# Gateway
-shared/gateway/conf/**
-!shared/gateway/conf/.keep
-
-shared/gateway/logs/**
-!shared/gateway/logs/.keep
-
+# Other
 *.iml
-
