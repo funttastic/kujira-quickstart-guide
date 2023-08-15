@@ -122,8 +122,10 @@ else
 	fi
 fi
 
-RESOURCES_FOLDER="$FOLDER/resources"
-CERTIFICATES_FOLDER="$RESOURCES_FOLDER/certificates"
+COMMON_FOLDER="$FOLDER/common"
+CERTIFICATES_FOLDER="$COMMON_FOLDER/certificates"
+CLIENT_FOLDER="$FOLDER/funttastic/client"
+RESOURCES_FOLDER="$CLIENT_FOLDER/resources"
 CONFIGURATION_FOLDER="$RESOURCES_FOLDER/configuration"
 STRATEGIES_FOLDER="$RESOURCES_FOLDER/strategies"
 LOGS_FOLDER="$RESOURCES_FOLDER/logs"
@@ -135,12 +137,14 @@ printf "%30s %5s\n" "Instance name:" "$INSTANCE_NAME"
 printf "%30s %5s\n" "Version:" "$TAG"
 printf "%30s %5s\n" "Repository branch:" "$CLONE_BRANCH"
 echo
-printf "%30s %5s\n" "Main folder:" "$FOLDER"
-printf "%30s %5s\n" "Resources:" "├── $RESOURCES_FOLDER"
-printf "%30s %5s\n" "Certificates:" "├──── $CERTIFICATES_FOLDER"
-printf "%30s %5s\n" "Configuration:" "├──── $CONFIGURATION_FOLDER"
-printf "%30s %5s\n" "Strategies:" "├──── $STRATEGIES_FOLDER"
-printf "%30s %5s\n" "Log files:" "├──── $LOGS_FOLDER"
+printf "%30s %5s\n" "Base folder:"    " $FOLDER"
+printf "%30s %5s\n" "Common folder:"  " $COMMON_FOLDER"
+printf "%30s %5s\n" "Certificates:"   " $CERTIFICATES_FOLDER"
+printf "%30s %5s\n" "Client folder:"  " $CLIENT_FOLDER"
+printf "%30s %5s\n" "Resources:"      " $RESOURCES_FOLDER"
+printf "%30s %5s\n" "Configuration:"  " $CONFIGURATION_FOLDER"
+printf "%30s %5s\n" "Strategies:"     " $STRATEGIES_FOLDER"
+printf "%30s %5s\n" "Log files:"      " $LOGS_FOLDER"
 echo
 
 prompt_proceed () {
