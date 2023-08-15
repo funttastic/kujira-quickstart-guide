@@ -32,7 +32,7 @@ RUN \
 		git
 
 RUN <<-EOF
-	git clone -b $CLONE_BRANCH https://github.com/funttastic/gateway.git temporary
+	git clone -b $CLONE_BRANCH https://github.com/Team-Kujira/gateway.git temporary
 	cp -r temporary/* .
 	rm -rf temporary
 EOF

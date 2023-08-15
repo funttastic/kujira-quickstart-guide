@@ -50,7 +50,7 @@ RUN <<-EOF
 EOF
 
 RUN <<-EOF
-	git clone -b $CLONE_BRANCH https://github.com/funttastic/hummingbot-client.git temporary
+	git clone -b $CLONE_BRANCH https://github.com/Team-Kujira/hummingbot-client.git temporary
 	cp -r temporary/* .
 	rm -rf temporary
 EOF
