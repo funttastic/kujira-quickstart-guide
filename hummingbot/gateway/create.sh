@@ -204,7 +204,7 @@ create_instance () {
   BUILT=true
   if [ ! "$BUILD_CACHE" == "" ]
   then
-    BUILT=$(DOCKER_BUILDKIT=1 docker build $BUILD_CACHE -t $IMAGE_NAME -f gateway/Dockerfile .)
+    BUILT=$(DOCKER_BUILDKIT=1 docker build $BUILD_CACHE -t $IMAGE_NAME -f hummingbot/gateway/Dockerfile .)
   fi
 
   # 5) Launch a new instance
