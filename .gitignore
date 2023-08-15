@@ -19,3 +19,6 @@ shared/gateway/conf/**
 
 shared/gateway/logs/**
 !shared/gateway/logs/.keep
+
+*.iml
+
