@@ -133,7 +133,7 @@ else
 		FOLDER=$PWD/$FOLDER_SUFFIX
 		PORT=15888
 		ENTRYPOINT="--entrypoint=/bin/bash"
-		CLONE_BRANCH="production"
+		CLONE_BRANCH=${CLONE_BRANCH:-production}
 	else
 		IMAGE_NAME="hb-gateway"
 		TAG="latest"
@@ -142,7 +142,7 @@ else
 		FOLDER_SUFFIX="shared"
 		FOLDER=$PWD/$FOLDER_SUFFIX
 		PORT=15888
-		CLONE_BRANCH="production"
+		CLONE_BRANCH=${CLONE_BRANCH:-production}
   fi
 
   # Prompts user for a password for the gateway certificates

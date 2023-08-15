@@ -110,7 +110,7 @@ else
 		FOLDER_SUFFIX="shared"
 		FOLDER=$PWD/$FOLDER_SUFFIX
 		ENTRYPOINT="--entrypoint=/bin/bash"
-		CLONE_BRANCH="production"
+		CLONE_BRANCH=${CLONE_BRANCH:-production}
 	else
 		IMAGE_NAME="fun-hb-client"
 		TAG="latest"
@@ -118,7 +118,7 @@ else
 		INSTANCE_NAME="fun-hb-client"
 		FOLDER_SUFFIX="shared"
 		FOLDER=$PWD/$FOLDER_SUFFIX
-		CLONE_BRANCH="production"
+		CLONE_BRANCH=${CLONE_BRANCH:-production}
 	fi
 fi
 
