@@ -26,7 +26,7 @@ RUN set -ex \
     python3-pip \
 #  && apt clean \
 #  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
-	&& unlink /usr/bin/python \
+#	&& unlink /usr/bin/python \
 	&& unlink /usr/bin/pip \
   && ln -s /usr/bin/python3 /usr/bin/python \
   && ln -s /usr/bin/pip3 /usr/bin/pip \
