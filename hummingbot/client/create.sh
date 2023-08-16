@@ -148,19 +148,20 @@ PMM_SCRIPTS_FOLDER="$CLIENT_FOLDER/pmm_scripts"
 echo
 echo "ℹ️  Confirm below if the instance and its folders are correct:"
 echo
-printf "%30s %5s\n" "Instance name:" "$INSTANCE_NAME"
-printf "%30s %5s\n" "Version:" "$TAG"
-printf "%30s %5s\n" "Repository branch:" "$REPOSITORY_BRANCH"
+printf "%30s %5s\n" "Instance name:"        "$INSTANCE_NAME"
+printf "%30s %5s\n" "Version:"              "$TAG"
+printf "%30s %5s\n" "Repository url:"       "$REPOSITORY_URL"
+printf "%30s %5s\n" "Repository branch:"    "$REPOSITORY_BRANCH"
 echo
-printf "%30s %5s\n" "Base:"                 " $FOLDER"
-printf "%30s %5s\n" "Common:"               " $COMMON_FOLDER"
-printf "%30s %5s\n" "Certificates:"         " $CERTS_FOLDER"
-printf "%30s %5s\n" "Client:"               " $CLIENT_FOLDER"
-printf "%30s %5s\n" "Config files:"         " $CONF_FOLDER"
-printf "%30s %5s\n" "Log files:"            " $LOGS_FOLDER"
-printf "%30s %5s\n" "Trade and data files:" " $DATA_FOLDER"
-printf "%30s %5s\n" "PMM scripts files:"    " $PMM_SCRIPTS_FOLDER"
-printf "%30s %5s\n" "Scripts files:"        " $SCRIPTS_FOLDER"
+printf "%30s %5s\n" "Base:"                 "$FOLDER"
+printf "%30s %5s\n" "Common:"               "$COMMON_FOLDER"
+printf "%30s %5s\n" "Certificates:"         "$CERTS_FOLDER"
+printf "%30s %5s\n" "Client:"               "$CLIENT_FOLDER"
+printf "%30s %5s\n" "Config files:"         "$CONF_FOLDER"
+printf "%30s %5s\n" "Log files:"            "$LOGS_FOLDER"
+printf "%30s %5s\n" "Trade and data files:" "$DATA_FOLDER"
+printf "%30s %5s\n" "PMM scripts files:"    "$PMM_SCRIPTS_FOLDER"
+printf "%30s %5s\n" "Scripts files:"        "$SCRIPTS_FOLDER"
 echo
 
 prompt_proceed () {

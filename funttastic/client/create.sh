@@ -147,18 +147,19 @@ LOGS_FOLDER="$RESOURCES_FOLDER/logs"
 echo
 echo "ℹ️  Confirm below if the instance and its folders are correct:"
 echo
-printf "%30s %5s\n" "Instance name:" "$INSTANCE_NAME"
-printf "%30s %5s\n" "Version:" "$TAG"
-printf "%30s %5s\n" "Repository branch:" "$CLONE_BRANCH"
+printf "%30s %5s\n" "Instance name:"        "$INSTANCE_NAME"
+printf "%30s %5s\n" "Version:"              "$TAG"
+printf "%30s %5s\n" "Repository url:"       "$REPOSITORY_URL"
+printf "%30s %5s\n" "Repository branch:"    "$REPOSITORY_BRANCH"
 echo
-printf "%30s %5s\n" "Base folder:"    " $FOLDER"
-printf "%30s %5s\n" "Common folder:"  " $COMMON_FOLDER"
-printf "%30s %5s\n" "Certificates:"   " $CERTIFICATES_FOLDER"
-printf "%30s %5s\n" "Client folder:"  " $CLIENT_FOLDER"
-printf "%30s %5s\n" "Resources:"      " $RESOURCES_FOLDER"
-printf "%30s %5s\n" "Configuration:"  " $CONFIGURATION_FOLDER"
-printf "%30s %5s\n" "Strategies:"     " $STRATEGIES_FOLDER"
-printf "%30s %5s\n" "Log files:"      " $LOGS_FOLDER"
+printf "%30s %5s\n" "Base folder:"          "$FOLDER"
+printf "%30s %5s\n" "Common folder:"        "$COMMON_FOLDER"
+printf "%30s %5s\n" "Certificates:"         "$CERTIFICATES_FOLDER"
+printf "%30s %5s\n" "Client folder:"        "$CLIENT_FOLDER"
+printf "%30s %5s\n" "Resources:"            "$RESOURCES_FOLDER"
+printf "%30s %5s\n" "Configuration:"        "$CONFIGURATION_FOLDER"
+printf "%30s %5s\n" "Strategies:"           "$STRATEGIES_FOLDER"
+printf "%30s %5s\n" "Log files:"            "$LOGS_FOLDER"
 echo
 
 prompt_proceed () {
