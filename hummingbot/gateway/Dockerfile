@@ -8,11 +8,12 @@ LABEL commit=${COMMIT}
 LABEL date=${BUILD_DATE}
 
 # Set ENV variables
+ENV REPOSITORY_URL=${REPOSITORY_URL:-https://github.com/Team-Kujira/gateway.git}
+ENV REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-production}
 ENV COMMIT_BRANCH=${BRANCH}
 ENV COMMIT_SHA=${COMMIT}
 ENV BUILD_DATE=${DATE}
 ENV GATEWAY_PASSPHRASE=""
-ENV CLONE_BRANCH=${CLONE_BRANCH:-production}
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ="Etc/GMT"
@@ -32,7 +33,7 @@ RUN \
 		git
 
 RUN <<-EOF
-	git clone -b $CLONE_BRANCH https://github.com/Team-Kujira/gateway.git temporary
+	git clone -b $REPOSITORY_BRANCH $REPOSITORY_URL temporary
 	cp -r temporary/* .
 	rm -rf temporary
 EOF

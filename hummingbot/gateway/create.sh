@@ -111,16 +111,28 @@ then
   done
   GATEWAY_PASSPHRASE=$RESPONSE
 
-  RESPONSE="$CLONE_BRANCH"
+  RESPONSE="$REPOSITORY_URL"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Enter the branch to be cloned from the repository (default = \"production\") >>> " RESPONSE
+    read -p "   Enter the url from the repository to be cloned (default = \"https://github.com/Team-Kujira/hummingbot.git\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
-    CLONE_BRANCH="production"
+    REPOSITORY_URL="https://github.com/Team-Kujira/hummingbot.git"
   else
-    CLONE_BRANCH="$RESPONSE"
+    REPOSITORY_URL="$RESPONSE"
+  fi
+
+  RESPONSE="$REPOSITORY_BRANCH"
+  if [ "$RESPONSE" == "" ]
+  then
+    read -p "   Enter the branch from the repository to be cloned (default = \"production\") >>> " RESPONSE
+  fi
+  if [ "$RESPONSE" == "" ]
+  then
+    REPOSITORY_BRANCH="production"
+  else
+    REPOSITORY_BRANCH="$RESPONSE"
   fi
 else
 	if [ ! "$DEBUG" == "" ]
@@ -133,7 +145,8 @@ else
 		FOLDER=$PWD/$FOLDER_SUFFIX
 		PORT=15888
 		ENTRYPOINT="--entrypoint=/bin/bash"
-		CLONE_BRANCH=${CLONE_BRANCH:-production}
+		REPOSITORY_URL=${REPOSITORY_URL:-https://github.com/Team-Kujira/gateway.git}
+		REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-production}
 	else
 		IMAGE_NAME="hb-gateway"
 		TAG="latest"
@@ -142,7 +155,8 @@ else
 		FOLDER_SUFFIX="shared"
 		FOLDER=$PWD/$FOLDER_SUFFIX
 		PORT=15888
-		CLONE_BRANCH=${CLONE_BRANCH:-production}
+		REPOSITORY_URL=${REPOSITORY_URL:-https://github.com/Team-Kujira/gateway.git}
+		REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-production}
   fi
 
   # Prompts user for a password for the gateway certificates
@@ -223,7 +237,8 @@ create_instance () {
     -e CONF_FOLDER="/root/conf" \
     -e LOGS_FOLDER="/root/logs" \
     -e GATEWAY_PASSPHRASE="$GATEWAY_PASSPHRASE" \
-    -e CLONE_BRANCH="$CLONE_BRANCH" \
+    -e REPOSITORY_URL="$REPOSITORY_URL" \
+    -e REPOSITORY_BRANCH="$REPOSITORY_BRANCH" \
     $ENTRYPOINT \
     $IMAGE_NAME:$TAG
 }

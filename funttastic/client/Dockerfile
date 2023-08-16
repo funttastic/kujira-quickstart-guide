@@ -12,8 +12,9 @@ ARG TZ="Etc/GMT"
 ARG SSH_PRIVATE_KEY
 ARG SSH_PUBLIC_KEY
 
+ENV REPOSITORY_URL=${REPOSITORY_URL:-git@github.com:funttastic/fun-hb-client.git}
+ENV REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-production}
 ENV PORT="${PORT:-5000}"
-ENV CLONE_BRANCH=${CLONE_BRANCH:-production}
 
 RUN set -ex \
   && apt-get update \
@@ -25,8 +26,8 @@ RUN set -ex \
     python3-pip \
 #  && apt clean \
 #  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
-	&& unlink /usr/bin/python
-	&& unlink /usr/bin/pip
+	&& unlink /usr/bin/python \
+	&& unlink /usr/bin/pip \
   && ln -s /usr/bin/python3 /usr/bin/python \
   && ln -s /usr/bin/pip3 /usr/bin/pip \
   && set +ex
@@ -49,7 +50,7 @@ RUN \
 
 RUN set -ex \
   && mkdir -p /media/shared \
-  && git clone -b $CLONE_BRANCH git@github.com:funttastic/fun-hb-client.git /tmp/app \
+  && git clone -b $REPOSITORY_BRANCH $REPOSITORY_URL /tmp/app \
   && mkdir /root/app \
   && mv /tmp/app/* /root/app/ \
   && rm -rf /tmp/app \

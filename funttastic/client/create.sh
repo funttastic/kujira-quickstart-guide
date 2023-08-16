@@ -89,16 +89,28 @@ then
     FOLDER=$RESPONSE
   fi
 
-  RESPONSE="$CLONE_BRANCH"
+  RESPONSE="$REPOSITORY_URL"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Enter the branch to be cloned from the repository (default = \"production\") >>> " RESPONSE
+    read -p "   Enter the url from the repository to be cloned (default = \"git@github.com:funttastic/fun-hb-client.git\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
-    CLONE_BRANCH="production"
+    REPOSITORY_URL="git@github.com:funttastic/fun-hb-client.git"
   else
-    CLONE_BRANCH="$RESPONSE"
+    REPOSITORY_URL="$RESPONSE"
+  fi
+
+  RESPONSE="$REPOSITORY_BRANCH"
+  if [ "$RESPONSE" == "" ]
+  then
+    read -p "   Enter the branch from the repository to be cloned (default = \"production\") >>> " RESPONSE
+  fi
+  if [ "$RESPONSE" == "" ]
+  then
+    REPOSITORY_BRANCH="production"
+  else
+    REPOSITORY_BRANCH="$RESPONSE"
   fi
 else
 	if [ ! "$DEBUG" == "" ]
@@ -110,7 +122,8 @@ else
 		FOLDER_SUFFIX="shared"
 		FOLDER=$PWD/$FOLDER_SUFFIX
 		ENTRYPOINT="--entrypoint=/bin/bash"
-		CLONE_BRANCH=${CLONE_BRANCH:-production}
+		REPOSITORY_URL=${REPOSITORY_URL:-git@github.com:funttastic/fun-hb-client.git}
+		REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-production}
 	else
 		IMAGE_NAME="fun-hb-client"
 		TAG="latest"
@@ -118,7 +131,8 @@ else
 		INSTANCE_NAME="fun-hb-client"
 		FOLDER_SUFFIX="shared"
 		FOLDER=$PWD/$FOLDER_SUFFIX
-		CLONE_BRANCH=${CLONE_BRANCH:-production}
+		REPOSITORY_URL=${REPOSITORY_URL:-git@github.com:funttastic/fun-hb-client.git}
+		REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-production}
 	fi
 fi
 
@@ -187,7 +201,8 @@ create_instance () {
     --network host \
     --mount type=bind,source=$RESOURCES_FOLDER,target=/root/resources \
     -e RESOURCES_FOLDER="/root/resources" \
-    -e CLONE_BRANCH="$CLONE_BRANCH" \
+    -e REPOSITORY_URL="$REPOSITORY_URL" \
+    -e REPOSITORY_BRANCH="$REPOSITORY_BRANCH" \
     $ENTRYPOINT \
     $IMAGE_NAME:$TAG
 }

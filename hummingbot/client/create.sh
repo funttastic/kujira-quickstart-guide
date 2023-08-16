@@ -89,16 +89,28 @@ then
     FOLDER=$RESPONSE
   fi
 
-  RESPONSE="$CLONE_BRANCH"
+  RESPONSE="$REPOSITORY_URL"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Enter the branch to be cloned from the repository (default = \"production\") >>> " RESPONSE
+    read -p "   Enter the url from the repository to be cloned (default = \"https://github.com/Team-Kujira/hummingbot.git\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
-    CLONE_BRANCH="production"
+    REPOSITORY_URL="https://github.com/Team-Kujira/hummingbot.git"
   else
-    CLONE_BRANCH="$RESPONSE"
+    REPOSITORY_URL="$RESPONSE"
+  fi
+
+  RESPONSE="$REPOSITORY_BRANCH"
+  if [ "$RESPONSE" == "" ]
+  then
+    read -p "   Enter the branch from the repository to be cloned (default = \"production\") >>> " RESPONSE
+  fi
+  if [ "$RESPONSE" == "" ]
+  then
+    REPOSITORY_BRANCH="production"
+  else
+    REPOSITORY_BRANCH="$RESPONSE"
   fi
 else
 	if [ ! "$DEBUG" == "" ]
@@ -110,7 +122,8 @@ else
 		FOLDER_SUFFIX="shared"
 		FOLDER=$PWD/$FOLDER_SUFFIX
 		ENTRYPOINT="--entrypoint=/bin/bash"
-		CLONE_BRANCH=${CLONE_BRANCH:-production}
+		REPOSITORY_URL=${REPOSITORY_URL:-https://github.com/Team-Kujira/hummingbot.git}
+		REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-production}
 	else
 		IMAGE_NAME="hb-client"
 		TAG="latest"
@@ -118,7 +131,8 @@ else
 		INSTANCE_NAME="hb-client"
 		FOLDER_SUFFIX="shared"
 		FOLDER=$PWD/$FOLDER_SUFFIX
-		CLONE_BRANCH=${CLONE_BRANCH:-production}
+		REPOSITORY_URL=${REPOSITORY_URL:-https://github.com/Team-Kujira/hummingbot.git}
+		REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-production}
 	fi
 fi
 
@@ -136,7 +150,7 @@ echo "ℹ️  Confirm below if the instance and its folders are correct:"
 echo
 printf "%30s %5s\n" "Instance name:" "$INSTANCE_NAME"
 printf "%30s %5s\n" "Version:" "$TAG"
-printf "%30s %5s\n" "Repository branch:" "$CLONE_BRANCH"
+printf "%30s %5s\n" "Repository branch:" "$REPOSITORY_BRANCH"
 echo
 printf "%30s %5s\n" "Base:"                 " $FOLDER"
 printf "%30s %5s\n" "Common:"               " $COMMON_FOLDER"
@@ -207,7 +221,8 @@ create_instance () {
     -e SCRIPTS_FOLDER="/root/scripts" \
     -e PMM_SCRIPTS_FOLDER="/root/pmm_scripts" \
     -e CERTS_FOLDER="/root/certs" \
-    -e CLONE_BRANCH="$CLONE_BRANCH" \
+    -e REPOSITORY_URL="$REPOSITORY_URL" \
+    -e REPOSITORY_BRANCH="$REPOSITORY_BRANCH" \
     $ENTRYPOINT \
     $IMAGE_NAME:$TAG
 }
