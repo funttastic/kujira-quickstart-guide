@@ -165,7 +165,7 @@ echo
 printf "%30s %5s\n" "Instance name:" "$INSTANCE_NAME"
 printf "%30s %5s\n" "Version:" "$TAG"
 printf "%30s %5s\n" "Repository branch:" "$CLONE_BRANCH"
-printf "%30s %5s\n" "Gateway exposed port:" " $PORT"
+printf "%30s %5s\n" "Gateway exposed port:" "$PORT"
 echo
 printf "%30s %5s\n" "Base:"                 " $FOLDER"
 printf "%30s %5s\n" "Common:"               " $COMMON_FOLDER"
