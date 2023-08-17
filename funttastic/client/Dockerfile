@@ -1,9 +1,3 @@
-# Usage:
-#   # The --squash option for `docker build` would be good, but it is not available in `buildx` yet and `build` requires to enable experimental features
-#   docker buildx build --no-cache --build-arg SSH_PRIVATE_KEY="$(cat ~/.ssh/id_rsa)" --build-arg SSH_PUBLIC_KEY="$(cat ~/.ssh/id_rsa.pub)" -t <template> .
-#   docker run -dt --name=<template> -p <exposed port>:5000 -v /path/to/shared/folder:/media/shared <template>
-#   curl -d '{}' -H "Content-Type: application/json" -X POST http://localhost:<exposed port>/
-
 FROM ubuntu:latest
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -14,6 +8,8 @@ ARG REPOSITORY_URL="${REPOSITORY_URL:-git@github.com:funttastic/fun-hb-client.gi
 ARG REPOSITORY_BRANCH="${REPOSITORY_BRANCH:-production}"
 
 ENV PORT="${PORT:-5000}"
+
+WORKDIR /root
 
 RUN set -ex \
   && apt-get update \
@@ -52,17 +48,12 @@ RUN \
 
 RUN set -ex \
   && git clone -b $REPOSITORY_BRANCH $REPOSITORY_URL /tmp/app \
-  && mkdir /root/app \
-  && mv /tmp/app/* /root/app/ \
+  && mv /tmp/app/* . \
   && rm -rf /tmp/app \
-  && cd /root/app \
   && pip install -r requirements.txt \
   && set +ex
-
-WORKDIR /root/app
 
 # Needs to coincide with what's defined inside of the configuration file.
 EXPOSE $PORT
 
-CMD \
-  python app.py
+CMD python app.py

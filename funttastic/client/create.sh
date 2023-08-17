@@ -200,7 +200,7 @@ create_instance () {
     --log-opt max-file=5 \
     --name $INSTANCE_NAME \
     --network host \
-    --mount type=bind,source=$RESOURCES_FOLDER,target=/root/app/resources \
+    --mount type=bind,source=$RESOURCES_FOLDER,target=/root/resources \
     $ENTRYPOINT \
     $IMAGE_NAME:$TAG
 }
