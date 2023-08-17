@@ -51,7 +51,7 @@ RUN \
   && set +ex
 
 RUN set -ex \
-  && mkdir -p /media/shared \
+  && mkdir -p /media/shared/resources \
   && git clone -b $REPOSITORY_BRANCH $REPOSITORY_URL /tmp/app \
   && mkdir /root/app \
   && mv /tmp/app/* /root/app/ \
