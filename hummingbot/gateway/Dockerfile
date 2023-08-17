@@ -1,22 +1,20 @@
 # syntax=docker/dockerfile-upstream:1-labs
 FROM node:16.3.0
 
-# Set labels
+ARG DEBIAN_FRONTEND=noninteractive
+ARG TZ="Etc/GMT"
+ARG REPOSITORY_URL=${REPOSITORY_URL:-https://github.com/Team-Kujira/gateway.git}
+ARG REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-production}
+
 LABEL application="gateway-v2"
 LABEL branch=${BRANCH}
 LABEL commit=${COMMIT}
 LABEL date=${BUILD_DATE}
 
-# Set ENV variables
-ENV REPOSITORY_URL=${REPOSITORY_URL:-https://github.com/Team-Kujira/gateway.git}
-ENV REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-production}
 ENV COMMIT_BRANCH=${BRANCH}
 ENV COMMIT_SHA=${COMMIT}
 ENV BUILD_DATE=${DATE}
 ENV GATEWAY_PASSPHRASE=""
-
-ARG DEBIAN_FRONTEND=noninteractive
-ARG TZ="Etc/GMT"
 
 WORKDIR /root
 

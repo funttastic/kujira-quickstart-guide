@@ -8,12 +8,11 @@ FROM ubuntu:latest
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ="Etc/GMT"
-
-ARG SSH_PRIVATE_KEY
 ARG SSH_PUBLIC_KEY
+ARG SSH_PRIVATE_KEY
+ARG REPOSITORY_URL="${REPOSITORY_URL:-git@github.com:funttastic/fun-hb-client.git}"
+ARG REPOSITORY_BRANCH="${REPOSITORY_BRANCH:-production}"
 
-ENV REPOSITORY_URL=${REPOSITORY_URL:-git@github.com:funttastic/fun-hb-client.git}
-ENV REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-production}
 ENV PORT="${PORT:-5000}"
 
 RUN set -ex \
@@ -24,6 +23,9 @@ RUN set -ex \
     git \
     python3 \
     python3-pip \
+    postgresql-server-dev-all \
+    build-essential \
+    python3-dev \
 #  && apt clean \
 #  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
 #	&& unlink /usr/bin/python \

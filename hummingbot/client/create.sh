@@ -198,7 +198,7 @@ create_instance () {
   BUILT=true
   if [ ! "$BUILD_CACHE" == "" ]
   then
-    BUILT=$(DOCKER_BUILDKIT=1 docker build $BUILD_CACHE -t $IMAGE_NAME -f hummingbot/client/Dockerfile .)
+    BUILT=$(DOCKER_BUILDKIT=1 docker build $BUILD_CACHE --build-arg REPOSITORY_URL="$REPOSITORY_URL" --build-arg REPOSITORY_BRANCH="$REPOSITORY_BRANCH" -t $IMAGE_NAME -f hummingbot/client/Dockerfile .)
   fi
 
   # 5) Launch a new instance
@@ -222,8 +222,6 @@ create_instance () {
     -e SCRIPTS_FOLDER="/root/scripts" \
     -e PMM_SCRIPTS_FOLDER="/root/pmm_scripts" \
     -e CERTS_FOLDER="/root/certs" \
-    -e REPOSITORY_URL="$REPOSITORY_URL" \
-    -e REPOSITORY_BRANCH="$REPOSITORY_BRANCH" \
     $ENTRYPOINT \
     $IMAGE_NAME:$TAG
 }

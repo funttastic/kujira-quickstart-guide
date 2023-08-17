@@ -219,7 +219,7 @@ create_instance () {
   BUILT=true
   if [ ! "$BUILD_CACHE" == "" ]
   then
-    BUILT=$(DOCKER_BUILDKIT=1 docker build $BUILD_CACHE -t $IMAGE_NAME -f hummingbot/gateway/Dockerfile .)
+    BUILT=$(DOCKER_BUILDKIT=1 docker build $BUILD_CACHE --build-arg REPOSITORY_URL="$REPOSITORY_URL" --build-arg REPOSITORY_BRANCH="$REPOSITORY_BRANCH" -t $IMAGE_NAME -f hummingbot/gateway/Dockerfile .)
   fi
 
   # 5) Launch a new instance
@@ -238,8 +238,6 @@ create_instance () {
     -e CONF_FOLDER="/root/conf" \
     -e LOGS_FOLDER="/root/logs" \
     -e GATEWAY_PASSPHRASE="$GATEWAY_PASSPHRASE" \
-    -e REPOSITORY_URL="$REPOSITORY_URL" \
-    -e REPOSITORY_BRANCH="$REPOSITORY_BRANCH" \
     $ENTRYPOINT \
     $IMAGE_NAME:$TAG
 }

@@ -189,7 +189,7 @@ create_instance () {
   BUILT=true
   if [ ! "$BUILD_CACHE" == "" ]
   then
-    BUILT=$(DOCKER_BUILDKIT=1 docker build $BUILD_CACHE -t $IMAGE_NAME -f funttastic/client/Dockerfile .)
+    BUILT=$(DOCKER_BUILDKIT=1 docker buildx build $BUILD_CACHE --build-arg SSH_PUBLIC_KEY="$SSH_PUBLIC_KEY" --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --build-arg REPOSITORY_URL="$REPOSITORY_URL" --build-arg REPOSITORY_BRANCH="$REPOSITORY_BRANCH" -t $IMAGE_NAME -f funttastic/client/Dockerfile .)
   fi
 
   # 5) Launch a new instance
@@ -202,8 +202,6 @@ create_instance () {
     --network host \
     --mount type=bind,source=$RESOURCES_FOLDER,target=/root/resources \
     -e RESOURCES_FOLDER="/root/resources" \
-    -e REPOSITORY_URL="$REPOSITORY_URL" \
-    -e REPOSITORY_BRANCH="$REPOSITORY_BRANCH" \
     $ENTRYPOINT \
     $IMAGE_NAME:$TAG
 }
