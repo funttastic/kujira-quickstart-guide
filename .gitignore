@@ -22,6 +22,9 @@ shared/hummingbot/gateway/logs/**/*
 ## Client
 shared/funttastic/client/resources/**/*
 !shared/funttastic/client/resources/configuration/.keep
+!shared/funttastic/client/resources/configuration/main.yml
+!shared/funttastic/client/resources/configuration/common.yml
+!shared/funttastic/client/resources/configuration/production.example.yml
 !shared/funttastic/client/resources/logs/.keep
 !shared/funttastic/client/resources/strategies/.keep
 
