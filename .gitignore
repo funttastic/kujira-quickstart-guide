@@ -1,35 +1,47 @@
 # Hummingbot
 ## Client
 shared/hummingbot/client/conf/**/*
+!shared/hummingbot/client/conf/connectors
 !shared/hummingbot/client/conf/connectors/.keep
+!shared/hummingbot/client/conf/strategies
 !shared/hummingbot/client/conf/strategies/.keep
-!/shared/hummingbot/client/conf/strategies/kujira_pmm_strategy_example.yml
+!shared/hummingbot/client/conf/strategies/kujira_pmm_strategy_example.yml
 
 shared/hummingbot/client/logs/**/*
+!shared/hummingbot/client/logs
 !shared/hummingbot/client/logs/.keep
 
 shared/hummingbot/client/data/**/*
+!shared/hummingbot/client/data
 !shared/hummingbot/client/data/.keep
 
 ## Gateway
 shared/hummingbot/gateway/conf/**/*
+!shared/hummingbot/gateway/conf
 !shared/hummingbot/gateway/conf/.keep
 
 shared/hummingbot/gateway/logs/**/*
+!shared/hummingbot/gateway/logs
 !shared/hummingbot/gateway/logs/.keep
 
 # Funttastic
 ## Client
 shared/funttastic/client/resources/**/*
+!shared/funttastic/client/resources/configuration
 !shared/funttastic/client/resources/configuration/.keep
 !shared/funttastic/client/resources/configuration/main.yml
 !shared/funttastic/client/resources/configuration/common.yml
 !shared/funttastic/client/resources/configuration/production.example.yml
+!shared/funttastic/client/resources/logs
 !shared/funttastic/client/resources/logs/.keep
+!shared/funttastic/client/resources/strategies
 !shared/funttastic/client/resources/strategies/.keep
+!shared/funttastic/client/resources/strategies/templates
+!shared/funttastic/client/resources/strategies/templates/**/*
 
 # Common
 shared/common/certificates/**/*
+!shared/common/certificates
 !shared/common/certificates/.keep
 
 # Other

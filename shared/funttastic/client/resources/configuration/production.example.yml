@@ -1,0 +1,38 @@
+server:
+  environment: production
+  debug: false
+logging:
+  level: 20 # 20 -> INFO
+  use_telegram: true
+telegram:
+  url: "https://api.telegram.org/bot{token}/sendMessage"
+  token: "<token>"
+  chat_id: "<chat_id>"
+  parse_mode: "HTML"
+  level: 20 # 20 -> INFO
+hummingbot:
+  gateway:
+    host: https://localhost
+    port: 15888
+    certificates:
+      server_private_key_password: '<password>'
+      path:
+        base:
+          relative: 'resources/certificates'
+          absolute: null # </path/to/the/certificates>
+        # Certificate Authority's (CA) certificate. Proves the CA's identity.
+        certificate_authority_certificate: 'ca_cert.pem'
+        # Private key of the CA. Used to sign certificates. Must be kept secret and secure.
+        certificate_authority_private_key: 'ca_key.pem'
+        # Client's certificate. Proves the client's identity to the server.
+        client_certificate: 'client_cert.pem'
+        # Client's Certificate Signing Request. Used to request a certificate from the CA.
+        client_certificate_signing_request: 'client_csr.pem'
+        # Client's private key. Used to prove the client's identity and to secure communication. Must be kept secret and secure.
+        client_private_key: 'client_key.pem'
+        # Server's certificate. Proves the server's identity to the client.
+        server_certificate: 'server_cert.pem'
+        # Server's Certificate Signing Request. Used to request a certificate from the CA.
+        server_certificate_signing_request: 'server_csr.pem'
+        # Server's private key. Used to prove the server's identity and to secure communication. Must be kept secret and secure.
+        server_private_key: 'server_key.pem'
