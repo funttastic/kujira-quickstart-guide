@@ -115,22 +115,23 @@ then
 else
 	if [ ! "$DEBUG" == "" ]
 	then
-		IMAGE_NAME="temp-fun-hb-client"
-		TAG="latest"
-		BUILD_CACHE="--no-cache"
-		INSTANCE_NAME="temp-fun-hb-client"
-		FOLDER_SUFFIX="shared"
-		FOLDER=$PWD/$FOLDER_SUFFIX
-		ENTRYPOINT="--entrypoint=/bin/bash"
+		IMAGE_NAME=${IMAGE_NAME:-temp-fun-hb-client}
+		TAG=${TAG:-latest}
+		BUILD_CACHE=${BUILD_CACHE:---no-cache}
+		INSTANCE_NAME=${INSTANCE_NAME:-temp-fun-hb-client}
+		FOLDER_SUFFIX=${FOLDER_SUFFIX:-shared}
+		FOLDER=${FOLDER:-$PWD/$FOLDER_SUFFIX}
+		ENTRYPOINT=${ENTRYPOINT:---entrypoint=/bin/bash}
 		REPOSITORY_URL=${REPOSITORY_URL:-git@github.com:funttastic/fun-hb-client.git}
 		REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-production}
 	else
-		IMAGE_NAME="fun-hb-client"
-		TAG="latest"
-		BUILD_CACHE="--no-cache"
-		INSTANCE_NAME="fun-hb-client"
-		FOLDER_SUFFIX="shared"
-		FOLDER=$PWD/$FOLDER_SUFFIX
+		IMAGE_NAME=${IMAGE_NAME:-fun-hb-client}
+		TAG=${TAG:-latest}
+		BUILD_CACHE=${BUILD_CACHE:---no-cache}
+		INSTANCE_NAME=${INSTANCE_NAME:-fun-hb-client}
+		FOLDER_SUFFIX=${FOLDER_SUFFIX:-shared}
+		FOLDER=${FOLDER:-$PWD/$FOLDER_SUFFIX}
+		ENTRYPOINT=${ENTRYPOINT:---entrypoint=/bin/bash}
 		REPOSITORY_URL=${REPOSITORY_URL:-git@github.com:funttastic/fun-hb-client.git}
 		REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-production}
 	fi
@@ -147,10 +148,14 @@ LOGS_FOLDER="$RESOURCES_FOLDER/logs"
 echo
 echo "ℹ️  Confirm below if the instance and its folders are correct:"
 echo
-printf "%30s %5s\n" "Instance name:"        "$INSTANCE_NAME"
-printf "%30s %5s\n" "Version:"              "$TAG"
+printf "%30s %5s\n" "Image:"              	"$IMAGE_NAME:$TAG"
+printf "%30s %5s\n" "Instance:"        			"$INSTANCE_NAME"
 printf "%30s %5s\n" "Repository url:"       "$REPOSITORY_URL"
 printf "%30s %5s\n" "Repository branch:"    "$REPOSITORY_BRANCH"
+printf "%30s %5s\n" "Deploy public key:"    "$SSH_PUBLIC_KEY"
+printf "%30s %5s\n" "Reuse image?:"    		  "$BUILD_CACHE"
+printf "%30s %5s\n" "Debug?:"    						"$DEBUG"
+printf "%30s %5s\n" "Entrypoint:"    				"$ENTRYPOINT"
 echo
 printf "%30s %5s\n" "Base folder:"          "$FOLDER"
 printf "%30s %5s\n" "Common folder:"        "$COMMON_FOLDER"

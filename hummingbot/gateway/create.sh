@@ -137,24 +137,25 @@ then
 else
 	if [ ! "$DEBUG" == "" ]
 	then
-		IMAGE_NAME="temp-hb-gateway"
-		TAG="latest"
-		BUILD_CACHE="--no-cache"
-		INSTANCE_NAME="temp-hb-gateway"
-		FOLDER_SUFFIX="shared"
-		FOLDER=$PWD/$FOLDER_SUFFIX
-		PORT=15888
-		ENTRYPOINT="--entrypoint=/bin/bash"
+		IMAGE_NAME=${IMAGE_NAME:-temp-hb-gateway}
+		TAG=${TAG:-latest}
+		BUILD_CACHE=${BUILD_CACHE:---no-cache}
+		INSTANCE_NAME=${INSTANCE_NAME:-temp-hb-gateway}
+		FOLDER_SUFFIX=${FOLDER_SUFFIX:-shared}
+		FOLDER=${FOLDER:-$PWD/$FOLDER_SUFFIX}
+		PORT=${PORT:-15888}
+		ENTRYPOINT=${ENTRYPOINT:---entrypoint=/bin/bash}
 		REPOSITORY_URL=${REPOSITORY_URL:-https://github.com/Team-Kujira/gateway.git}
 		REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-production}
 	else
-		IMAGE_NAME="hb-gateway"
-		TAG="latest"
-		BUILD_CACHE="--no-cache"
-		INSTANCE_NAME="hb-gateway"
-		FOLDER_SUFFIX="shared"
-		FOLDER=$PWD/$FOLDER_SUFFIX
-		PORT=15888
+		IMAGE_NAME=${IMAGE_NAME:-hb-gateway}
+		TAG=${TAG:-latest}
+		BUILD_CACHE=${BUILD_CACHE:---no-cache}
+		INSTANCE_NAME=${INSTANCE_NAME:-hb-gateway}
+		FOLDER_SUFFIX=${FOLDER_SUFFIX:-shared}
+		FOLDER=${FOLDER:-$PWD/$FOLDER_SUFFIX}
+		PORT=${PORT:-15888}
+		ENTRYPOINT=${ENTRYPOINT:---entrypoint=/bin/bash}
 		REPOSITORY_URL=${REPOSITORY_URL:-https://github.com/Team-Kujira/gateway.git}
 		REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-production}
   fi
@@ -176,11 +177,14 @@ LOGS_FOLDER="$GATEWAY_FOLDER/logs"
 echo
 echo "ℹ️  Confirm below if the instance and its folders are correct:"
 echo
-printf "%30s %5s\n" "Instance name:"        "$INSTANCE_NAME"
-printf "%30s %5s\n" "Version:"              "$TAG"
+printf "%30s %5s\n" "Image:"              	"$IMAGE_NAME:$TAG"
+printf "%30s %5s\n" "Instance:"        			"$INSTANCE_NAME"
+printf "%30s %5s\n" "Gateway exposed port:" "$PORT"
 printf "%30s %5s\n" "Repository url:"       "$REPOSITORY_URL"
 printf "%30s %5s\n" "Repository branch:"    "$REPOSITORY_BRANCH"
-printf "%30s %5s\n" "Gateway exposed port:" "$PORT"
+printf "%30s %5s\n" "Reuse image?:"    		  "$BUILD_CACHE"
+printf "%30s %5s\n" "Debug?:"    						"$DEBUG"
+printf "%30s %5s\n" "Entrypoint:"    				"$ENTRYPOINT"
 echo
 printf "%30s %5s\n" "Base:"                 "$FOLDER"
 printf "%30s %5s\n" "Common:"               "$COMMON_FOLDER"
