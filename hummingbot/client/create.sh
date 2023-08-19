@@ -115,22 +115,22 @@ then
 else
 	if [ ! "$DEBUG" == "" ]
 	then
-		IMAGE_NAME="temp-hb-client"
-		TAG="latest"
-		BUILD_CACHE="--no-cache"
-		INSTANCE_NAME="temp-hb-client"
-		FOLDER_SUFFIX="shared"
-		FOLDER=$PWD/$FOLDER_SUFFIX
-		ENTRYPOINT="--entrypoint=/bin/bash"
+		IMAGE_NAME=${IMAGE_NAME:-temp-hb-client}
+		TAG=${TAG:-latest}
+		BUILD_CACHE=${BUILD_CACHE:---no-cache}
+		INSTANCE_NAME=${INSTANCE_NAME:-temp-hb-client}
+		FOLDER_SUFFIX=${FOLDER_SUFFIX:-shared}
+		FOLDER=${FOLDER:-$PWD/$FOLDER_SUFFIX}
+		ENTRYPOINT=${ENTRYPOINT:---entrypoint=/bin/bash}
 		REPOSITORY_URL=${REPOSITORY_URL:-https://github.com/Team-Kujira/hummingbot.git}
 		REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-production}
 	else
-		IMAGE_NAME="hb-client"
-		TAG="latest"
-		BUILD_CACHE="--no-cache"
-		INSTANCE_NAME="hb-client"
-		FOLDER_SUFFIX="shared"
-		FOLDER=$PWD/$FOLDER_SUFFIX
+		IMAGE_NAME=${IMAGE_NAME:-hb-client}
+		TAG=${TAG:-latest}
+		BUILD_CACHE=${BUILD_CACHE:---no-cache}
+		INSTANCE_NAME=${INSTANCE_NAME:-hb-client}
+		FOLDER_SUFFIX=${FOLDER_SUFFIX:-shared}
+		FOLDER=${FOLDER:-$PWD/$FOLDER_SUFFIX}
 		REPOSITORY_URL=${REPOSITORY_URL:-https://github.com/Team-Kujira/hummingbot.git}
 		REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-production}
 	fi
