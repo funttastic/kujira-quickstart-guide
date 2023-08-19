@@ -148,8 +148,8 @@ PMM_SCRIPTS_FOLDER="$CLIENT_FOLDER/pmm_scripts"
 echo
 echo "ℹ️  Confirm below if the instance and its folders are correct:"
 echo
-printf "%30s %5s\n" "Instance name:"        "$INSTANCE_NAME"
-printf "%30s %5s\n" "Version:"              "$TAG"
+printf "%30s %5s\n" "Image:"              	"$IMAGE_NAME:$TAG"
+printf "%30s %5s\n" "Instance:"        			"$INSTANCE_NAME"
 printf "%30s %5s\n" "Repository url:"       "$REPOSITORY_URL"
 printf "%30s %5s\n" "Repository branch:"    "$REPOSITORY_BRANCH"
 echo
