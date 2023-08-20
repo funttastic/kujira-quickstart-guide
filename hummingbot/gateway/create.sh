@@ -155,7 +155,6 @@ else
 		FOLDER_SUFFIX=${FOLDER_SUFFIX:-shared}
 		FOLDER=${FOLDER:-$PWD/$FOLDER_SUFFIX}
 		PORT=${PORT:-15888}
-		ENTRYPOINT=${ENTRYPOINT:---entrypoint=/bin/bash}
 		REPOSITORY_URL=${REPOSITORY_URL:-https://github.com/Team-Kujira/gateway.git}
 		REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-production}
   fi
