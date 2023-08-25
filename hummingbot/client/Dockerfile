@@ -32,6 +32,8 @@ RUN :> /root/.bashrc
 SHELL [ "/bin/bash", "-lc" ]
 
 RUN <<-EOF
+	set -ex
+
 	apt-get update
 
 	apt-get install --no-install-recommends -y \
@@ -46,18 +48,29 @@ RUN <<-EOF
 		libssl-dev \
 		curl \
 		python3 \
-		git
+		git \
+		vim \
+		tree \
+		psmisc
+
+	set +ex
 EOF
 
 RUN <<-EOF
-	git clone -b $REPOSITORY_BRANCH $REPOSITORY_URL temporary
-	cp -r temporary/* .
-	rm -rf temporary
+	set -ex
+
+	git clone -b $REPOSITORY_BRANCH $REPOSITORY_URL /tmp/app
+	cp -R /tmp/app/. .
+  rm -rf /tmp/app
+
+	set +ex
 EOF
 # COPY . .
 
 # Install miniconda
 RUN <<-EOF
+	set -ex
+
 	ARCHITECTURE="$(uname -m)"
 
 	case $(uname | tr '[:upper:]' '[:lower:]') in
@@ -111,10 +124,14 @@ RUN <<-EOF
 
 	echo "export MINICONDA_VERSION=$MINICONDA_VERSION" >> /root/.bashrc
 	echo "export MINICONDA_URL=$MINICONDA_URL" >> /root/.bashrc
+
+	set +ex
 EOF
 
 # Install nvm and CeloCLI; note: nvm adds own section to /root/.bashrc
 RUN <<-EOF
+	set -ex
+
 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 	NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
 	[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
@@ -129,10 +146,14 @@ RUN <<-EOF
 	nvm cache clear
 	npm cache clean --force
 	rm -rf /root/.cache
+
+	set +ex
 EOF
 
 # ./install | create hummingbot environment
 RUN <<-EOF
+	set -ex
+
 	MINICONDA_ENVIRONMENT=$(head -1 /root/setup/environment.yml | cut -d' ' -f2)
 	if [ -z "$MINICONDA_ENVIRONMENT" ]
 	then
@@ -144,19 +165,27 @@ RUN <<-EOF
 	/root/miniconda3/bin/conda env create -f /root/setup/environment.yml
 	/root/miniconda3/bin/conda clean -tipy
 	rm -rf /root/.cache
+
+	set +ex
 EOF
 
 SHELL [ "/bin/bash", "-lc" ]
 # activate hummingbot env when entering the CT
 # ./compile + cleanup build folder
 RUN <<-EOF
+	set -ex
+
 	echo "source /root/miniconda3/etc/profile.d/conda.sh && conda activate $MINICONDA_ENVIRONMENT" >> /root/.bashrc
 	/root/miniconda3/envs/$MINICONDA_ENVIRONMENT/bin/python3 setup.py build_ext --inplace -j 8
 	rm -rf /root/build/
 	find . -type f -name "*.cpp" -delete
+
+	set +ex
 EOF
 
 RUN <<-EOF
+	set -ex
+
 	mkdir -p \
 	/root/certs \
 	/root/conf/connectors \
@@ -167,17 +196,25 @@ RUN <<-EOF
 	/root/scripts \
 	/root/pmm_scripts \
 	/var/lib/gateway
+
+	set +ex
 EOF
 
-RUN <<-EOF
-	apt autoremove -y
-
-	apt clean autoclean
-
-	rm -rf \
-		/var/lib/apt/lists/* \
-		/etc/apt/sources.list \
-		/etc/apt/sources.list.d/*
-EOF
+#RUN <<-EOF
+#	set -ex
+#
+#	apt autoremove -y
+#
+#	apt clean autoclean
+#
+#	rm -rf \
+#		/var/lib/apt/lists/* \
+#		/etc/apt/sources.list \
+#		/etc/apt/sources.list.d/* \
+#		/tmp/* \
+#		/var/tmp/*
+#
+#	set +ex
+#EOF
 
 CMD /root/miniconda3/envs/hummingbot/bin/python3 /root/bin/hummingbot_quickstart.py

@@ -23,23 +23,38 @@ RUN :> /root/.bashrc
 
 SHELL [ "/bin/bash", "-lc" ]
 
-RUN \
-	apt-get update \
-	&& apt-get install --no-install-recommends -y \
+RUN <<-EOF
+	set -ex
+
+	apt-get update
+
+	apt-get install --no-install-recommends -y \
 		ca-certificates \
 		openssh-server \
-		git
+		git \
+		vim \
+		tree \
+		psmisc
+
+	set +ex
+EOF
 
 RUN <<-EOF
-	git clone -b $REPOSITORY_BRANCH $REPOSITORY_URL temporary
-	cp -r temporary/* .
-	rm -rf temporary
+	set -ex
+
+	git clone -b $REPOSITORY_BRANCH $REPOSITORY_URL /tmp/app
+	cp -R /tmp/app/. .
+  rm -rf /tmp/app
+
+  set +ex
 EOF
 # COPY . .
 
 EXPOSE 15888
 
-RUN \
+RUN <<-EOF
+	set -ex
+
 	mkdir -p \
 		/root/certs \
 		/root/db \
@@ -47,20 +62,42 @@ RUN \
 		/root/logs \
 		/var/lib
 
-RUN cp -R /root/src/templates/* /root/conf/
-
-RUN yarn
-RUN yarn build
+	set +ex
+EOF
 
 RUN <<-EOF
-	apt autoremove -y
+	set -ex
 
-	apt clean autoclean
+	cp -R /root/src/templates/. /root/conf/
 
-	rm -rf \
-		/var/lib/apt/lists/* \
-		/etc/apt/sources.list \
-		/etc/apt/sources.list.d/*
+	set +ex
 EOF
+
+RUN <<-EOF
+	set -ex
+
+	yarn
+	yarn prebuild
+	yarn build
+
+	set +ex
+EOF
+
+#RUN <<-EOF
+#	set -ex
+#
+#	apt autoremove -y
+#
+#	apt clean autoclean
+#
+#	rm -rf \
+#		/var/lib/apt/lists/* \
+#		/etc/apt/sources.list \
+#		/etc/apt/sources.list.d/* \
+#		/tmp/* \
+#		/var/tmp/*
+#
+#	set +ex
+#EOF
 
 CMD ["yarn", "start"]
