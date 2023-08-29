@@ -233,7 +233,7 @@ $BUILT \
 	-dt \
 	--log-opt max-size=10m \
 	--log-opt max-file=5 \
-	-p $PORT:15888 \
+	-p $PORT:$PORT \
 	--name $INSTANCE_NAME \
 	--network host \
 	--mount type=bind,source=$CERTS_FOLDER,target=/root/certs \
@@ -243,6 +243,7 @@ $BUILT \
 	-e CERTS_FOLDER="/root/certs" \
 	-e CONF_FOLDER="/root/conf" \
 	-e LOGS_FOLDER="/root/logs" \
+	-e GATEWAY_PORT=$PORT \
 	-e GATEWAY_PASSPHRASE="$GATEWAY_PASSPHRASE" \
 	$ENTRYPOINT \
 	$IMAGE_NAME:$TAG
@@ -252,7 +253,7 @@ EOF
 		-dt \
     --log-opt max-size=10m \
     --log-opt max-file=5 \
-    -p $PORT:15888 \
+    -p $PORT:$PORT \
     --name $INSTANCE_NAME \
     --network host \
     --mount type=bind,source=$CERTS_FOLDER,target=/root/certs \
@@ -262,6 +263,7 @@ EOF
     -e CERTS_FOLDER="/root/certs" \
     -e CONF_FOLDER="/root/conf" \
     -e LOGS_FOLDER="/root/logs" \
+    -e GATEWAY_PORT=$PORT \
     -e GATEWAY_PASSPHRASE="$GATEWAY_PASSPHRASE" \
     $ENTRYPOINT \
     $IMAGE_NAME:$TAG
