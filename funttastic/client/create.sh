@@ -213,7 +213,7 @@ create_instance () {
   fi
 
   # 5) Launch a new instance
-cat << 'EOF'
+printf 'EOF'
 $BUILT \
 && docker run \
 	--log-opt max-size=10m \
