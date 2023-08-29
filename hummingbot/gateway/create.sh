@@ -227,7 +227,6 @@ create_instance () {
 
   # 5) Launch a new instance
   $BUILT && docker run \
-    -it \
     --log-opt max-size=10m \
     --log-opt max-file=5 \
     -p $PORT:15888 \
