@@ -213,6 +213,20 @@ create_instance () {
   fi
 
   # 5) Launch a new instance
+cat << 'EOF'
+$BUILT \
+&& docker run \
+	--log-opt max-size=10m \
+	--log-opt max-file=5 \
+	-p $PORT:15888 \
+	--name $INSTANCE_NAME \
+	--network host \
+	--mount type=bind,source=$RESOURCES_FOLDER,target=/root/resources \
+	--mount type=bind,source=$CERTIFICATES_FOLDER,target=/root/resources/certificates \
+	$ENTRYPOINT \
+	$IMAGE_NAME:$TAG
+EOF
+
   $BUILT \
   && docker run \
     --log-opt max-size=10m \
