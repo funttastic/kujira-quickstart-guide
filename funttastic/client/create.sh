@@ -134,7 +134,7 @@ else
 		INSTANCE_NAME=${INSTANCE_NAME:-temp-fun-hb-client}
 		FOLDER_SUFFIX=${FOLDER_SUFFIX:-shared}
 		FOLDER=${FOLDER:-$PWD/$FOLDER_SUFFIX}
-		PORT=${PORT:-15888}
+		PORT=${PORT:-5000}
 		ENTRYPOINT=${ENTRYPOINT:---entrypoint=/bin/bash}
 		REPOSITORY_URL=${REPOSITORY_URL:-git@github.com:funttastic/fun-hb-client.git}
 		REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-production}
@@ -145,7 +145,7 @@ else
 		INSTANCE_NAME=${INSTANCE_NAME:-fun-hb-client}
 		FOLDER_SUFFIX=${FOLDER_SUFFIX:-shared}
 		FOLDER=${FOLDER:-$PWD/$FOLDER_SUFFIX}
-		PORT=${PORT:-15888}
+		PORT=${PORT:-5000}
 		REPOSITORY_URL=${REPOSITORY_URL:-git@github.com:funttastic/fun-hb-client.git}
 		REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-production}
 	fi
