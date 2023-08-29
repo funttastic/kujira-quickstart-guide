@@ -178,7 +178,7 @@ echo "ℹ️  Confirm below if the instance and its folders are correct:"
 echo
 printf "%30s %5s\n" "Image:"              	"$IMAGE_NAME:$TAG"
 printf "%30s %5s\n" "Instance:"        			"$INSTANCE_NAME"
-printf "%30s %5s\n" "Gateway exposed port:" "$PORT"
+printf "%30s %5s\n" "Exposed port:"					"$PORT"
 printf "%30s %5s\n" "Repository url:"       "$REPOSITORY_URL"
 printf "%30s %5s\n" "Repository branch:"    "$REPOSITORY_BRANCH"
 printf "%30s %5s\n" "Reuse image?:"    		  "$BUILD_CACHE"

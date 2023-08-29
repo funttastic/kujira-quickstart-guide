@@ -89,6 +89,19 @@ then
     FOLDER=$RESPONSE
   fi
 
+  # Exposed port?
+  RESPONSE="$PORT"
+  if [ "$RESPONSE" == "" ]
+  then
+    read -p "   Enter a port for expose your new instance (default = \"5000\") >>> " RESPONSE
+  fi
+  if [ "$RESPONSE" == "" ]
+  then
+    PORT=5000
+  else
+    PORT=$RESPONSE
+  fi
+
   RESPONSE="$REPOSITORY_URL"
   if [ "$RESPONSE" == "" ]
   then
@@ -121,6 +134,7 @@ else
 		INSTANCE_NAME=${INSTANCE_NAME:-temp-fun-hb-client}
 		FOLDER_SUFFIX=${FOLDER_SUFFIX:-shared}
 		FOLDER=${FOLDER:-$PWD/$FOLDER_SUFFIX}
+		PORT=${PORT:-15888}
 		ENTRYPOINT=${ENTRYPOINT:---entrypoint=/bin/bash}
 		REPOSITORY_URL=${REPOSITORY_URL:-git@github.com:funttastic/fun-hb-client.git}
 		REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-production}
@@ -131,6 +145,7 @@ else
 		INSTANCE_NAME=${INSTANCE_NAME:-fun-hb-client}
 		FOLDER_SUFFIX=${FOLDER_SUFFIX:-shared}
 		FOLDER=${FOLDER:-$PWD/$FOLDER_SUFFIX}
+		PORT=${PORT:-15888}
 		REPOSITORY_URL=${REPOSITORY_URL:-git@github.com:funttastic/fun-hb-client.git}
 		REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-production}
 	fi
@@ -149,6 +164,7 @@ echo "ℹ️  Confirm below if the instance and its folders are correct:"
 echo
 printf "%30s %5s\n" "Image:"              	"$IMAGE_NAME:$TAG"
 printf "%30s %5s\n" "Instance:"        			"$INSTANCE_NAME"
+printf "%30s %5s\n" "Exposed port:"					"$PORT"
 printf "%30s %5s\n" "Repository url:"       "$REPOSITORY_URL"
 printf "%30s %5s\n" "Repository branch:"    "$REPOSITORY_BRANCH"
 printf "%30s %5s\n" "Deploy public key:"    "$SSH_PUBLIC_KEY"
@@ -201,6 +217,7 @@ create_instance () {
   && docker run \
     --log-opt max-size=10m \
     --log-opt max-file=5 \
+    -p $PORT:15888 \
     --name $INSTANCE_NAME \
     --network host \
     --mount type=bind,source=$RESOURCES_FOLDER,target=/root/resources \
