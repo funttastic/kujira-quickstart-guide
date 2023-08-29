@@ -226,6 +226,27 @@ create_instance () {
   fi
 
   # 5) Launch a new instance
+
+cat <<EOF
+$BUILT \
+&& docker run \
+	--log-opt max-size=10m \
+	--log-opt max-file=5 \
+	-p $PORT:15888 \
+	--name $INSTANCE_NAME \
+	--network host \
+	--mount type=bind,source=$CERTS_FOLDER,target=/root/certs \
+	--mount type=bind,source=$CONF_FOLDER,target=/root/conf \
+	--mount type=bind,source=$LOGS_FOLDER,target=/root/logs \
+	--mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
+	-e CERTS_FOLDER="/root/certs" \
+	-e CONF_FOLDER="/root/conf" \
+	-e LOGS_FOLDER="/root/logs" \
+	-e GATEWAY_PASSPHRASE="$GATEWAY_PASSPHRASE" \
+	$ENTRYPOINT \
+	$IMAGE_NAME:$TAG
+EOF
+
   $BUILT && docker run \
     --log-opt max-size=10m \
     --log-opt max-file=5 \

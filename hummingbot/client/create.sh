@@ -205,6 +205,30 @@ create_instance () {
   fi
 
   # 5) Launch a new instance
+cat <<EOF
+$BUILT \
+&& docker run \
+	--log-opt max-size=10m \
+	--log-opt max-file=5 \
+	--name $INSTANCE_NAME \
+	--network host \
+	--mount type=bind,source=$CONF_FOLDER,target=/root/conf \
+	--mount type=bind,source=$LOGS_FOLDER,target=/root/logs \
+	--mount type=bind,source=$DATA_FOLDER,target=/root/data \
+	--mount type=bind,source=$SCRIPTS_FOLDER,target=/root/scripts \
+	--mount type=bind,source=$PMM_SCRIPTS_FOLDER,target=/root/pmm_scripts \
+	--mount type=bind,source=$CERTS_FOLDER,target=/root/certs \
+	--mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
+	-e CONF_FOLDER="/root/conf" \
+	-e LOGS_FOLDER="/root/logs" \
+	-e DATA_FOLDER="/root/data" \
+	-e SCRIPTS_FOLDER="/root/scripts" \
+	-e PMM_SCRIPTS_FOLDER="/root/pmm_scripts" \
+	-e CERTS_FOLDER="/root/certs" \
+	$ENTRYPOINT \
+	$IMAGE_NAME:$TAG
+EOF
+
   $BUILT \
   && docker run \
     --log-opt max-size=10m \
