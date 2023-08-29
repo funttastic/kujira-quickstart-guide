@@ -230,6 +230,7 @@ create_instance () {
 cat <<EOF
 $BUILT \
 && docker run \
+	-dt \
 	--log-opt max-size=10m \
 	--log-opt max-file=5 \
 	-p $PORT:15888 \
@@ -248,6 +249,7 @@ $BUILT \
 EOF
 
   $BUILT && docker run \
+		-dt \
     --log-opt max-size=10m \
     --log-opt max-file=5 \
     -p $PORT:15888 \

@@ -208,6 +208,7 @@ create_instance () {
 cat <<EOF
 $BUILT \
 && docker run \
+	-dt \
 	--log-opt max-size=10m \
 	--log-opt max-file=5 \
 	--name $INSTANCE_NAME \
@@ -231,6 +232,7 @@ EOF
 
   $BUILT \
   && docker run \
+		-dt \
     --log-opt max-size=10m \
     --log-opt max-file=5 \
     --name $INSTANCE_NAME \

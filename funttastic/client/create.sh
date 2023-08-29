@@ -219,7 +219,7 @@ $BUILT \
 	-dt \
 	--log-opt max-size=10m \
 	--log-opt max-file=5 \
-	-p $PORT:5000 \
+	-p $PORT:$PORT \
 	--name $INSTANCE_NAME \
 	--network host \
 	--mount type=bind,source=$RESOURCES_FOLDER,target=/root/resources \
@@ -233,7 +233,7 @@ EOF
   	-dt \
     --log-opt max-size=10m \
     --log-opt max-file=5 \
-    -p $PORT:5000 \
+    -p $PORT:$PORT \
     --name $INSTANCE_NAME \
     --network host \
     --mount type=bind,source=$RESOURCES_FOLDER,target=/root/resources \
