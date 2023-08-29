@@ -7,7 +7,7 @@ ARG SSH_PRIVATE_KEY
 ARG REPOSITORY_URL="${REPOSITORY_URL:-git@github.com:funttastic/fun-hb-client.git}"
 ARG REPOSITORY_BRANCH="${REPOSITORY_BRANCH:-production}"
 
-ENV PORT="${PORT:-5000}"
+ENV PORT=${PORT:-5000}
 
 WORKDIR /root
 
