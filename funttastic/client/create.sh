@@ -218,7 +218,7 @@ $BUILT \
 && docker run \
 	--log-opt max-size=10m \
 	--log-opt max-file=5 \
-	-p $PORT:15888 \
+	-p $PORT:5000 \
 	--name $INSTANCE_NAME \
 	--network host \
 	--mount type=bind,source=$RESOURCES_FOLDER,target=/root/resources \
@@ -231,7 +231,7 @@ EOF
   && docker run \
     --log-opt max-size=10m \
     --log-opt max-file=5 \
-    -p $PORT:15888 \
+    -p $PORT:5000 \
     --name $INSTANCE_NAME \
     --network host \
     --mount type=bind,source=$RESOURCES_FOLDER,target=/root/resources \
