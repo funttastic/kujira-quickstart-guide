@@ -102,6 +102,15 @@ then
     PORT=$RESPONSE
   fi
 
+  # Prompts user for a password for the certificates
+  RESPONSE="$PASSWORD"
+  while [ "$RESPONSE" == "" ]
+  do
+    read -sp "   Inform the password for the certificates  >>> " RESPONSE
+    echo "   It is necessary to inform the password for the certificates. Try again."
+  done
+  PASSWORD=$RESPONSE
+
   RESPONSE="$REPOSITORY_URL"
   if [ "$RESPONSE" == "" ]
   then

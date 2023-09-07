@@ -106,8 +106,8 @@ then
   RESPONSE="$PASSPHRASE"
   while [ "$RESPONSE" == "" ]
   do
-    read -sp "   Define a passphrase for the Gateway certificate  >>> " RESPONSE
-    echo "   It is necessary to define a password for the certificate, which is the same as the one entered when executing the \"gateway generate-certs\" command on the client. Try again."
+    read -sp "   Inform the passphrase for the Gateway certificates  >>> " RESPONSE
+    echo "   It is necessary to inform the password for the certificates, which is the same as the one entered when executing the \"gateway generate-certs\" command on the Client. Try again."
   done
   PASSPHRASE=$RESPONSE
 
