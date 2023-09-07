@@ -8,6 +8,7 @@ ARG REPOSITORY_URL="${REPOSITORY_URL:-git@github.com:funttastic/fun-hb-client.gi
 ARG REPOSITORY_BRANCH="${REPOSITORY_BRANCH:-production}"
 
 ENV PORT=${PORT:-5000}
+ENV PASSWORD
 
 WORKDIR /root
 
