@@ -264,7 +264,7 @@ EOF
     -e CONF_FOLDER="/root/conf" \
     -e LOGS_FOLDER="/root/logs" \
     -e GATEWAY_PORT=$PORT \
-    -e GATEWAY_PASSPHRASE="$PASSPHRASE" \
+    -e GATEWAY_PASSPHRASE="'$PASSPHRASE'" \
     $ENTRYPOINT \
     $IMAGE_NAME:$TAG
 }
