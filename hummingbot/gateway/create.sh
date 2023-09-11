@@ -204,69 +204,72 @@ prompt_proceed () {
 
 # Execute docker commands
 create_instance () {
-  echo
-  echo "Creating instance ..."
-  echo
-  # 1) Create main folder for your new instance
-  mkdir -p $FOLDER
-  mkdir -p $GATEWAY_FOLDER
-  # 2) Create subfolders
-  mkdir -p $CERTS_FOLDER
-  mkdir -p $CONF_FOLDER
-  mkdir -p $LOGS_FOLDER
+	echo "PASSPHRASE:"
+	echo "$PASSPHRASE"
 
-  # 3) Set required permissions to save hummingbot password the first time
-  chmod a+rw $CONF_FOLDER
-
-  # 4) Create a new image?
-  BUILT=true
-  if [ ! "$BUILD_CACHE" == "" ]
-  then
-    BUILT=$(DOCKER_BUILDKIT=1 docker build $BUILD_CACHE --build-arg REPOSITORY_URL="$REPOSITORY_URL" --build-arg REPOSITORY_BRANCH="$REPOSITORY_BRANCH" -t $IMAGE_NAME -f hummingbot/gateway/Dockerfile .)
-  fi
-
-  # 5) Launch a new instance
-
-cat <<EOF
-$BUILT \
-&& docker run \
-	-dt \
-	--log-opt max-size=10m \
-	--log-opt max-file=5 \
-	-p $PORT:$PORT \
-	--name $INSTANCE_NAME \
-	--network host \
-	--mount type=bind,source=$CERTS_FOLDER,target=/root/certs \
-	--mount type=bind,source=$CONF_FOLDER,target=/root/conf \
-	--mount type=bind,source=$LOGS_FOLDER,target=/root/logs \
-	--mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
-	-e CERTS_FOLDER="/root/certs" \
-	-e CONF_FOLDER="/root/conf" \
-	-e LOGS_FOLDER="/root/logs" \
-	-e GATEWAY_PORT=$PORT \
-	-e GATEWAY_PASSPHRASE="***" \
-	$ENTRYPOINT \
-	$IMAGE_NAME:$TAG
-EOF
-
-  $BUILT && docker run \
-		-dt \
-    --log-opt max-size=10m \
-    --log-opt max-file=5 \
-    -p $PORT:$PORT \
-    --name $INSTANCE_NAME \
-    --network host \
-    --mount type=bind,source=$CERTS_FOLDER,target=/root/certs \
-    --mount type=bind,source=$CONF_FOLDER,target=/root/conf \
-    --mount type=bind,source=$LOGS_FOLDER,target=/root/logs \
-    --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
-    -e CERTS_FOLDER="/root/certs" \
-    -e CONF_FOLDER="/root/conf" \
-    -e LOGS_FOLDER="/root/logs" \
-    -e GATEWAY_PORT=$PORT \
-    -e GATEWAY_PASSPHRASE="'$PASSPHRASE'" \
-    $ENTRYPOINT \
-    $IMAGE_NAME:$TAG
+#  echo
+#  echo "Creating instance ..."
+#  echo
+#  # 1) Create main folder for your new instance
+#  mkdir -p $FOLDER
+#  mkdir -p $GATEWAY_FOLDER
+#  # 2) Create subfolders
+#  mkdir -p $CERTS_FOLDER
+#  mkdir -p $CONF_FOLDER
+#  mkdir -p $LOGS_FOLDER
+#
+#  # 3) Set required permissions to save hummingbot password the first time
+#  chmod a+rw $CONF_FOLDER
+#
+#  # 4) Create a new image?
+#  BUILT=true
+#  if [ ! "$BUILD_CACHE" == "" ]
+#  then
+#    BUILT=$(DOCKER_BUILDKIT=1 docker build $BUILD_CACHE --build-arg REPOSITORY_URL="$REPOSITORY_URL" --build-arg REPOSITORY_BRANCH="$REPOSITORY_BRANCH" -t $IMAGE_NAME -f hummingbot/gateway/Dockerfile .)
+#  fi
+#
+#  # 5) Launch a new instance
+#
+#cat <<EOF
+#$BUILT \
+#&& docker run \
+#	-dt \
+#	--log-opt max-size=10m \
+#	--log-opt max-file=5 \
+#	-p $PORT:$PORT \
+#	--name $INSTANCE_NAME \
+#	--network host \
+#	--mount type=bind,source=$CERTS_FOLDER,target=/root/certs \
+#	--mount type=bind,source=$CONF_FOLDER,target=/root/conf \
+#	--mount type=bind,source=$LOGS_FOLDER,target=/root/logs \
+#	--mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
+#	-e CERTS_FOLDER="/root/certs" \
+#	-e CONF_FOLDER="/root/conf" \
+#	-e LOGS_FOLDER="/root/logs" \
+#	-e GATEWAY_PORT=$PORT \
+#	-e GATEWAY_PASSPHRASE="***" \
+#	$ENTRYPOINT \
+#	$IMAGE_NAME:$TAG
+#EOF
+#
+#  $BUILT && docker run \
+#		-dt \
+#    --log-opt max-size=10m \
+#    --log-opt max-file=5 \
+#    -p $PORT:$PORT \
+#    --name $INSTANCE_NAME \
+#    --network host \
+#    --mount type=bind,source=$CERTS_FOLDER,target=/root/certs \
+#    --mount type=bind,source=$CONF_FOLDER,target=/root/conf \
+#    --mount type=bind,source=$LOGS_FOLDER,target=/root/logs \
+#    --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
+#    -e CERTS_FOLDER="/root/certs" \
+#    -e CONF_FOLDER="/root/conf" \
+#    -e LOGS_FOLDER="/root/logs" \
+#    -e GATEWAY_PORT=$PORT \
+#    -e GATEWAY_PASSPHRASE="'$PASSPHRASE'" \
+#    $ENTRYPOINT \
+#    $IMAGE_NAME:$TAG
 }
 
 if [ "$CUSTOMIZE" == "--customize" ]
