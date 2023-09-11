@@ -8,8 +8,8 @@ echo
 echo "ℹ️  Press [ENTER] for default values:"
 echo
 
-echo "PASSPHRASE:"
-echo "$PASSPHRASE"
+echo "PASSPHRASE2:"
+echo "$PASSPHRASE2"
 
 #if [ ! "$DEBUG" == "" ]
 #then
