@@ -103,13 +103,13 @@ then
   fi
 
   # Prompts user for a password for the gateway certificates
-  RESPONSE="$PASSPHRASE"
+  RESPONSE="$PASSWORD"
   while [ "$RESPONSE" == "" ]
   do
-    read -sp "   Inform the passphrase for the Gateway certificates  >>> " RESPONSE
+    read -sp "   Inform the password for the Gateway certificates  >>> " RESPONSE
     echo "   It is necessary to inform the password for the certificates, which is the same as the one entered when executing the \"gateway generate-certs\" command on the Client. Try again."
   done
-  PASSPHRASE=$RESPONSE
+  PASSWORD=$RESPONSE
 
   RESPONSE="$REPOSITORY_URL"
   if [ "$RESPONSE" == "" ]
@@ -160,9 +160,9 @@ else
   fi
 
   # Prompts user for a password for the gateway certificates
-  while [ "$PASSPHRASE" == "" ]
+  while [ "$PASSWORD" == "" ]
   do
-    read -sp "   Define a passphrase for the Gateway certificate  >>> " PASSPHRASE
+    read -sp "   Define a password for the Gateway certificate  >>> " PASSWORD
     echo "   It is necessary to define a password for the certificate, which is the same as the one entered when executing the \"gateway generate-certs\" command on the client. Try again."
   done
 fi
@@ -264,7 +264,7 @@ EOF
     -e CONF_FOLDER="/root/conf" \
     -e LOGS_FOLDER="/root/logs" \
     -e GATEWAY_PORT=$PORT \
-    -e GATEWAY_PASSPHRASE="$PASSPHRASE" \
+    -e GATEWAY_PASSPHRASE="$PASSWORD" \
     $ENTRYPOINT \
     $IMAGE_NAME:$TAG
 }
