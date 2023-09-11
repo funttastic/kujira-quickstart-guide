@@ -19,86 +19,86 @@ ENV GATEWAY_PASSPHRASE="${GATEWAY_PASSPHRASE}"
 
 WORKDIR /root
 
-# Dropping default /root/.bashrc because it will return if not running as interactive shell, thus not invoking PATH settings
-RUN :> /root/.bashrc
-
-SHELL [ "/bin/bash", "-lc" ]
-
-RUN <<-EOF
-	set -ex
-
-	apt-get update
-
-	apt-get install --no-install-recommends -y \
-		ca-certificates \
-		openssh-server \
-		git \
-		vim \
-		tree \
-		psmisc
-
-	set +ex
-EOF
-
-RUN <<-EOF
-	set -ex
-
-	git clone -b $REPOSITORY_BRANCH $REPOSITORY_URL /tmp/app
-	cp -R /tmp/app/. .
-  rm -rf /tmp/app
-
-  set +ex
-EOF
-# COPY . .
-
-EXPOSE 15888
-
-RUN <<-EOF
-	set -ex
-
-	mkdir -p \
-		/root/certs \
-		/root/db \
-		/root/conf \
-		/root/logs \
-		/var/lib
-
-	set +ex
-EOF
-
-RUN <<-EOF
-	set -ex
-
-	cp -R /root/src/templates/. /root/conf/
-
-	set +ex
-EOF
-
-RUN <<-EOF
-	set -ex
-
-	yarn
-	yarn prebuild
-	yarn build
-
-	set +ex
-EOF
-
+## Dropping default /root/.bashrc because it will return if not running as interactive shell, thus not invoking PATH settings
+#RUN :> /root/.bashrc
+#
+#SHELL [ "/bin/bash", "-lc" ]
+#
 #RUN <<-EOF
 #	set -ex
 #
-#	apt autoremove -y
+#	apt-get update
 #
-#	apt clean autoclean
-#
-#	rm -rf \
-#		/var/lib/apt/lists/* \
-#		/etc/apt/sources.list \
-#		/etc/apt/sources.list.d/* \
-#		/tmp/* \
-#		/var/tmp/*
+#	apt-get install --no-install-recommends -y \
+#		ca-certificates \
+#		openssh-server \
+#		git \
+#		vim \
+#		tree \
+#		psmisc
 #
 #	set +ex
 #EOF
-
-CMD ["yarn", "start"]
+#
+#RUN <<-EOF
+#	set -ex
+#
+#	git clone -b $REPOSITORY_BRANCH $REPOSITORY_URL /tmp/app
+#	cp -R /tmp/app/. .
+#  rm -rf /tmp/app
+#
+#  set +ex
+#EOF
+## COPY . .
+#
+#EXPOSE 15888
+#
+#RUN <<-EOF
+#	set -ex
+#
+#	mkdir -p \
+#		/root/certs \
+#		/root/db \
+#		/root/conf \
+#		/root/logs \
+#		/var/lib
+#
+#	set +ex
+#EOF
+#
+#RUN <<-EOF
+#	set -ex
+#
+#	cp -R /root/src/templates/. /root/conf/
+#
+#	set +ex
+#EOF
+#
+#RUN <<-EOF
+#	set -ex
+#
+#	yarn
+#	yarn prebuild
+#	yarn build
+#
+#	set +ex
+#EOF
+#
+##RUN <<-EOF
+##	set -ex
+##
+##	apt autoremove -y
+##
+##	apt clean autoclean
+##
+##	rm -rf \
+##		/var/lib/apt/lists/* \
+##		/etc/apt/sources.list \
+##		/etc/apt/sources.list.d/* \
+##		/tmp/* \
+##		/var/tmp/*
+##
+##	set +ex
+##EOF
+#
+#CMD ["yarn", "start"]
