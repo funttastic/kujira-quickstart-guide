@@ -250,7 +250,7 @@ EOF
     --mount type=bind,source=$RESOURCES_FOLDER,target=/root/resources \
     --mount type=bind,source=$CERTIFICATES_FOLDER,target=/root/resources/certificates \
     -e PORT=$PORT \
-    -e PASSWORD="'$PASSWORD'" \
+    -e PASSWORD="$PASSWORD" \
     $ENTRYPOINT \
     $IMAGE_NAME:$TAG
 }
