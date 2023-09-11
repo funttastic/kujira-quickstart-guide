@@ -8,6 +8,9 @@ echo
 echo "ℹ️  Press [ENTER] for default values:"
 echo
 
+echo "PASSPHRASE:"
+echo "$PASSPHRASE"
+
 if [ ! "$DEBUG" == "" ]
 then
 	docker stop temp-hb-gateway
