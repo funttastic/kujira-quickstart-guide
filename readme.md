@@ -19,7 +19,7 @@ Run:
 
 to create a Client instance. Follow the instructions on the screen.
 
-**Important**: it is needed to be located in the scripts folders, seeing the client folder, otherwise the Dockerfile
+**Important**: it is needed to be located inside the cloned repository, seeing the client folder, otherwise the Dockerfile
 will not be able to copy the required files and attach to the required folders.
 
 ### Configuration
@@ -42,7 +42,7 @@ Run:
 to create a Gateway instance. Follow the instructions on the screen
 and enter the same passphrase created when configuring the Client.
 
-**Important**: it is needed to be located in the scripts folders, seeing the client folder, otherwise the Dockerfile
+**Important**: it is needed to be located inside the cloned repository, seeing the gateway folder, otherwise the Dockerfile
 will not be able to copy the required files and attach to the required folders.
 
 ### Configuration
