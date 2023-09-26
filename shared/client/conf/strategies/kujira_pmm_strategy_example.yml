@@ -9,7 +9,7 @@ strategy: pure_market_making
 exchange: kujira_kujira_testnet
 
 # Token trading pair for the exchange, e.g. BTC-USDT
-market: KUJI-DEMO
+market: KUJI-USK
 
 # How far away from mid price to place the bid order.
 # Spread of 1 = 1% away from mid price at that time.
