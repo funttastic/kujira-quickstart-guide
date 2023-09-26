@@ -49,6 +49,9 @@ RUN \
 
 RUN cp -R /root/src/templates/* /root/conf/
 
+RUN mkdir -p /home/gateway/conf # This was added beacause of kujira.yml configuration
+RUN cp -R /root/src/templates/* /home/gateway/conf/ # This too
+
 RUN yarn
 RUN yarn build
 
