@@ -49,7 +49,7 @@ RUN <<-EOF
 EOF
 
 RUN <<-EOF
-	git clone -b development https://github.com/hummingbot/hummingbot.git temporary
+	git clone -b community https://github.com/Team-Kujira/hummingbot.git temporary
 	cp -r temporary/* .
 	rm -rf temporary
 EOF
