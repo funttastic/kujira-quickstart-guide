@@ -243,6 +243,7 @@ docker_create_image_kujira_hb_client () {
 docker_create_container_kujira_hb_client () {
   $BUILT \
   && docker run \
+    -d \
     -it \
     --log-opt max-size=10m \
     --log-opt max-file=5 \
@@ -255,6 +256,20 @@ docker_create_container_kujira_hb_client () {
     $IMAGE_NAME:$TAG
 }
 
+post_installation_kujira_hb_client () {
+  docker exec "$INSTANCE_NAME" /bin/bash -c "cp -r /root/app/resources_temp/* /root/app/resources"
+  docker exec "$INSTANCE_NAME" /bin/bash -c "rm -rf /root/app/resources_temp"
+  docker exec "$INSTANCE_NAME" /bin/bash -c 'python /root/app/resources/scripts/generate_ssl_certificates.py --passphrase "$SELECTED_PASSPHRASE" --cert-path /root/app/resources/certificates'
+  docker exec "$INSTANCE_NAME" /bin/bash -c 'sed -i "s/<password>/$SELECTED_PASSPHRASE/g" /root/app/resources/configuration/production.yml'
+  docker exec "$INSTANCE_NAME" /bin/bash -c "sed -i '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' resources/configuration/common.yml"
+  docker exec "$INSTANCE_NAME" /bin/bash -c "sed -i '/logging:/,/use_telegram: true/ s/use_telegram: true/use_telegram: false/' resources/configuration/production.yml"
+  docker exec "$INSTANCE_NAME" /bin/bash -c "groupadd -f $GROUP"
+  docker exec "$INSTANCE_NAME" /bin/bash -c "cd resources && chown -RH :$GROUP ."
+  docker exec "$INSTANCE_NAME" /bin/bash -c "cd resources && chmod -R a+rwX ."
+  docker exec "$INSTANCE_NAME" /bin/bash -c "python app.py"
+}
+
+
 default_installation () {
   BUILT=true
 
@@ -265,6 +280,9 @@ default_installation () {
 
   # Create a new separated container from image
   docker_create_container_kujira_hb_client
+
+  # Makes some configurations within the container after its creation
+  post_installation_kujira_hb_client
 }
 
 create_instance () {
