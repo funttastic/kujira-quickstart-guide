@@ -30,7 +30,20 @@ prompt_proceed () {
   fi
 }
 
-install_kujira_hb_client () {
+default_values_info () {
+  echo
+  echo "ℹ️  Press [ENTER] for default values:"
+  echo
+}
+
+pre_installation_kujira_hb_client () {
+  echo
+  echo
+  echo "   ===============  KUJIRA HB CLIENT INSTALLATION PROCESS ==============="
+  echo
+
+  default_values_info
+
   # Customize the Client image to be used?
   RESPONSE="$IMAGE_NAME"
   if [ "$RESPONSE" == "" ]
@@ -124,9 +137,6 @@ fi
 if [ "$CUSTOMIZE" == "--customize" ]
 then
   echo
-  echo "ℹ️  Press [ENTER] for default values:"
-  echo
-
   echo "   CHOOSE A OPTION BELOW TO INSTALL"
   echo
   echo "   [1] KUJIRA HB CLIENT"
@@ -161,11 +171,7 @@ then
 
   case $choice in
       1)
-          echo
-          echo
-          echo "   ===============  KUJIRA HB CLIENT INSTALLATION PROCESS ==============="
-          echo
-          install_kujira_hb_client
+          pre_installation_kujira_hb_client
           ;;
       2)
           NOT_IMPLEMENTED=true
@@ -182,11 +188,9 @@ then
           echo
           ;;
       4)
-          NOT_IMPLEMENTED=true
-          echo
-          echo
-          echo "      NOT IMPLEMENTED"
-          echo
+          pre_installation_kujira_hb_client
+
+          # TODO - PARTIALLY IMPLEMENTED
           ;;
       5)
           NOT_IMPLEMENTED=true
@@ -269,8 +273,7 @@ post_installation_kujira_hb_client () {
   docker exec "$INSTANCE_NAME" /bin/bash -c "python app.py"
 }
 
-
-default_installation () {
+choice_one_installation () {
   BUILT=true
 
   $BUILT && docker volume create resources > /dev/null
@@ -285,22 +288,48 @@ default_installation () {
   post_installation_kujira_hb_client
 }
 
-create_instance () {
-  echo
-  echo "   Automatically installing:"
-  echo
-  echo "     > Kujira HB Client"
-  echo "     > Hummingbot Gateway Fork"
-  echo
-  mkdir -p "$FOLDER"
-  mkdir -p "$RESOURCES_FOLDER"
+default_installation () {
+  choice_one_installation
 
-  default_installation
+  # TODO - PARTIALLY IMPLEMENTED
+}
+
+execute_installation () {
+  case $choice in
+    1)
+        echo
+        echo "   Installing:"
+        echo
+        echo "     > Kujira HB Client"
+        echo
+
+        choice_one_installation
+        ;;
+    2)
+        echo
+        ;;
+    3)
+        echo
+        ;;
+    4)
+        echo
+        echo "   Automatically installing:"
+        echo
+        echo "     > Kujira HB Client"
+        echo "     > Hummingbot Gateway Fork"
+        echo
+
+        default_installation
+        ;;
+    5)
+        echo
+        ;;
+  esac
 }
 
 install_docker () {
   if [ "$(command -v docker)" ]; then
-    create_instance
+    execute_installation
   else
     echo "   Docker is not installed."
     echo "   Installing Docker will require superuser permissions."
@@ -377,7 +406,7 @@ install_docker () {
         echo "Docker installation is finished."
         echo
 
-        create_instance
+        execute_installation
     else
       echo
       echo "   Script execution aborted."
@@ -386,7 +415,7 @@ install_docker () {
   fi
 }
 
-if [[ "$CUSTOMIZE" == "--customize" && "$NOT_IMPLEMENTED" == 0 ]]
+if [[ "$CUSTOMIZE" == "--customize" &&  ! "$NOT_IMPLEMENTED" ]]
 then
   echo
   echo "ℹ️  Confirm below if the instance and its folders are correct:"
@@ -410,6 +439,7 @@ then
   fi
 else
   if [ ! "$NOT_IMPLEMENTED" ]; then
+    choice=4
     install_docker
   fi
 fi
