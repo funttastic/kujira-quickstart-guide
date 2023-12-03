@@ -4,6 +4,12 @@ CUSTOMIZE=$1
 USER=$(whoami)
 GROUP=$(id -gn)
 TAG="latest"
+CHOICE=0
+PASSPHRASE_LENGTH=4
+SHARED_FOLDER_SUFFIX="shared"
+SHARED_FOLDER=$PWD/$SHARED_FOLDER_SUFFIX
+COMMON_FOLDER="$SHARED_FOLDER/common"
+ENTRYPOINT="/bin/bash"
 
 generate_passphrase() {
     local length=$1
@@ -39,7 +45,7 @@ default_values_info () {
 pre_installation_kujira_hb_client () {
   echo
   echo
-  echo "   ===============  KUJIRA HB CLIENT INSTALLATION PROCESS ==============="
+  echo "   ===============   KUJIRA HB CLIENT INSTALLATION SETUP  ==============="
   echo
 
   default_values_info
@@ -75,7 +81,7 @@ pre_installation_kujira_hb_client () {
   fi
 
   # Create a new container?
-  RESPONSE="$INSTANCE_NAME"
+  RESPONSE="$KUJIRA_HB_CLIENT_CONTAINER_NAME"
   if [ "$RESPONSE" == "" ]
   then
     echo
@@ -83,16 +89,16 @@ pre_installation_kujira_hb_client () {
   fi
   if [ "$RESPONSE" == "" ]
   then
-    INSTANCE_NAME="kujira-hb-client"
+    KUJIRA_HB_CLIENT_CONTAINER_NAME="kujira-hb-client"
   else
-    INSTANCE_NAME=$RESPONSE
+    KUJIRA_HB_CLIENT_CONTAINER_NAME=$RESPONSE
   fi
 
   # Prompt the user for the passphrase to encrypt the certificates
   while true; do
       echo
-      read -s -p "   Enter a passphrase to encrypt the certificates with at least 4 characters >>> " DEFINED_PASSPHRASE
-      if [ -z "$DEFINED_PASSPHRASE" ] || [ ${#DEFINED_PASSPHRASE} -lt 4 ]; then
+      read -s -p "   Enter a passphrase to encrypt the certificates with at least $PASSPHRASE_LENGTH characters >>> " DEFINED_PASSPHRASE
+      if [ -z "$DEFINED_PASSPHRASE" ] || [ ${#DEFINED_PASSPHRASE} -lt "$PASSPHRASE_LENGTH" ]; then
           echo
           echo
           echo "      Weak passphrase, please try again."
@@ -103,25 +109,158 @@ pre_installation_kujira_hb_client () {
   done
 
   # Location to save files?
-  RESPONSE="$FOLDER"
+  RESPONSE="$KUJIRA_HB_CLIENT_FOLDER"
   if [ "$RESPONSE" == "" ]
   then
-    FOLDER_SUFFIX="shared"
+    KUJIRA_HB_CLIENT_FOLDER_SUFFIX="kujira"
     echo
-    read -p "   Enter a folder name where your Kujira HB Client files will be saved (default = \"$FOLDER_SUFFIX\") >>> " RESPONSE
+    read -p "   Enter a folder name where your Kujira HB Client files will be saved (default = \"$KUJIRA_HB_CLIENT_FOLDER_SUFFIX\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
-    FOLDER=$PWD/$FOLDER_SUFFIX
+    KUJIRA_HB_CLIENT_FOLDER=$SHARED_FOLDER/$KUJIRA_HB_CLIENT_FOLDER_SUFFIX
   elif [[ ${RESPONSE::1} != "/" ]]; then
-    FOLDER=$PWD/$RESPONSE
+    KUJIRA_HB_CLIENT_FOLDER=$SHARED_FOLDER/$RESPONSE
   else
-    FOLDER=$RESPONSE
+    KUJIRA_HB_CLIENT_FOLDER=$RESPONSE
   fi
 }
 
+pre_installation_hb_gateway_fork () {
+  echo
+  echo
+  echo "   ===============   HB GATEWAY FORK INSTALLATION SETUP   ==============="
+  echo
+
+  if [ "$CHOICE" == 3 ]; then
+    default_values_info
+  fi
+
+  RESPONSE="$GATEWAY_IMAGE_NAME"
+  if [ "$RESPONSE" == "" ]
+  then
+    echo
+    read -p "   Enter a HB Gateway Fork image name you want to use (default = \"hb-gateway-fork\") >>> " RESPONSE
+  fi
+  if [ "$RESPONSE" == "" ]
+  then
+    GATEWAY_IMAGE_NAME="hb-gateway-fork"
+  else
+    GATEWAY_IMAGE_NAME="$RESPONSE"
+  fi
+
+  # Create a new image?
+  RESPONSE="$GATEWAY_BUILD_CACHE"
+  if [ "$RESPONSE" == "" ]
+  then
+    echo
+    read -p "   Do you want to use an existing HB Gateway Fork image (\"y/N\") >>> " RESPONSE
+  fi
+  if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]
+  then
+    echo
+    echo "      A new image will be created..."
+    GATEWAY_BUILD_CACHE="--no-cache"
+  else
+    GATEWAY_BUILD_CACHE=""
+  fi
+
+  # Create a new instance?
+  RESPONSE="$GATEWAY_CONTAINER_NAME"
+  if [ "$RESPONSE" == "" ]
+  then
+    echo
+    read -p "   Enter a name for your new HB Gateway Fork instance (default = \"hb-gateway-fork\") >>> " RESPONSE
+  fi
+  if [ "$RESPONSE" == "" ]
+  then
+    GATEWAY_CONTAINER_NAME="hb-gateway-fork"
+  else
+    GATEWAY_CONTAINER_NAME=$RESPONSE
+  fi
+
+  # Exposed port?
+  RESPONSE="$GATEWAY_PORT"
+  if [ "$RESPONSE" == "" ]
+  then
+    echo
+    read -p "   Enter a port for expose your new HB Gateway Fork instance (default = \"15888\") >>> " RESPONSE
+  fi
+  if [ "$RESPONSE" == "" ]
+  then
+    GATEWAY_PORT=15888
+  else
+    GATEWAY_PORT=$RESPONSE
+  fi
+
+  # Location to save files?
+  RESPONSE="$GATEWAY_FOLDER"
+  if [ "$RESPONSE" == "" ]
+  then
+    GATEWAY_FOLDER_SUFFIX="gateway"
+    echo
+    read -p "   Enter a folder name where your HB Gateway Fork files will be saved (default = \"$GATEWAY_FOLDER_SUFFIX\") >>> " RESPONSE
+  fi
+  if [ "$RESPONSE" == "" ]
+  then
+    GATEWAY_FOLDER=$SHARED_FOLDER/"hummingbot"/$GATEWAY_FOLDER_SUFFIX
+  elif [[ ${RESPONSE::1} != "/" ]]; then
+    GATEWAY_FOLDER=$SHARED_FOLDER/"hummingbot"/$RESPONSE
+  else
+    GATEWAY_FOLDER=$RESPONSE
+  fi
+
+  # Executes only if the choice is 3
+  if [ "$CHOICE" == 3 ]; then
+    # Prompts user for a password for the gateway certificates
+    while true; do
+        echo
+        read -s -p "   Enter a passphrase to encrypt the certificates with at least $PASSPHRASE_LENGTH characters >>> " DEFINED_PASSPHRASE
+        if [ -z "$DEFINED_PASSPHRASE" ] || [ ${#DEFINED_PASSPHRASE} -lt "$PASSPHRASE_LENGTH" ]; then
+            echo
+            echo
+            echo "      Weak passphrase, please try again."
+        else
+            echo
+            break
+        fi
+    done
+  fi
+
+  RESPONSE="$GATEWAY_REPOSITORY_URL"
+  if [ "$RESPONSE" == "" ]
+  then
+    echo
+    read -p "   Enter the url from the repository to be cloned
+   (default = \"https://github.com/Team-Kujira/gateway.git\") >>> " RESPONSE
+  fi
+  if [ "$RESPONSE" == "" ]
+  then
+    GATEWAY_REPOSITORY_URL="https://github.com/Team-Kujira/gateway.git"
+  else
+    GATEWAY_REPOSITORY_URL="$RESPONSE"
+  fi
+
+  RESPONSE="$GATEWAY_REPOSITORY_BRANCH"
+  if [ "$RESPONSE" == "" ]
+  then
+    echo
+    read -p "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
+  fi
+  if [ "$RESPONSE" == "" ]
+  then
+    GATEWAY_REPOSITORY_BRANCH="community"
+  else
+    GATEWAY_REPOSITORY_BRANCH="$RESPONSE"
+  fi
+
+  CERTS_FOLDER="$COMMON_FOLDER/certificates"
+  GATEWAY_CONF_FOLDER="$GATEWAY_FOLDER/conf"
+  GATEWAY_LOGS_FOLDER="$GATEWAY_FOLDER/logs"
+}
+
 echo
-echo "   ===============  WELCOME TO KUJIRA HB CLIENT SETUP ==============="
+echo "   ===============    WELCOME TO KUJIRA HB CLIENT SETUP   ==============="
 echo
 
 RESPONSE=""
@@ -140,24 +279,24 @@ then
   echo "   CHOOSE A OPTION BELOW TO INSTALL"
   echo
   echo "   [1] KUJIRA HB CLIENT"
-  echo "   [3] HUMMINGBOT CLIENT FORK"
-  echo "   [2] HUMMINGBOT GATEWAY FORK"
-  echo "   [4] KUJIRA HB CLIENT and HB GATEWAY FORK [DEFAULT]"
+  echo "   [2] HUMMINGBOT CLIENT FORK"
+  echo "   [3] HUMMINGBOT GATEWAY FORK"
+  echo "   [4] KUJIRA HB CLIENT and HB GATEWAY FORK [RECOMMENDED]"
   echo "   [5] ALL"
   echo
   echo "   For more information about the difference between HB Official and HB Forks, please visit:"
   echo
-  echo "         https://wwww.site.com/docs"
+  echo "         https://www.funttastic.com/partners/kujira"
   echo
 
-  read -p "   Enter your choice (1-5): " choice
+  read -p "   Enter your choice (1-5): " CHOICE
 
 #  if [[ -z $choice || ! $choice =~ ^[1-5]$ ]]; then
-#      choice=4
+#      CHOICE=4
 #  fi
 
   while true; do
-    case $choice in
+    case $CHOICE in
         1|2|3|4|5)
             break
             ;;
@@ -166,10 +305,10 @@ then
             ;;
     esac
 
-    read -p "   Enter your choice (1-5): " choice
+    read -p "   Enter your choice (1-5): " CHOICE
   done
 
-  case $choice in
+  case $CHOICE in
       1)
           pre_installation_kujira_hb_client
           ;;
@@ -181,16 +320,11 @@ then
           echo
           ;;
       3)
-          NOT_IMPLEMENTED=true
-          echo
-          echo
-          echo "      NOT IMPLEMENTED"
-          echo
+          pre_installation_hb_gateway_fork
           ;;
       4)
           pre_installation_kujira_hb_client
-
-          # TODO - PARTIALLY IMPLEMENTED
+          pre_installation_hb_gateway_fork
           ;;
       5)
           NOT_IMPLEMENTED=true
@@ -205,27 +339,39 @@ else
 
   # Kujira HB Client Settings
   IMAGE_NAME="kujira-hb-client"
-  INSTANCE_NAME="kujira-hb-client"
+  KUJIRA_HB_CLIENT_CONTAINER_NAME="kujira-hb-client"
+  KUJIRA_HB_CLIENT_FOLDER_SUFFIX="kujira"
+  KUJIRA_HB_CLIENT_FOLDER="$SHARED_FOLDER"/"$KUJIRA_HB_CLIENT_FOLDER_SUFFIX"
 
   # HB Gateway Fork Settings
+  GATEWAY_IMAGE_NAME=${GATEWAY_IMAGE_NAME:-"hb-gateway-fork"}
+  GATEWAY_BUILD_CACHE=${GATEWAY_BUILD_CACHE:-"--no-cache"}
+  GATEWAY_CONTAINER_NAME=${GATEWAY_CONTAINER_NAME:-"hb-gateway-fork"}
+  GATEWAY_FOLDER_SUFFIX=${GATEWAY_FOLDER_SUFFIX:-"gateway"}
+  GATEWAY_FOLDER=${GATEWAY_FOLDER:-$SHARED_FOLDER/"hummingbot"/$GATEWAY_FOLDER_SUFFIX}
+  GATEWAY_PORT=${GATEWAY_PORT:-15888}
+  GATEWAY_REPOSITORY_URL=${GATEWAY_REPOSITORY_URL:-https://github.com/Team-Kujira/gateway.git}
+  GATEWAY_REPOSITORY_BRANCH=${GATEWAY_REPOSITORY_BRANCH:-community}
+  CERTS_FOLDER="$COMMON_FOLDER/certificates"
+  GATEWAY_CONF_FOLDER="$GATEWAY_FOLDER/conf"
+  GATEWAY_LOGS_FOLDER="$GATEWAY_FOLDER/logs"
 
   # Settings for both
-  TAG="latest"
+  TAG=${TAG:-"latest"}
+  ENTRYPOINT=${ENTRYPOINT:-"/bin/bash"}
   BUILD_CACHE="--no-cache"
-  FOLDER_SUFFIX="shared"
-  FOLDER=$PWD/$FOLDER_SUFFIX
 
 	RANDOM_PASSPHRASE=$(generate_passphrase 32)
 fi
 
-RESOURCES_FOLDER="$FOLDER/kujira/client/resources"
+RESOURCES_FOLDER="$KUJIRA_HB_CLIENT_FOLDER/client/resources"
 
 if [ -n "$RANDOM_PASSPHRASE" ]; then  \
 echo "   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"; \
 echo "   |                                                        |"; \
 echo "   |   A new random passphrase has been saved in the file   |"; \
 echo "   |                                                        |"; \
-echo "   |      resources/random_passphrase.txt                   |"; \
+echo "   |      shared/kujira/resources/random_passphrase.txt     |"; \
 echo "   |                                                        |"; \
 echo "   |   Copy it to a safe location and delete the file.      |"; \
 echo "   |                                                        |"; \
@@ -237,10 +383,10 @@ docker_create_image_kujira_hb_client () {
   if [ ! "$BUILD_CACHE" == "" ]
   then
     BUILT=$(DOCKER_BUILDKIT=1 docker build \
-    --build-arg RANDOM_PASSPHRASE="$RANDOM_PASSPHRASE" \
     $BUILD_CACHE \
+    --build-arg RANDOM_PASSPHRASE="$RANDOM_PASSPHRASE" \
     --build-arg DEFINED_PASSPHRASE="$DEFINED_PASSPHRASE" \
-    -t $IMAGE_NAME -f ./docker/Dockerfile .)
+    -t $IMAGE_NAME -f ./docker/Dockerfile/Dockerfile-Kujira-HB-Client .)
   fi
 }
 
@@ -251,7 +397,7 @@ docker_create_container_kujira_hb_client () {
     -it \
     --log-opt max-size=10m \
     --log-opt max-file=5 \
-    --name $INSTANCE_NAME \
+    --name $KUJIRA_HB_CLIENT_CONTAINER_NAME \
     --network host \
     -v "$RESOURCES_FOLDER":/root/app/resources \
     --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
@@ -260,17 +406,50 @@ docker_create_container_kujira_hb_client () {
     $IMAGE_NAME:$TAG
 }
 
+docker_create_image_hb_gateway_fork () {
+  if [ ! "$GATEWAY_BUILD_CACHE" == "" ]; then
+    BUILT=$(DOCKER_BUILDKIT=1 docker build \
+      "$GATEWAY_BUILD_CACHE" \
+      --build-arg REPOSITORY_URL="$GATEWAY_REPOSITORY_URL" \
+      --build-arg REPOSITORY_BRANCH="$GATEWAY_REPOSITORY_BRANCH" \
+      --build-arg RANDOM_PASSPHRASE="$RANDOM_PASSPHRASE" \
+      --build-arg DEFINED_PASSPHRASE="$DEFINED_PASSPHRASE" \
+      -t "$GATEWAY_IMAGE_NAME" -f ./docker/Dockerfile/Dockerfile-HB-Gateway-Fork .)
+  fi
+}
+
+
+docker_create_container_hb_gateway_fork () {
+  $BUILT && docker run \
+  -dt \
+  --log-opt max-size=10m \
+  --log-opt max-file=5 \
+  -p "$GATEWAY_PORT":"$GATEWAY_PORT" \
+  --name "$GATEWAY_CONTAINER_NAME" \
+  --network host \
+  --mount type=bind,source="$CERTS_FOLDER",target=/root/certs \
+  --mount type=bind,source="$GATEWAY_CONF_FOLDER",target=/root/conf \
+  --mount type=bind,source="$GATEWAY_LOGS_FOLDER",target=/root/logs \
+  --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
+  -e CERTS_FOLDER="/root/certs" \
+  -e CONF_FOLDER="/root/conf" \
+  -e LOGS_FOLDER="/root/logs" \
+  -e GATEWAY_PORT="$GATEWAY_PORT" \
+  --entrypoint="$ENTRYPOINT" \
+  $GATEWAY_IMAGE_NAME:$TAG
+}
+
 post_installation_kujira_hb_client () {
-  docker exec "$INSTANCE_NAME" /bin/bash -c "cp -r /root/app/resources_temp/* /root/app/resources"
-  docker exec "$INSTANCE_NAME" /bin/bash -c "rm -rf /root/app/resources_temp"
-  docker exec "$INSTANCE_NAME" /bin/bash -c 'python /root/app/resources/scripts/generate_ssl_certificates.py --passphrase "$SELECTED_PASSPHRASE" --cert-path /root/app/resources/certificates'
-  docker exec "$INSTANCE_NAME" /bin/bash -c 'sed -i "s/<password>/$SELECTED_PASSPHRASE/g" /root/app/resources/configuration/production.yml'
-  docker exec "$INSTANCE_NAME" /bin/bash -c "sed -i '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' resources/configuration/common.yml"
-  docker exec "$INSTANCE_NAME" /bin/bash -c "sed -i '/logging:/,/use_telegram: true/ s/use_telegram: true/use_telegram: false/' resources/configuration/production.yml"
-  docker exec "$INSTANCE_NAME" /bin/bash -c "groupadd -f $GROUP"
-  docker exec "$INSTANCE_NAME" /bin/bash -c "cd resources && chown -RH :$GROUP ."
-  docker exec "$INSTANCE_NAME" /bin/bash -c "cd resources && chmod -R a+rwX ."
-  docker exec "$INSTANCE_NAME" /bin/bash -c "python app.py"
+  docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cp -r /root/app/resources_temp/* /root/app/resources"
+  docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "rm -rf /root/app/resources_temp"
+  docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'python /root/app/resources/scripts/generate_ssl_certificates.py --passphrase "$SELECTED_PASSPHRASE" --cert-path /root/app/resources/certificates'
+  docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'sed -i "s/<password>/$SELECTED_PASSPHRASE/g" /root/app/resources/configuration/production.yml'
+  docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' resources/configuration/common.yml"
+  docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i '/logging:/,/use_telegram: true/ s/use_telegram: true/use_telegram: false/' resources/configuration/production.yml"
+  docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "groupadd -f $GROUP"
+  docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd resources && chown -RH :$GROUP ."
+  docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd resources && chmod -R a+rwX ."
+  docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "python app.py" &
 }
 
 choice_one_installation () {
@@ -288,14 +467,36 @@ choice_one_installation () {
   post_installation_kujira_hb_client
 }
 
+choice_three_installation () {
+  BUILT=true
+
+  mkdir -p "$GATEWAY_FOLDER"
+  mkdir -p "$CERTS_FOLDER"
+  mkdir -p "$GATEWAY_CONF_FOLDER"
+  mkdir -p "$GATEWAY_LOGS_FOLDER"
+
+  chmod a+rw "$GATEWAY_CONF_FOLDER"
+
+  # Create a new separated image for HB Gateway Fork
+  docker_create_image_hb_gateway_fork
+
+  # Create a new separated container from image
+  docker_create_container_hb_gateway_fork
+
+  # Makes some configurations within the container after its creation
+#  post_installation_hb_gateway_fork
+}
+
 default_installation () {
   choice_one_installation
-
-  # TODO - PARTIALLY IMPLEMENTED
+  choice_three_installation
 }
 
 execute_installation () {
-  case $choice in
+  mkdir -p "$SHARED_FOLDER"
+  mkdir -p "$COMMON_FOLDER"
+
+  case $CHOICE in
     1)
         echo
         echo "   Installing:"
@@ -310,6 +511,12 @@ execute_installation () {
         ;;
     3)
         echo
+        echo "   Installing:"
+        echo
+        echo "     > HB Gateway Fork"
+        echo
+
+        choice_three_installation
         ;;
     4)
         echo
@@ -417,14 +624,38 @@ install_docker () {
 
 if [[ "$CUSTOMIZE" == "--customize" &&  ! "$NOT_IMPLEMENTED" ]]
 then
-  echo
-  echo "ℹ️  Confirm below if the instance and its folders are correct:"
-  echo
-  printf "%19s %5s\n" "Instance name:" "$INSTANCE_NAME"
-  printf "%19s %5s\n" "Version:" "$TAG"
-  printf "%19s %5s\n" "Main folder:" "├── $FOLDER"
-  printf "%19s %5s\n" "Resources folder:" "├── $RESOURCES_FOLDER"
-  echo
+  if [[ "$CHOICE" == 1 || "$CHOICE" == 4 ]]; then
+    echo
+    echo "ℹ️  Confirm below if the Kujira HB Client instance and its folders are correct:"
+    echo
+    printf "%19s %5s\n" "Instance name:" "$KUJIRA_HB_CLIENT_CONTAINER_NAME"
+    printf "%19s %5s\n" "Version:" "$TAG"
+    printf "%19s %5s\n" "Base folder:" "$SHARED_FOLDER_SUFFIX"
+    printf "%19s %5s\n" "Kujira HB Client folder:" "├── $KUJIRA_HB_CLIENT_FOLDER"
+    printf "%19s %5s\n" "Resources folder:" "├── $RESOURCES_FOLDER"
+    echo
+  fi
+
+  if [[ "$CHOICE" == 3 || "$CHOICE" == 4 ]]; then
+    echo
+    echo "ℹ️  Confirm below if the instance and its folders are correct:"
+    echo
+    printf "%30s %5s\n" "Image:"              	"$GATEWAY_IMAGE_NAME:$TAG"
+    printf "%30s %5s\n" "Instance:"        			"$GATEWAY_CONTAINER_NAME"
+    printf "%30s %5s\n" "Exposed port:"					"$GATEWAY_PORT"
+    printf "%30s %5s\n" "Repository url:"       "$GATEWAY_REPOSITORY_URL"
+    printf "%30s %5s\n" "Repository branch:"    "$GATEWAY_REPOSITORY_BRANCH"
+    printf "%30s %5s\n" "Reuse image?:"    		  "$GATEWAY_BUILD_CACHE"
+    printf "%30s %5s\n" "Entrypoint:"    				"$ENTRYPOINT"
+    echo
+    printf "%30s %5s\n" "Base:"                 "$SHARED_FOLDER"
+    printf "%30s %5s\n" "Common:"               "$COMMON_FOLDER"
+    printf "%30s %5s\n" "Certificates:"         "$CERTS_FOLDER"
+    printf "%30s %5s\n" "Gateway folder:"       "$GATEWAY_FOLDER"
+    printf "%30s %5s\n" "Gateway config files:" "$GATEWAY_CONF_FOLDER"
+    printf "%30s %5s\n" "Gateway log files:"    "$GATEWAY_LOGS_FOLDER"
+    echo
+  fi
 
   prompt_proceed
 
@@ -439,7 +670,7 @@ then
   fi
 else
   if [ ! "$NOT_IMPLEMENTED" ]; then
-    choice=4
+    CHOICE=4
     install_docker
   fi
 fi
