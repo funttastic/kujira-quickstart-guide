@@ -44,56 +44,56 @@ default_values_info () {
   echo
 }
 
-pre_installation_kujira_hb_client () {
+pre_installation_fun_hb_client () {
   echo
   echo
-  echo "   ===============   KUJIRA HB CLIENT INSTALLATION SETUP  ==============="
+  echo "   ===============    FUN HB CLIENT INSTALLATION SETUP    ==============="
   echo
 
   default_values_info
 
   # Customize the Client image to be used?
-  RESPONSE="$KUJIRA_HB_CLIENT_IMAGE_NAME"
+  RESPONSE="$FUN_HB_CLIENT_IMAGE_NAME"
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter a Kujira HB Client image name you want to use (default = \"kujira-hb-client\") >>> " RESPONSE
+    read -p "   Enter a FUN HB Client image name you want to use (default = \"fun-hb-client\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
-    KUJIRA_HB_CLIENT_IMAGE_NAME="kujira-hb-client"
+    FUN_HB_CLIENT_IMAGE_NAME="fun-hb-client"
   else
-    KUJIRA_HB_CLIENT_IMAGE_NAME="$RESPONSE"
+    FUN_HB_CLIENT_IMAGE_NAME="$RESPONSE"
   fi
 
   # Create a new image?
-  RESPONSE="$KUJIRA_HB_CLIENT_BUILD_CACHE"
+  RESPONSE="$FUN_HB_CLIENT_BUILD_CACHE"
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Do you want to use an existing Kujira HB Client image (\"y/N\") >>> " RESPONSE
+    read -p "   Do you want to use an existing FUN HB Client image (\"y/N\") >>> " RESPONSE
   fi
   if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]
   then
     echo
     echo "      A new image will be created..."
-    KUJIRA_HB_CLIENT_BUILD_CACHE="--no-cache"
+    FUN_HB_CLIENT_BUILD_CACHE="--no-cache"
   else
-    KUJIRA_HB_CLIENT_BUILD_CACHE=""
+    FUN_HB_CLIENT_BUILD_CACHE=""
   fi
 
   # Create a new container?
-  RESPONSE="$KUJIRA_HB_CLIENT_CONTAINER_NAME"
+  RESPONSE="$FUN_HB_CLIENT_CONTAINER_NAME"
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter a name for your new Kujira HB Client instance (default = \"kujira-hb-client\") >>> " RESPONSE
+    read -p "   Enter a name for your new FUN HB Client instance (default = \"fun-hb-client\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
-    KUJIRA_HB_CLIENT_CONTAINER_NAME="kujira-hb-client"
+    FUN_HB_CLIENT_CONTAINER_NAME="fun-hb-client"
   else
-    KUJIRA_HB_CLIENT_CONTAINER_NAME=$RESPONSE
+    FUN_HB_CLIENT_CONTAINER_NAME=$RESPONSE
   fi
 
   # Prompt the user for the passphrase to encrypt the certificates
@@ -111,27 +111,27 @@ pre_installation_kujira_hb_client () {
   done
 
   # Location to save files?
-  RESPONSE="$KUJIRA_HB_CLIENT_FOLDER"
+  RESPONSE="$FUN_HB_CLIENT_FOLDER"
   if [ "$RESPONSE" == "" ]
   then
-    KUJIRA_HB_CLIENT_FOLDER_SUFFIX="kujira"
+    FUN_HB_CLIENT_FOLDER_SUFFIX="funttastic"
     echo
-    read -p "   Enter a folder name where your Kujira HB Client files will be saved (default = \"$KUJIRA_HB_CLIENT_FOLDER_SUFFIX\") >>> " RESPONSE
+    read -p "   Enter a folder name where your FUN HB Client files will be saved (default = \"$FUN_HB_CLIENT_FOLDER_SUFFIX\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
-    KUJIRA_HB_CLIENT_FOLDER=$SHARED_FOLDER/$KUJIRA_HB_CLIENT_FOLDER_SUFFIX
+    FUN_HB_CLIENT_FOLDER=$SHARED_FOLDER/$FUN_HB_CLIENT_FOLDER_SUFFIX
   elif [[ ${RESPONSE::1} != "/" ]]; then
-    KUJIRA_HB_CLIENT_FOLDER=$SHARED_FOLDER/$RESPONSE
+    FUN_HB_CLIENT_FOLDER=$SHARED_FOLDER/$RESPONSE
   else
-    KUJIRA_HB_CLIENT_FOLDER=$RESPONSE
+    FUN_HB_CLIENT_FOLDER=$RESPONSE
   fi
 }
 
-pre_installation_hb_client_fork () {
+pre_installation_hb_client () {
   echo
   echo
-  echo "   ===============   HB CLIENT FORK INSTALLATION SETUP   ==============="
+  echo "   ===============   HB CLIENT INSTALLATION SETUP   ==============="
   echo
 
   if [ "$CHOICE" == 2 ]; then
@@ -142,11 +142,11 @@ pre_installation_hb_client_fork () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter a HB Client Fork image name you want to use (default = \"hb-client-fork\") >>> " RESPONSE
+    read -p "   Enter a HB Client image name you want to use (default = \"hb-client\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
-    HB_CLIENT_IMAGE_NAME="hb-client-fork"
+    HB_CLIENT_IMAGE_NAME="hb-client"
   else
     HB_CLIENT_IMAGE_NAME="$RESPONSE"
   fi
@@ -156,7 +156,7 @@ pre_installation_hb_client_fork () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Do you want to use an existing HB Client Fork image (\"y/N\") >>> " RESPONSE
+    read -p "   Do you want to use an existing HB Client image (\"y/N\") >>> " RESPONSE
   fi
   if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]
   then
@@ -172,11 +172,11 @@ pre_installation_hb_client_fork () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter a name for your new HB Client Fork instance (default = \"hb-client-fork\") >>> " RESPONSE
+    read -p "   Enter a name for your new HB Client instance (default = \"hb-client\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
-    HB_CLIENT_CONTAINER_NAME="hb-client-fork"
+    HB_CLIENT_CONTAINER_NAME="hb-client"
   else
     HB_CLIENT_CONTAINER_NAME=$RESPONSE
   fi
@@ -187,7 +187,7 @@ pre_installation_hb_client_fork () {
   then
     HB_CLIENT_FOLDER_SUFFIX="client"
     echo
-    read -p "   Enter a folder name where your HB Client Fork files will be saved (default = \"$HB_CLIENT_FOLDER_SUFFIX\") >>> " RESPONSE
+    read -p "   Enter a folder name where your HB Client files will be saved (default = \"$HB_CLIENT_FOLDER_SUFFIX\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -232,10 +232,10 @@ pre_installation_hb_client_fork () {
   HB_CLIENT_SCRIPTS_FOLDER="$HB_CLIENT_FOLDER/scripts"
 }
 
-pre_installation_hb_gateway_fork () {
+pre_installation_hb_gateway () {
   echo
   echo
-  echo "   ===============   HB GATEWAY FORK INSTALLATION SETUP   ==============="
+  echo "   ===============   HB GATEWAY INSTALLATION SETUP   ==============="
   echo
 
   if [ "$CHOICE" == 3 ]; then
@@ -246,11 +246,11 @@ pre_installation_hb_gateway_fork () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter a HB Gateway Fork image name you want to use (default = \"hb-gateway-fork\") >>> " RESPONSE
+    read -p "   Enter a HB Gateway image name you want to use (default = \"hb-gateway\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
-    GATEWAY_IMAGE_NAME="hb-gateway-fork"
+    GATEWAY_IMAGE_NAME="hb-gateway"
   else
     GATEWAY_IMAGE_NAME="$RESPONSE"
   fi
@@ -260,7 +260,7 @@ pre_installation_hb_gateway_fork () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Do you want to use an existing HB Gateway Fork image (\"y/N\") >>> " RESPONSE
+    read -p "   Do you want to use an existing HB Gateway image (\"y/N\") >>> " RESPONSE
   fi
   if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]
   then
@@ -276,11 +276,11 @@ pre_installation_hb_gateway_fork () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter a name for your new HB Gateway Fork instance (default = \"hb-gateway-fork\") >>> " RESPONSE
+    read -p "   Enter a name for your new HB Gateway instance (default = \"hb-gateway\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
-    GATEWAY_CONTAINER_NAME="hb-gateway-fork"
+    GATEWAY_CONTAINER_NAME="hb-gateway"
   else
     GATEWAY_CONTAINER_NAME=$RESPONSE
   fi
@@ -290,7 +290,7 @@ pre_installation_hb_gateway_fork () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter a port for expose your new HB Gateway Fork instance (default = \"15888\") >>> " RESPONSE
+    read -p "   Enter a port for expose your new HB Gateway instance (default = \"15888\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -305,7 +305,7 @@ pre_installation_hb_gateway_fork () {
   then
     GATEWAY_FOLDER_SUFFIX="gateway"
     echo
-    read -p "   Enter a folder name where your HB Gateway Fork files will be saved (default = \"$GATEWAY_FOLDER_SUFFIX\") >>> " RESPONSE
+    read -p "   Enter a folder name where your HB Gateway files will be saved (default = \"$GATEWAY_FOLDER_SUFFIX\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -365,7 +365,7 @@ pre_installation_hb_gateway_fork () {
 }
 
 echo
-echo "   ===============    WELCOME TO KUJIRA HB CLIENT SETUP   ==============="
+echo "   ===============     WELCOME TO FUN HB CLIENT SETUP     ==============="
 echo
 
 RESPONSE=""
@@ -383,13 +383,13 @@ then
   echo
   echo "   CHOOSE A OPTION BELOW TO INSTALL"
   echo
-  echo "   [1] KUJIRA HB CLIENT"
-  echo "   [2] HUMMINGBOT CLIENT FORK"
-  echo "   [3] HUMMINGBOT GATEWAY FORK"
-  echo "   [4] KUJIRA HB CLIENT and HB GATEWAY FORK [RECOMMENDED]"
+  echo "   [1] FUN HB CLIENT"
+  echo "   [2] HUMMINGBOT CLIENT"
+  echo "   [3] HUMMINGBOT GATEWAY"
+  echo "   [4] FUN HB CLIENT and HB GATEWAY [RECOMMENDED]"
   echo "   [5] ALL"
   echo
-  echo "   For more information about the difference between HB Official and HB Forks, please visit:"
+  echo "   For more information about the FUN HB CLIENT, please visit:"
   echo
   echo "         https://www.funttastic.com/partners/kujira"
   echo
@@ -415,38 +415,38 @@ then
 
   case $CHOICE in
       1)
-          pre_installation_kujira_hb_client
+          pre_installation_fun_hb_client
           ;;
       2)
-          pre_installation_hb_client_fork
+          pre_installation_hb_client
           ;;
       3)
-          pre_installation_hb_gateway_fork
+          pre_installation_hb_gateway
           ;;
       4)
-          pre_installation_kujira_hb_client
-          pre_installation_hb_gateway_fork
+          pre_installation_fun_hb_client
+          pre_installation_hb_gateway
           ;;
       5)
-          pre_installation_kujira_hb_client
-          pre_installation_hb_gateway_fork
-          pre_installation_hb_client_fork
+          pre_installation_fun_hb_client
+          pre_installation_hb_gateway
+          pre_installation_hb_client
           ;;
   esac
 else
-  # Default settings to install Kujira HB Client, HB Gateway Fork and HB Client Fork
+  # Default settings to install FUN HB Client, HB Gateway and HB Client
 
-  # Kujira HB Client Settings
-  KUJIRA_HB_CLIENT_IMAGE_NAME="kujira-hb-client"
-  KUJIRA_HB_CLIENT_CONTAINER_NAME="kujira-hb-client"
-  KUJIRA_HB_CLIENT_FOLDER_SUFFIX="kujira"
-  KUJIRA_HB_CLIENT_FOLDER="$SHARED_FOLDER"/"$KUJIRA_HB_CLIENT_FOLDER_SUFFIX"
-  KUJIRA_HB_CLIENT_BUILD_CACHE="--no-cache"
+  # FUN HB Client Settings
+  FUN_HB_CLIENT_IMAGE_NAME="fun-hb-client"
+  FUN_HB_CLIENT_CONTAINER_NAME="fun-hb-client"
+  FUN_HB_CLIENT_FOLDER_SUFFIX="funttastic"
+  FUN_HB_CLIENT_FOLDER="$SHARED_FOLDER"/"$FUN_HB_CLIENT_FOLDER_SUFFIX"
+  FUN_HB_CLIENT_BUILD_CACHE="--no-cache"
 
   # HB Client Settings
-  HB_CLIENT_IMAGE_NAME=${HB_CLIENT_IMAGE_NAME:-"hb-client-fork"}
+  HB_CLIENT_IMAGE_NAME=${HB_CLIENT_IMAGE_NAME:-"hb-client"}
   HB_CLIENT_BUILD_CACHE=${HB_CLIENT_BUILD_CACHE:-"--no-cache"}
-  HB_CLIENT_CONTAINER_NAME=${HB_CLIENT_CONTAINER_NAME:-"hb-client-fork"}
+  HB_CLIENT_CONTAINER_NAME=${HB_CLIENT_CONTAINER_NAME:-"hb-client"}
   HB_CLIENT_FOLDER_SUFFIX=${HB_CLIENT_FOLDER_SUFFIX:-"client"}
   HB_CLIENT_FOLDER=${HB_CLIENT_FOLDER:-$SHARED_FOLDER/"hummingbot"/$HB_CLIENT_FOLDER_SUFFIX}
   HB_CLIENT_REPOSITORY_URL=${HB_CLIENT_REPOSITORY_URL:-"https://github.com/Team-Kujira/hummingbot.git"}
@@ -457,10 +457,10 @@ else
   HB_CLIENT_PMM_SCRIPTS_FOLDER="$HB_CLIENT_FOLDER/pmm_scripts"
   HB_CLIENT_SCRIPTS_FOLDER="$HB_CLIENT_FOLDER/scripts"
 
-  # HB Gateway Fork Settings
-  GATEWAY_IMAGE_NAME=${GATEWAY_IMAGE_NAME:-"hb-gateway-fork"}
+  # HB Gateway Settings
+  GATEWAY_IMAGE_NAME=${GATEWAY_IMAGE_NAME:-"hb-gateway"}
   GATEWAY_BUILD_CACHE=${GATEWAY_BUILD_CACHE:-"--no-cache"}
-  GATEWAY_CONTAINER_NAME=${GATEWAY_CONTAINER_NAME:-"hb-gateway-fork"}
+  GATEWAY_CONTAINER_NAME=${GATEWAY_CONTAINER_NAME:-"hb-gateway"}
   GATEWAY_FOLDER_SUFFIX=${GATEWAY_FOLDER_SUFFIX:-"gateway"}
   GATEWAY_FOLDER=${GATEWAY_FOLDER:-$SHARED_FOLDER/"hummingbot"/$GATEWAY_FOLDER_SUFFIX}
   GATEWAY_PORT=${GATEWAY_PORT:-15888}
@@ -476,39 +476,39 @@ else
 	RANDOM_PASSPHRASE=$(generate_passphrase 32)
 fi
 
-RESOURCES_FOLDER="$KUJIRA_HB_CLIENT_FOLDER/client/resources"
+RESOURCES_FOLDER="$FUN_HB_CLIENT_FOLDER/client/resources"
 
 if [ -n "$RANDOM_PASSPHRASE" ]; then  \
-echo "   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"; \
-echo "   |                                                              |"; \
-echo "   |   A new random passphrase will be saved in the file          |"; \
-echo "   |                                                              |"; \
-echo "   |      shared/kujira/client/resources/random_passphrase.txt    |"; \
-echo "   |                                                              |"; \
-echo "   |   Copy it to a safe location and delete the file.            |"; \
-echo "   |                                                              |"; \
-echo "   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"; \
+echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"; \
+echo "   |                                                                 |"; \
+echo "   |   A new random passphrase will be saved in the file             |"; \
+echo "   |                                                                 |"; \
+echo "   |     shared/funttastic/client/resources/random_passphrase.txt    |"; \
+echo "   |                                                                 |"; \
+echo "   |   Copy it to a safe location and delete the file.               |"; \
+echo "   |                                                                 |"; \
+echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"; \
 echo; \
 fi
 
-docker_create_image_kujira_hb_client () {
-  if [ ! "$KUJIRA_HB_CLIENT_BUILD_CACHE" == "" ]
+docker_create_image_fun_hb_client () {
+  if [ ! "$FUN_HB_CLIENT_BUILD_CACHE" == "" ]
   then
     BUILT=$(DOCKER_BUILDKIT=1 docker build \
-    "$KUJIRA_HB_CLIENT_BUILD_CACHE" \
+    "$FUN_HB_CLIENT_BUILD_CACHE" \
     --build-arg RANDOM_PASSPHRASE="$RANDOM_PASSPHRASE" \
     --build-arg DEFINED_PASSPHRASE="$DEFINED_PASSPHRASE" \
-    -t $KUJIRA_HB_CLIENT_IMAGE_NAME -f ./all/Dockerfile/Dockerfile-Kujira-HB-Client .)
+    -t $FUN_HB_CLIENT_IMAGE_NAME -f ./all/Dockerfile/Dockerfile-Fun-HB-Client .)
   fi
 }
 
-docker_create_container_kujira_hb_client () {
+docker_create_container_fun_hb_client () {
   $BUILT \
   && docker run \
     -dit \
     --log-opt max-size=10m \
     --log-opt max-file=5 \
-    --name $KUJIRA_HB_CLIENT_CONTAINER_NAME \
+    --name $FUN_HB_CLIENT_CONTAINER_NAME \
     --network "$NETWORK" \
     --mount type=bind,source="$RESOURCES_FOLDER",target=/root/app/resources \
     --mount type=bind,source="$CERTS_FOLDER",target=/root/app/resources/certificates \
@@ -516,21 +516,21 @@ docker_create_container_kujira_hb_client () {
     -e RESOURCES_FOLDER="/root/app/resources" \
     -e CERTS_FOLDER="/root/app/resources/certificates" \
     --entrypoint="$ENTRYPOINT" \
-    $KUJIRA_HB_CLIENT_IMAGE_NAME:$TAG
+    $FUN_HB_CLIENT_IMAGE_NAME:$TAG
 }
 
-docker_create_image_hb_client_fork () {
+docker_create_image_hb_client () {
   if [ ! "$HB_CLIENT_BUILD_CACHE" == "" ]
   then
     BUILT=$(DOCKER_BUILDKIT=1 docker build \
     "$HB_CLIENT_BUILD_CACHE" \
     --build-arg REPOSITORY_URL="$HB_CLIENT_REPOSITORY_URL" \
     --build-arg REPOSITORY_BRANCH="$HB_CLIENT_REPOSITORY_BRANCH" \
-    -t "$HB_CLIENT_IMAGE_NAME" -f ./all/Dockerfile/Dockerfile-HB-Client-Fork .)
+    -t "$HB_CLIENT_IMAGE_NAME" -f ./all/Dockerfile/Dockerfile-HB-Client .)
   fi
 }
 
-docker_create_container_hb_client_fork () {
+docker_create_container_hb_client () {
   $BUILT \
   && docker run \
     -dt \
@@ -555,7 +555,7 @@ docker_create_container_hb_client_fork () {
     "$HB_CLIENT_IMAGE_NAME":$TAG
 }
 
-docker_create_image_hb_gateway_fork () {
+docker_create_image_hb_gateway () {
   if [ ! "$GATEWAY_BUILD_CACHE" == "" ]; then
     BUILT=$(DOCKER_BUILDKIT=1 docker build \
       "$GATEWAY_BUILD_CACHE" \
@@ -563,12 +563,12 @@ docker_create_image_hb_gateway_fork () {
       --build-arg REPOSITORY_BRANCH="$GATEWAY_REPOSITORY_BRANCH" \
       --build-arg RANDOM_PASSPHRASE="$RANDOM_PASSPHRASE" \
       --build-arg DEFINED_PASSPHRASE="$DEFINED_PASSPHRASE" \
-      -t "$GATEWAY_IMAGE_NAME" -f ./all/Dockerfile/Dockerfile-HB-Gateway-Fork .)
+      -t "$GATEWAY_IMAGE_NAME" -f ./all/Dockerfile/Dockerfile-HB-Gateway .)
   fi
 }
 
 
-docker_create_container_hb_gateway_fork () {
+docker_create_container_hb_gateway () {
   $BUILT && docker run \
   -dt \
   --log-opt max-size=10m \
@@ -588,24 +588,24 @@ docker_create_container_hb_gateway_fork () {
   "$GATEWAY_IMAGE_NAME":$TAG
 }
 
-post_installation_kujira_hb_client () {
-  docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cp -r /root/app/resources_temp/* /root/app/resources"
-  docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "rm -rf /root/app/resources_temp"
-  docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'python /root/app/resources/scripts/generate_ssl_certificates.py --passphrase "$SELECTED_PASSPHRASE" --cert-path /root/app/resources/certificates'
-  docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'sed -i "s/<password>/$SELECTED_PASSPHRASE/g" /root/app/resources/configuration/production.yml'
-  docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' resources/configuration/common.yml"
-  docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i '/logging:/,/use_telegram: true/ s/use_telegram: true/use_telegram: false/' resources/configuration/production.yml"
-  docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "groupadd -f $GROUP"
-  docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd resources && chown -RH :$GROUP ."
-  docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd resources && chmod -R a+rwX ."
-  docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "python app.py" > /dev/null 2>&1 &
+post_installation_fun_hb_client () {
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cp -r /root/app/resources_temp/* /root/app/resources"
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "rm -rf /root/app/resources_temp"
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'python /root/app/resources/scripts/generate_ssl_certificates.py --passphrase "$SELECTED_PASSPHRASE" --cert-path /root/app/resources/certificates'
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'sed -i "s/<password>/$SELECTED_PASSPHRASE/g" /root/app/resources/configuration/production.yml'
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' resources/configuration/common.yml"
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i '/logging:/,/use_telegram: true/ s/use_telegram: true/use_telegram: false/' resources/configuration/production.yml"
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "groupadd -f $GROUP"
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd resources && chown -RH :$GROUP ."
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd resources && chmod -R a+rwX ."
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "python app.py" > /dev/null 2>&1 &
 }
 
-post_installation_hb_client_fork () {
+post_installation_hb_client () {
   docker exec "$HB_CLIENT_CONTAINER_NAME" /bin/bash -c "/root/miniconda3/envs/hummingbot/bin/python3 /root/bin/hummingbot_quickstart.py"
 }
 
-post_installation_hb_gateway_fork () {
+post_installation_hb_gateway () {
   docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cp -R /root/src/templates/. /root/conf"
   docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "groupadd -f $GROUP"
   docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/conf && chown -RH :$GROUP ."
@@ -622,14 +622,14 @@ choice_one_installation () {
   mkdir -p "$CERTS_FOLDER"
   mkdir -p "$RESOURCES_FOLDER"
 
-  # Create a new separated image for Kujira HB Client
-  docker_create_image_kujira_hb_client
+  # Create a new separated image for FUN HB Client
+  docker_create_image_fun_hb_client
 
   # Create a new separated container from image
-  docker_create_container_kujira_hb_client
+  docker_create_container_fun_hb_client
 
   # Makes some configurations within the container after its creation
-  post_installation_kujira_hb_client
+  post_installation_fun_hb_client
 }
 
 choice_two_installation () {
@@ -648,14 +648,14 @@ choice_two_installation () {
 
   chmod a+rw "$HB_CLIENT_CONF_FOLDER"
 
-  # Create a new separated image for HB Client Fork
-  docker_create_image_hb_client_fork
+  # Create a new separated image for HB Client
+  docker_create_image_hb_client
 
   # Create a new separated container from image
-  docker_create_container_hb_client_fork
+  docker_create_container_hb_client
 
   # Makes some configurations within the container after its creation
-#  post_installation_hb_client_fork
+#  post_installation_hb_client
 }
 
 choice_three_installation () {
@@ -669,14 +669,14 @@ choice_three_installation () {
 
   chmod a+rw "$GATEWAY_CONF_FOLDER"
 
-  # Create a new separated image for HB Gateway Fork
-  docker_create_image_hb_gateway_fork
+  # Create a new separated image for HB Gateway
+  docker_create_image_hb_gateway
 
   # Create a new separated container from image
-  docker_create_container_hb_gateway_fork
+  docker_create_container_hb_gateway
 
   # Makes some configurations within the container after its creation
-  post_installation_hb_gateway_fork
+  post_installation_hb_gateway
 }
 
 default_installation () {
@@ -699,7 +699,7 @@ execute_installation () {
         echo
         echo "   Installing:"
         echo
-        echo "     > Kujira HB Client"
+        echo "     > FUN HB Client"
         echo
 
         choice_one_installation
@@ -708,7 +708,7 @@ execute_installation () {
         echo
         echo "   Installing:"
         echo
-        echo "     > Hummingbot Client Fork"
+        echo "     > Hummingbot Client"
         echo
 
         choice_two_installation
@@ -717,7 +717,7 @@ execute_installation () {
         echo
         echo "   Installing:"
         echo
-        echo "     > Hummingbot Gateway Fork"
+        echo "     > Hummingbot Gateway"
         echo
 
         choice_three_installation
@@ -726,8 +726,8 @@ execute_installation () {
         echo
         echo "   Automatically installing:"
         echo
-        echo "     > Kujira HB Client"
-        echo "     > Hummingbot Gateway Fork"
+        echo "     > FUN HB Client"
+        echo "     > Hummingbot Gateway"
         echo
 
         default_installation
@@ -736,9 +736,9 @@ execute_installation () {
         echo
         echo "   Automatically installing:"
         echo
-        echo "     > Kujira HB Client"
-        echo "     > Hummingbot Client Fork"
-        echo "     > Hummingbot Gateway Fork"
+        echo "     > FUN HB Client"
+        echo "     > Hummingbot Client"
+        echo "     > Hummingbot Gateway"
         echo
 
         choice_five_installation
@@ -837,12 +837,12 @@ if [[ "$CUSTOMIZE" == "--customize" &&  ! "$NOT_IMPLEMENTED" ]]
 then
   if [[ "$CHOICE" == 1 || "$CHOICE" == 4 || "$CHOICE" == 5 ]]; then
     echo
-    echo "ℹ️  Confirm below if the Kujira HB Client instance and its folders are correct:"
+    echo "ℹ️  Confirm below if the FUN HB Client instance and its folders are correct:"
     echo
-    printf "%25s %5s\n" "Instance name:" "$KUJIRA_HB_CLIENT_CONTAINER_NAME"
+    printf "%25s %5s\n" "Instance name:" "$FUN_HB_CLIENT_CONTAINER_NAME"
     printf "%25s %5s\n" "Version:" "$TAG"
     printf "%25s %5s\n" "Base folder:" "$SHARED_FOLDER_SUFFIX"
-    printf "%25s %5s\n" "Kujira HB Client folder:" "├── $KUJIRA_HB_CLIENT_FOLDER"
+    printf "%25s %5s\n" "FUN HB Client folder:" "├── $FUN_HB_CLIENT_FOLDER"
     printf "%25s %5s\n" "Resources folder:" "├── $RESOURCES_FOLDER"
     echo
   fi
