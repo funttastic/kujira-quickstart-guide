@@ -388,7 +388,7 @@ docker_create_image_kujira_hb_client () {
     "$KUJIRA_HB_CLIENT_BUILD_CACHE" \
     --build-arg RANDOM_PASSPHRASE="$RANDOM_PASSPHRASE" \
     --build-arg DEFINED_PASSPHRASE="$DEFINED_PASSPHRASE" \
-    -t $IMAGE_NAME -f ./all/docker/Dockerfile/Dockerfile-Kujira-HB-Client .)
+    -t $IMAGE_NAME -f ./all/Dockerfile/Dockerfile-Kujira-HB-Client .)
   fi
 }
 
@@ -418,7 +418,7 @@ docker_create_image_hb_gateway_fork () {
       --build-arg REPOSITORY_BRANCH="$GATEWAY_REPOSITORY_BRANCH" \
       --build-arg RANDOM_PASSPHRASE="$RANDOM_PASSPHRASE" \
       --build-arg DEFINED_PASSPHRASE="$DEFINED_PASSPHRASE" \
-      -t "$GATEWAY_IMAGE_NAME" -f ./all/docker/Dockerfile/Dockerfile-HB-Gateway-Fork .)
+      -t "$GATEWAY_IMAGE_NAME" -f ./all/Dockerfile/Dockerfile-HB-Gateway-Fork .)
   fi
 }
 
