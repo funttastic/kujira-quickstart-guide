@@ -53,7 +53,7 @@ pre_installation_kujira_hb_client () {
   default_values_info
 
   # Customize the Client image to be used?
-  RESPONSE="$IMAGE_NAME"
+  RESPONSE="$KUJIRA_HB_CLIENT_IMAGE_NAME"
   if [ "$RESPONSE" == "" ]
   then
     echo
@@ -61,9 +61,9 @@ pre_installation_kujira_hb_client () {
   fi
   if [ "$RESPONSE" == "" ]
   then
-    IMAGE_NAME="kujira-hb-client"
+    KUJIRA_HB_CLIENT_IMAGE_NAME="kujira-hb-client"
   else
-    IMAGE_NAME="$RESPONSE"
+    KUJIRA_HB_CLIENT_IMAGE_NAME="$RESPONSE"
   fi
 
   # Create a new image?
@@ -126,6 +126,110 @@ pre_installation_kujira_hb_client () {
   else
     KUJIRA_HB_CLIENT_FOLDER=$RESPONSE
   fi
+}
+
+pre_installation_hb_client_fork () {
+  echo
+  echo
+  echo "   ===============   HB CLIENT FORK INSTALLATION SETUP   ==============="
+  echo
+
+  if [ "$CHOICE" == 3 ]; then
+    default_values_info
+  fi
+
+  RESPONSE="$HB_CLIENT_IMAGE_NAME"
+  if [ "$RESPONSE" == "" ]
+  then
+    echo
+    read -p "   Enter a HB Client Fork image name you want to use (default = \"hb-client-fork\") >>> " RESPONSE
+  fi
+  if [ "$RESPONSE" == "" ]
+  then
+    HB_CLIENT_IMAGE_NAME="hb-client-fork"
+  else
+    HB_CLIENT_IMAGE_NAME="$RESPONSE"
+  fi
+
+  # Create a new image?
+  RESPONSE="$HB_CLIENT_BUILD_CACHE"
+  if [ "$RESPONSE" == "" ]
+  then
+    echo
+    read -p "   Do you want to use an existing HB Client Fork image (\"y/N\") >>> " RESPONSE
+  fi
+  if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]
+  then
+    echo
+    echo "      A new image will be created..."
+    HB_CLIENT_BUILD_CACHE="--no-cache"
+  else
+    HB_CLIENT_BUILD_CACHE=""
+  fi
+
+  # Create a new instance?
+  RESPONSE="$HB_CLIENT_CONTAINER_NAME"
+  if [ "$RESPONSE" == "" ]
+  then
+    echo
+    read -p "   Enter a name for your new HB Client Fork instance (default = \"hb-client-fork\") >>> " RESPONSE
+  fi
+  if [ "$RESPONSE" == "" ]
+  then
+    HB_CLIENT_CONTAINER_NAME="hb-client-fork"
+  else
+    HB_CLIENT_CONTAINER_NAME=$RESPONSE
+  fi
+
+  # Location to save files?
+  RESPONSE="$HB_CLIENT_FOLDER"
+  if [ "$RESPONSE" == "" ]
+  then
+    HB_CLIENT_FOLDER_SUFFIX="client"
+    echo
+    read -p "   Enter a folder name where your HB Client Fork files will be saved (default = \"$HB_CLIENT_FOLDER_SUFFIX\") >>> " RESPONSE
+  fi
+  if [ "$RESPONSE" == "" ]
+  then
+    HB_CLIENT_FOLDER=$SHARED_FOLDER/"hummingbot"/$HB_CLIENT_FOLDER_SUFFIX
+  elif [[ ${RESPONSE::1} != "/" ]]; then
+    HB_CLIENT_FOLDER=$SHARED_FOLDER/"hummingbot"/$RESPONSE
+  else
+    HB_CLIENT_FOLDER=$RESPONSE
+  fi
+
+  RESPONSE="$HB_CLIENT_REPOSITORY_URL"
+  if [ "$RESPONSE" == "" ]
+  then
+    echo
+    read -p "   Enter the url from the repository to be cloned
+   (default = \"https://github.com/Team-Kujira/hummingbot.git\") >>> " RESPONSE
+  fi
+  if [ "$RESPONSE" == "" ]
+  then
+    HB_CLIENT_REPOSITORY_URL="https://github.com/Team-Kujira/hummingbot.git"
+  else
+    HB_CLIENT_REPOSITORY_URL="$RESPONSE"
+  fi
+
+  RESPONSE="$HB_CLIENT_REPOSITORY_BRANCH"
+  if [ "$RESPONSE" == "" ]
+  then
+    echo
+    read -p "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
+  fi
+  if [ "$RESPONSE" == "" ]
+  then
+    HB_CLIENT_REPOSITORY_BRANCH="community"
+  else
+    HB_CLIENT_REPOSITORY_BRANCH="$RESPONSE"
+  fi
+
+  HB_CLIENT_CONF_FOLDER="$HB_CLIENT_FOLDER/conf"
+  HB_CLIENT_LOGS_FOLDER="$HB_CLIENT_FOLDER/logs"
+  HB_CLIENT_DATA_FOLDER="$HB_CLIENT_FOLDER/data"
+  HB_CLIENT_PMM_SCRIPTS_FOLDER="$HB_CLIENT_FOLDER/pmm_scripts"
+  HB_CLIENT_SCRIPTS_FOLDER="$HB_CLIENT_FOLDER/scripts"
 }
 
 pre_installation_hb_gateway_fork () {
@@ -314,11 +418,7 @@ then
           pre_installation_kujira_hb_client
           ;;
       2)
-          NOT_IMPLEMENTED=true
-          echo
-          echo
-          echo "      NOT IMPLEMENTED"
-          echo
+          pre_installation_hb_client_fork
           ;;
       3)
           pre_installation_hb_gateway_fork
@@ -328,22 +428,34 @@ then
           pre_installation_hb_gateway_fork
           ;;
       5)
-          NOT_IMPLEMENTED=true
-          echo
-          echo
-          echo "      NOT IMPLEMENTED"
-          echo
+          pre_installation_hb_client_fork
+          pre_installation_kujira_hb_client
+          pre_installation_hb_gateway_fork
           ;;
   esac
 else
-  # Default settings to install Kujira HB Client and HB Gateway Fork
+  # Default settings to install Kujira HB Client, HB Gateway Fork and HB Client Fork
 
   # Kujira HB Client Settings
-  IMAGE_NAME="kujira-hb-client"
+  KUJIRA_HB_CLIENT_IMAGE_NAME="kujira-hb-client"
   KUJIRA_HB_CLIENT_CONTAINER_NAME="kujira-hb-client"
   KUJIRA_HB_CLIENT_FOLDER_SUFFIX="kujira"
   KUJIRA_HB_CLIENT_FOLDER="$SHARED_FOLDER"/"$KUJIRA_HB_CLIENT_FOLDER_SUFFIX"
   KUJIRA_HB_CLIENT_BUILD_CACHE="--no-cache"
+
+  # HB Client Settings
+  HB_CLIENT_IMAGE_NAME=${HB_CLIENT_IMAGE_NAME:-"hb-client-fork"}
+  HB_CLIENT_BUILD_CACHE=${HB_CLIENT_BUILD_CACHE:-"--no-cache"}
+  HB_CLIENT_CONTAINER_NAME=${HB_CLIENT_CONTAINER_NAME:-"hb-client-fork"}
+  HB_CLIENT_FOLDER_SUFFIX=${HB_CLIENT_FOLDER_SUFFIX:-"client"}
+  HB_CLIENT_FOLDER=${HB_CLIENT_FOLDER:-$SHARED_FOLDER/"hummingbot"/$HB_CLIENT_FOLDER_SUFFIX}
+  HB_CLIENT_REPOSITORY_URL=${HB_CLIENT_REPOSITORY_URL:-"https://github.com/Team-Kujira/hummingbot.git"}
+  HB_CLIENT_REPOSITORY_BRANCH=${HB_CLIENT_REPOSITORY_BRANCH:-"community"}
+  HB_CLIENT_CONF_FOLDER="$HB_CLIENT_FOLDER/conf"
+  HB_CLIENT_LOGS_FOLDER="$HB_CLIENT_FOLDER/logs"
+  HB_CLIENT_DATA_FOLDER="$HB_CLIENT_FOLDER/data"
+  HB_CLIENT_PMM_SCRIPTS_FOLDER="$HB_CLIENT_FOLDER/pmm_scripts"
+  HB_CLIENT_SCRIPTS_FOLDER="$HB_CLIENT_FOLDER/scripts"
 
   # HB Gateway Fork Settings
   GATEWAY_IMAGE_NAME=${GATEWAY_IMAGE_NAME:-"hb-gateway-fork"}
@@ -352,12 +464,10 @@ else
   GATEWAY_FOLDER_SUFFIX=${GATEWAY_FOLDER_SUFFIX:-"gateway"}
   GATEWAY_FOLDER=${GATEWAY_FOLDER:-$SHARED_FOLDER/"hummingbot"/$GATEWAY_FOLDER_SUFFIX}
   GATEWAY_PORT=${GATEWAY_PORT:-15888}
-  GATEWAY_REPOSITORY_URL=${GATEWAY_REPOSITORY_URL:-https://github.com/Team-Kujira/gateway.git}
-  GATEWAY_REPOSITORY_BRANCH=${GATEWAY_REPOSITORY_BRANCH:-community}
-  CERTS_FOLDER="$COMMON_FOLDER/certificates"
+  GATEWAY_REPOSITORY_URL=${GATEWAY_REPOSITORY_URL:-"https://github.com/Team-Kujira/gateway.git"}
+  GATEWAY_REPOSITORY_BRANCH=${GATEWAY_REPOSITORY_BRANCH:-"community"}
   GATEWAY_CONF_FOLDER="$GATEWAY_FOLDER/conf"
   GATEWAY_LOGS_FOLDER="$GATEWAY_FOLDER/logs"
-  GATEWAY_BUILD_CACHE="--no-cache"
 
   # Settings for both
   TAG=${TAG:-"latest"}
@@ -388,15 +498,14 @@ docker_create_image_kujira_hb_client () {
     "$KUJIRA_HB_CLIENT_BUILD_CACHE" \
     --build-arg RANDOM_PASSPHRASE="$RANDOM_PASSPHRASE" \
     --build-arg DEFINED_PASSPHRASE="$DEFINED_PASSPHRASE" \
-    -t $IMAGE_NAME -f ./all/Dockerfile/Dockerfile-Kujira-HB-Client .)
+    -t $KUJIRA_HB_CLIENT_IMAGE_NAME -f ./all/Dockerfile/Dockerfile-Kujira-HB-Client .)
   fi
 }
 
 docker_create_container_kujira_hb_client () {
   $BUILT \
   && docker run \
-    -d \
-    -it \
+    -dit \
     --log-opt max-size=10m \
     --log-opt max-file=5 \
     --name $KUJIRA_HB_CLIENT_CONTAINER_NAME \
@@ -407,7 +516,43 @@ docker_create_container_kujira_hb_client () {
     -e RESOURCES_FOLDER="/root/app/resources" \
     -e CERTS_FOLDER="/root/app/resources/certificates" \
     --entrypoint="$ENTRYPOINT" \
-    $IMAGE_NAME:$TAG
+    $KUJIRA_HB_CLIENT_IMAGE_NAME:$TAG
+}
+
+docker_create_image_hb_client_fork () {
+  if [ ! "$HB_CLIENT_BUILD_CACHE" == "" ]
+  then
+    BUILT=$(DOCKER_BUILDKIT=1 docker build \
+    "$HB_CLIENT_BUILD_CACHE" \
+    --build-arg REPOSITORY_URL="$HB_CLIENT_REPOSITORY_URL" \
+    --build-arg REPOSITORY_BRANCH="$HB_CLIENT_REPOSITORY_BRANCH" \
+    -t "$HB_CLIENT_IMAGE_NAME" -f ./all/Dockerfile/Dockerfile-HB-Client-Fork .)
+  fi
+}
+
+docker_create_container_hb_client_fork () {
+  $BUILT \
+  && docker run \
+    -dt \
+    --log-opt max-size=10m \
+    --log-opt max-file=5 \
+    --name "$HB_CLIENT_CONTAINER_NAME" \
+    --network "$NETWORK" \
+    --mount type=bind,source="$HB_CLIENT_CONF_FOLDER",target=/root/conf \
+    --mount type=bind,source="$HB_CLIENT_LOGS_FOLDER",target=/root/logs \
+    --mount type=bind,source="$HB_CLIENT_DATA_FOLDER",target=/root/data \
+    --mount type=bind,source="$HB_CLIENT_PMM_SCRIPTS_FOLDER",target=/root/pmm_scripts \
+    --mount type=bind,source="$HB_CLIENT_SCRIPTS_FOLDER",target=/root/scripts \
+    --mount type=bind,source="$CERTS_FOLDER",target=/root/certs \
+    --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
+    -e HB_CLIENT_CONF_FOLDER="/root/conf" \
+    -e HB_CLIENT_LOGS_FOLDER="/root/logs" \
+    -e HB_CLIENT_DATA_FOLDER="/root/data" \
+    -e HB_CLIENT_PMM_SCRIPTS_FOLDER="/root/pmm_scripts" \
+    -e HB_CLIENT_SCRIPTS_FOLDER="/root/scripts" \
+    -e CERTS_FOLDER="/root/certs" \
+    --entrypoint="$ENTRYPOINT" \
+    "$HB_CLIENT_IMAGE_NAME":$TAG
 }
 
 docker_create_image_hb_gateway_fork () {
@@ -456,6 +601,10 @@ post_installation_kujira_hb_client () {
   docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "python app.py" > /dev/null 2>&1 &
 }
 
+post_installation_hb_client_fork () {
+  docker exec "$HB_CLIENT_CONTAINER_NAME" /bin/bash -c "/root/miniconda3/envs/hummingbot/bin/python3 /root/bin/hummingbot_quickstart.py"
+}
+
 post_installation_hb_gateway_fork () {
   docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cp -R /root/src/templates/. /root/conf"
   docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "groupadd -f $GROUP"
@@ -469,6 +618,7 @@ post_installation_hb_gateway_fork () {
 choice_one_installation () {
   BUILT=true
 
+  mkdir -p "$SHARED_FOLDER"
   mkdir -p "$CERTS_FOLDER"
   mkdir -p "$RESOURCES_FOLDER"
 
@@ -482,9 +632,36 @@ choice_one_installation () {
   post_installation_kujira_hb_client
 }
 
+choice_two_installation () {
+  BUILT=true
+
+  mkdir -p "$SHARED_FOLDER"
+  mkdir -p "$CERTS_FOLDER"
+  mkdir -p "$HB_CLIENT_FOLDER"
+  mkdir -p "$HB_CLIENT_CONF_FOLDER"
+  mkdir -p "$HB_CLIENT_CONF_FOLDER"/connectors
+  mkdir -p "$HB_CLIENT_CONF_FOLDER"/strategies
+  mkdir -p "$HB_CLIENT_LOGS_FOLDER"
+  mkdir -p "$HB_CLIENT_DATA_FOLDER"
+  mkdir -p "$HB_CLIENT_PMM_SCRIPTS_FOLDER"
+  mkdir -p "$HB_CLIENT_SCRIPTS_FOLDER"
+
+  chmod a+rw "$HB_CLIENT_CONF_FOLDER"
+
+  # Create a new separated image for HB Client Fork
+  docker_create_image_hb_client_fork
+
+  # Create a new separated container from image
+  docker_create_container_hb_client_fork
+
+  # Makes some configurations within the container after its creation
+#  post_installation_hb_client_fork
+}
+
 choice_three_installation () {
   BUILT=true
 
+  mkdir -p "$SHARED_FOLDER"
   mkdir -p "$CERTS_FOLDER"
   mkdir -p "$GATEWAY_FOLDER"
   mkdir -p "$GATEWAY_CONF_FOLDER"
@@ -523,6 +700,12 @@ execute_installation () {
         ;;
     2)
         echo
+        echo "   Installing:"
+        echo
+        echo "     > HB Client Fork"
+        echo
+
+        choice_two_installation
         ;;
     3)
         echo
@@ -648,6 +831,29 @@ then
     printf "%25s %5s\n" "Base folder:" "$SHARED_FOLDER_SUFFIX"
     printf "%25s %5s\n" "Kujira HB Client folder:" "├── $KUJIRA_HB_CLIENT_FOLDER"
     printf "%25s %5s\n" "Resources folder:" "├── $RESOURCES_FOLDER"
+    echo
+  fi
+
+  if [[ "$CHOICE" == 2 || "$CHOICE" == 5 ]]; then
+    echo
+    echo "ℹ️  Confirm below if the instance and its folders are correct:"
+    echo
+    printf "%25s %5s\n" "Image:"              	"$HB_CLIENT_IMAGE_NAME:$TAG"
+    printf "%25s %5s\n" "Instance:"        			"$HB_CLIENT_CONTAINER_NAME"
+    printf "%25s %5s\n" "Repository url:"       "$HB_CLIENT_REPOSITORY_URL"
+    printf "%25s %5s\n" "Repository branch:"    "$HB_CLIENT_REPOSITORY_BRANCH"
+    printf "%25s %5s\n" "Reuse image?:"    		  "$HB_CLIENT_BUILD_CACHE"
+    printf "%25s %5s\n" "Entrypoint:"    				"$ENTRYPOINT"
+    echo
+    printf "%25s %5s\n" "Base:"                 "$SHARED_FOLDER"
+    printf "%25s %5s\n" "Common:"               "$COMMON_FOLDER"
+    printf "%25s %5s\n" "Certificates:"         "$CERTS_FOLDER"
+    printf "%25s %5s\n" "Client:"               "$HB_CLIENT_FOLDER"
+    printf "%25s %5s\n" "Config files:"         "$HB_CLIENT_CONF_FOLDER"
+    printf "%25s %5s\n" "Log files:"            "$HB_CLIENT_LOGS_FOLDER"
+    printf "%25s %5s\n" "Trade and data files:" "$HB_CLIENT_DATA_FOLDER"
+    printf "%25s %5s\n" "PMM scripts files:"    "$HB_CLIENT_PMM_SCRIPTS_FOLDER"
+    printf "%25s %5s\n" "Scripts files:"        "$HB_CLIENT_SCRIPTS_FOLDER"
     echo
   fi
 
