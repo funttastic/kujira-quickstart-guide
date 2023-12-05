@@ -47,8 +47,6 @@ RUN <<-EOF
 	set +ex
 EOF
 
-# COPY . .
-
 EXPOSE 15888
 
 RUN <<-EOF
@@ -59,12 +57,6 @@ RUN <<-EOF
 		/root/conf \
 		/root/logs \
 		/var/lib
-	set +ex
-EOF
-
-RUN <<-EOF
-	set -ex
-	cp -R /root/src/templates/* /root/conf
 	set +ex
 EOF
 
@@ -88,5 +80,3 @@ EOF
 #		/var/tmp/*
 #	set +ex
 #EOF
-
-CMD ["yarn", "start"]

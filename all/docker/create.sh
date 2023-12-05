@@ -10,6 +10,8 @@ SHARED_FOLDER_SUFFIX="shared"
 SHARED_FOLDER=$PWD/$SHARED_FOLDER_SUFFIX
 COMMON_FOLDER="$SHARED_FOLDER/common"
 ENTRYPOINT="/bin/bash"
+NETWORK="bridge"
+CERTS_FOLDER="$COMMON_FOLDER/certificates"
 
 generate_passphrase() {
     local length=$1
@@ -65,7 +67,7 @@ pre_installation_kujira_hb_client () {
   fi
 
   # Create a new image?
-  RESPONSE="$BUILD_CACHE"
+  RESPONSE="$KUJIRA_HB_CLIENT_BUILD_CACHE"
   if [ "$RESPONSE" == "" ]
   then
     echo
@@ -75,9 +77,9 @@ pre_installation_kujira_hb_client () {
   then
     echo
     echo "      A new image will be created..."
-    BUILD_CACHE="--no-cache"
+    KUJIRA_HB_CLIENT_BUILD_CACHE="--no-cache"
   else
-    BUILD_CACHE=""
+    KUJIRA_HB_CLIENT_BUILD_CACHE=""
   fi
 
   # Create a new container?
@@ -254,7 +256,6 @@ pre_installation_hb_gateway_fork () {
     GATEWAY_REPOSITORY_BRANCH="$RESPONSE"
   fi
 
-  CERTS_FOLDER="$COMMON_FOLDER/certificates"
   GATEWAY_CONF_FOLDER="$GATEWAY_FOLDER/conf"
   GATEWAY_LOGS_FOLDER="$GATEWAY_FOLDER/logs"
 }
@@ -342,6 +343,7 @@ else
   KUJIRA_HB_CLIENT_CONTAINER_NAME="kujira-hb-client"
   KUJIRA_HB_CLIENT_FOLDER_SUFFIX="kujira"
   KUJIRA_HB_CLIENT_FOLDER="$SHARED_FOLDER"/"$KUJIRA_HB_CLIENT_FOLDER_SUFFIX"
+  KUJIRA_HB_CLIENT_BUILD_CACHE="--no-cache"
 
   # HB Gateway Fork Settings
   GATEWAY_IMAGE_NAME=${GATEWAY_IMAGE_NAME:-"hb-gateway-fork"}
@@ -355,11 +357,11 @@ else
   CERTS_FOLDER="$COMMON_FOLDER/certificates"
   GATEWAY_CONF_FOLDER="$GATEWAY_FOLDER/conf"
   GATEWAY_LOGS_FOLDER="$GATEWAY_FOLDER/logs"
+  GATEWAY_BUILD_CACHE="--no-cache"
 
   # Settings for both
   TAG=${TAG:-"latest"}
   ENTRYPOINT=${ENTRYPOINT:-"/bin/bash"}
-  BUILD_CACHE="--no-cache"
 
 	RANDOM_PASSPHRASE=$(generate_passphrase 32)
 fi
@@ -367,26 +369,26 @@ fi
 RESOURCES_FOLDER="$KUJIRA_HB_CLIENT_FOLDER/client/resources"
 
 if [ -n "$RANDOM_PASSPHRASE" ]; then  \
-echo "   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"; \
-echo "   |                                                        |"; \
-echo "   |   A new random passphrase has been saved in the file   |"; \
-echo "   |                                                        |"; \
-echo "   |      shared/kujira/resources/random_passphrase.txt     |"; \
-echo "   |                                                        |"; \
-echo "   |   Copy it to a safe location and delete the file.      |"; \
-echo "   |                                                        |"; \
-echo "   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"; \
+echo "   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"; \
+echo "   |                                                              |"; \
+echo "   |   A new random passphrase will be saved in the file          |"; \
+echo "   |                                                              |"; \
+echo "   |      shared/kujira/client/resources/random_passphrase.txt    |"; \
+echo "   |                                                              |"; \
+echo "   |   Copy it to a safe location and delete the file.            |"; \
+echo "   |                                                              |"; \
+echo "   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"; \
 echo; \
 fi
 
 docker_create_image_kujira_hb_client () {
-  if [ ! "$BUILD_CACHE" == "" ]
+  if [ ! "$KUJIRA_HB_CLIENT_BUILD_CACHE" == "" ]
   then
     BUILT=$(DOCKER_BUILDKIT=1 docker build \
-    $BUILD_CACHE \
+    "$KUJIRA_HB_CLIENT_BUILD_CACHE" \
     --build-arg RANDOM_PASSPHRASE="$RANDOM_PASSPHRASE" \
     --build-arg DEFINED_PASSPHRASE="$DEFINED_PASSPHRASE" \
-    -t $IMAGE_NAME -f ./docker/Dockerfile/Dockerfile-Kujira-HB-Client .)
+    -t $IMAGE_NAME -f ./all/docker/Dockerfile/Dockerfile-Kujira-HB-Client .)
   fi
 }
 
@@ -398,11 +400,13 @@ docker_create_container_kujira_hb_client () {
     --log-opt max-size=10m \
     --log-opt max-file=5 \
     --name $KUJIRA_HB_CLIENT_CONTAINER_NAME \
-    --network host \
-    -v "$RESOURCES_FOLDER":/root/app/resources \
+    --network "$NETWORK" \
+    --mount type=bind,source="$RESOURCES_FOLDER",target=/root/app/resources \
+    --mount type=bind,source="$CERTS_FOLDER",target=/root/app/resources/certificates \
     --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
     -e RESOURCES_FOLDER="/root/app/resources" \
-    -e HOST_USER_GROUP="$GROUP" \
+    -e CERTS_FOLDER="/root/app/resources/certificates" \
+    --entrypoint="$ENTRYPOINT" \
     $IMAGE_NAME:$TAG
 }
 
@@ -414,7 +418,7 @@ docker_create_image_hb_gateway_fork () {
       --build-arg REPOSITORY_BRANCH="$GATEWAY_REPOSITORY_BRANCH" \
       --build-arg RANDOM_PASSPHRASE="$RANDOM_PASSPHRASE" \
       --build-arg DEFINED_PASSPHRASE="$DEFINED_PASSPHRASE" \
-      -t "$GATEWAY_IMAGE_NAME" -f ./docker/Dockerfile/Dockerfile-HB-Gateway-Fork .)
+      -t "$GATEWAY_IMAGE_NAME" -f ./all/docker/Dockerfile/Dockerfile-HB-Gateway-Fork .)
   fi
 }
 
@@ -426,7 +430,7 @@ docker_create_container_hb_gateway_fork () {
   --log-opt max-file=5 \
   -p "$GATEWAY_PORT":"$GATEWAY_PORT" \
   --name "$GATEWAY_CONTAINER_NAME" \
-  --network host \
+  --network "$NETWORK" \
   --mount type=bind,source="$CERTS_FOLDER",target=/root/certs \
   --mount type=bind,source="$GATEWAY_CONF_FOLDER",target=/root/conf \
   --mount type=bind,source="$GATEWAY_LOGS_FOLDER",target=/root/logs \
@@ -436,7 +440,7 @@ docker_create_container_hb_gateway_fork () {
   -e LOGS_FOLDER="/root/logs" \
   -e GATEWAY_PORT="$GATEWAY_PORT" \
   --entrypoint="$ENTRYPOINT" \
-  $GATEWAY_IMAGE_NAME:$TAG
+  "$GATEWAY_IMAGE_NAME":$TAG
 }
 
 post_installation_kujira_hb_client () {
@@ -449,13 +453,24 @@ post_installation_kujira_hb_client () {
   docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "groupadd -f $GROUP"
   docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd resources && chown -RH :$GROUP ."
   docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd resources && chmod -R a+rwX ."
-  docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "python app.py" &
+  docker exec "$KUJIRA_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "python app.py" > /dev/null 2>&1 &
+}
+
+post_installation_hb_gateway_fork () {
+  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cp -R /root/src/templates/. /root/conf"
+  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "groupadd -f $GROUP"
+  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/conf && chown -RH :$GROUP ."
+  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/conf && chmod -R a+rw ."
+  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/logs && chown -RH :$GROUP ."
+  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/logs && chmod -R a+rw ."
+  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "yarn start" > /dev/null 2>&1 &
 }
 
 choice_one_installation () {
   BUILT=true
 
-  $BUILT && docker volume create resources > /dev/null
+  mkdir -p "$CERTS_FOLDER"
+  mkdir -p "$RESOURCES_FOLDER"
 
   # Create a new separated image for Kujira HB Client
   docker_create_image_kujira_hb_client
@@ -470,8 +485,8 @@ choice_one_installation () {
 choice_three_installation () {
   BUILT=true
 
-  mkdir -p "$GATEWAY_FOLDER"
   mkdir -p "$CERTS_FOLDER"
+  mkdir -p "$GATEWAY_FOLDER"
   mkdir -p "$GATEWAY_CONF_FOLDER"
   mkdir -p "$GATEWAY_LOGS_FOLDER"
 
@@ -484,7 +499,7 @@ choice_three_installation () {
   docker_create_container_hb_gateway_fork
 
   # Makes some configurations within the container after its creation
-#  post_installation_hb_gateway_fork
+  post_installation_hb_gateway_fork
 }
 
 default_installation () {
@@ -628,11 +643,11 @@ then
     echo
     echo "ℹ️  Confirm below if the Kujira HB Client instance and its folders are correct:"
     echo
-    printf "%19s %5s\n" "Instance name:" "$KUJIRA_HB_CLIENT_CONTAINER_NAME"
-    printf "%19s %5s\n" "Version:" "$TAG"
-    printf "%19s %5s\n" "Base folder:" "$SHARED_FOLDER_SUFFIX"
-    printf "%19s %5s\n" "Kujira HB Client folder:" "├── $KUJIRA_HB_CLIENT_FOLDER"
-    printf "%19s %5s\n" "Resources folder:" "├── $RESOURCES_FOLDER"
+    printf "%25s %5s\n" "Instance name:" "$KUJIRA_HB_CLIENT_CONTAINER_NAME"
+    printf "%25s %5s\n" "Version:" "$TAG"
+    printf "%25s %5s\n" "Base folder:" "$SHARED_FOLDER_SUFFIX"
+    printf "%25s %5s\n" "Kujira HB Client folder:" "├── $KUJIRA_HB_CLIENT_FOLDER"
+    printf "%25s %5s\n" "Resources folder:" "├── $RESOURCES_FOLDER"
     echo
   fi
 
@@ -640,20 +655,20 @@ then
     echo
     echo "ℹ️  Confirm below if the instance and its folders are correct:"
     echo
-    printf "%30s %5s\n" "Image:"              	"$GATEWAY_IMAGE_NAME:$TAG"
-    printf "%30s %5s\n" "Instance:"        			"$GATEWAY_CONTAINER_NAME"
-    printf "%30s %5s\n" "Exposed port:"					"$GATEWAY_PORT"
-    printf "%30s %5s\n" "Repository url:"       "$GATEWAY_REPOSITORY_URL"
-    printf "%30s %5s\n" "Repository branch:"    "$GATEWAY_REPOSITORY_BRANCH"
-    printf "%30s %5s\n" "Reuse image?:"    		  "$GATEWAY_BUILD_CACHE"
-    printf "%30s %5s\n" "Entrypoint:"    				"$ENTRYPOINT"
+    printf "%25s %5s\n" "Image:"              	"$GATEWAY_IMAGE_NAME:$TAG"
+    printf "%25s %5s\n" "Instance:"        			"$GATEWAY_CONTAINER_NAME"
+    printf "%25s %5s\n" "Exposed port:"					"$GATEWAY_PORT"
+    printf "%25s %5s\n" "Repository url:"       "$GATEWAY_REPOSITORY_URL"
+    printf "%25s %5s\n" "Repository branch:"    "$GATEWAY_REPOSITORY_BRANCH"
+    printf "%25s %5s\n" "Reuse image?:"    		  "$GATEWAY_BUILD_CACHE"
+    printf "%25s %5s\n" "Entrypoint:"    				"$ENTRYPOINT"
     echo
-    printf "%30s %5s\n" "Base:"                 "$SHARED_FOLDER"
-    printf "%30s %5s\n" "Common:"               "$COMMON_FOLDER"
-    printf "%30s %5s\n" "Certificates:"         "$CERTS_FOLDER"
-    printf "%30s %5s\n" "Gateway folder:"       "$GATEWAY_FOLDER"
-    printf "%30s %5s\n" "Gateway config files:" "$GATEWAY_CONF_FOLDER"
-    printf "%30s %5s\n" "Gateway log files:"    "$GATEWAY_LOGS_FOLDER"
+    printf "%25s %5s\n" "Base:"                 "$SHARED_FOLDER"
+    printf "%25s %5s\n" "Common:"               "$COMMON_FOLDER"
+    printf "%25s %5s\n" "Certificates:"         "$CERTS_FOLDER"
+    printf "%25s %5s\n" "Gateway folder:"       "$GATEWAY_FOLDER"
+    printf "%25s %5s\n" "Gateway config files:" "$GATEWAY_CONF_FOLDER"
+    printf "%25s %5s\n" "Gateway log files:"    "$GATEWAY_LOGS_FOLDER"
     echo
   fi
 
