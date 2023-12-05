@@ -134,7 +134,7 @@ pre_installation_hb_client_fork () {
   echo "   ===============   HB CLIENT FORK INSTALLATION SETUP   ==============="
   echo
 
-  if [ "$CHOICE" == 3 ]; then
+  if [ "$CHOICE" == 2 ]; then
     default_values_info
   fi
 
@@ -428,9 +428,9 @@ then
           pre_installation_hb_gateway_fork
           ;;
       5)
-          pre_installation_hb_client_fork
           pre_installation_kujira_hb_client
           pre_installation_hb_gateway_fork
+          pre_installation_hb_client_fork
           ;;
   esac
 else
@@ -684,6 +684,12 @@ default_installation () {
   choice_three_installation
 }
 
+choice_five_installation () {
+  choice_one_installation
+  choice_two_installation
+  choice_three_installation
+}
+
 execute_installation () {
   mkdir -p "$SHARED_FOLDER"
   mkdir -p "$COMMON_FOLDER"
@@ -702,7 +708,7 @@ execute_installation () {
         echo
         echo "   Installing:"
         echo
-        echo "     > HB Client Fork"
+        echo "     > Hummingbot Client Fork"
         echo
 
         choice_two_installation
@@ -711,7 +717,7 @@ execute_installation () {
         echo
         echo "   Installing:"
         echo
-        echo "     > HB Gateway Fork"
+        echo "     > Hummingbot Gateway Fork"
         echo
 
         choice_three_installation
@@ -728,7 +734,14 @@ execute_installation () {
         ;;
     5)
         echo
-        ;;
+        echo "   Automatically installing:"
+        echo
+        echo "     > Kujira HB Client"
+        echo "     > Hummingbot Client Fork"
+        echo "     > Hummingbot Gateway Fork"
+        echo
+
+        choice_five_installation
   esac
 }
 
@@ -822,7 +835,7 @@ install_docker () {
 
 if [[ "$CUSTOMIZE" == "--customize" &&  ! "$NOT_IMPLEMENTED" ]]
 then
-  if [[ "$CHOICE" == 1 || "$CHOICE" == 4 ]]; then
+  if [[ "$CHOICE" == 1 || "$CHOICE" == 4 || "$CHOICE" == 5 ]]; then
     echo
     echo "ℹ️  Confirm below if the Kujira HB Client instance and its folders are correct:"
     echo
@@ -857,7 +870,7 @@ then
     echo
   fi
 
-  if [[ "$CHOICE" == 3 || "$CHOICE" == 4 ]]; then
+  if [[ "$CHOICE" == 3 || "$CHOICE" == 4 || "$CHOICE" == 5 ]]; then
     echo
     echo "ℹ️  Confirm below if the instance and its folders are correct:"
     echo
