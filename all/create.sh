@@ -386,7 +386,7 @@ then
   echo "   [1] FUNTTASTIC HUMMINGBOT CLIENT"
   echo "   [2] HUMMINGBOT CLIENT"
   echo "   [3] HUMMINGBOT GATEWAY"
-  echo "   [4] FUNTTASTIC HUMMINGBOT CLIENT and HB GATEWAY [RECOMMENDED]"
+  echo "   [4] FUNTTASTIC HUMMINGBOT CLIENT and HUMMINGBOT GATEWAY [RECOMMENDED]"
   echo "   [5] ALL"
   echo
   echo "   For more information about the FUNTTASTIC HUMMINGBOT CLIENT, please visit:"
