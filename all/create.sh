@@ -272,7 +272,7 @@ pre_installation_hb_gateway () {
   fi
 
   # Create a new instance?
-  RESPONSE="$GATEWAY_CONTAINER_NAME"
+  RESPONSE="$HB_GATEWAY_CONTAINER_NAME"
   if [ "$RESPONSE" == "" ]
   then
     echo
@@ -388,6 +388,7 @@ then
   echo "   [3] HUMMINGBOT GATEWAY"
   echo "   [4] FUNTTASTIC HUMMINGBOT CLIENT and HUMMINGBOT GATEWAY [RECOMMENDED]"
   echo "   [5] ALL"
+  echo "   [6] RESTART ALL CONTAINERS AND PROCESSES"
   echo
   echo "   For more information about the FUNTTASTIC HUMMINGBOT CLIENT, please visit:"
   echo
@@ -431,6 +432,9 @@ then
           pre_installation_fun_hb_client
           pre_installation_hb_gateway
           pre_installation_hb_client
+          ;;
+      5)
+          restart_containers_and_processes
           ;;
   esac
 else
@@ -574,7 +578,7 @@ docker_create_container_hb_gateway () {
   --log-opt max-size=10m \
   --log-opt max-file=5 \
   -p "$GATEWAY_PORT":"$GATEWAY_PORT" \
-  --name "$GATEWAY_CONTAINER_NAME" \
+  --name "$HB_GATEWAY_CONTAINER_NAME" \
   --network "$NETWORK" \
   --mount type=bind,source="$CERTS_FOLDER",target=/root/certs \
   --mount type=bind,source="$GATEWAY_CONF_FOLDER",target=/root/conf \
@@ -606,13 +610,13 @@ post_installation_hb_client () {
 }
 
 post_installation_hb_gateway () {
-  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cp -R /root/src/templates/. /root/conf"
-  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "groupadd -f $GROUP"
-  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/conf && chown -RH :$GROUP ."
-  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/conf && chmod -R a+rw ."
-  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/logs && chown -RH :$GROUP ."
-  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/logs && chmod -R a+rw ."
-  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "yarn start" > /dev/null 2>&1 &
+  docker exec "$HB_GATEWAY_CONTAINER_NAME" /bin/bash -c "cp -R /root/src/templates/. /root/conf"
+  docker exec "$HB_GATEWAY_CONTAINER_NAME" /bin/bash -c "groupadd -f $GROUP"
+  docker exec "$HB_GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/conf && chown -RH :$GROUP ."
+  docker exec "$HB_GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/conf && chmod -R a+rw ."
+  docker exec "$HB_GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/logs && chown -RH :$GROUP ."
+  docker exec "$HB_GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/logs && chmod -R a+rw ."
+  docker exec "$HB_GATEWAY_CONTAINER_NAME" /bin/bash -c "yarn start" > /dev/null 2>&1 &
 }
 
 choice_one_installation () {
@@ -875,7 +879,7 @@ then
     echo "ℹ️  Confirm below if the instance and its folders are correct:"
     echo
     printf "%25s %5s\n" "Image:"              	"$GATEWAY_IMAGE_NAME:$TAG"
-    printf "%25s %5s\n" "Instance:"        			"$GATEWAY_CONTAINER_NAME"
+    printf "%25s %5s\n" "Instance:"        			"$HB_GATEWAY_CONTAINER_NAME"
     printf "%25s %5s\n" "Exposed port:"					"$GATEWAY_PORT"
     printf "%25s %5s\n" "Repository url:"       "$GATEWAY_REPOSITORY_URL"
     printf "%25s %5s\n" "Repository branch:"    "$GATEWAY_REPOSITORY_BRANCH"
@@ -908,3 +912,17 @@ else
     install_docker
   fi
 fi
+
+restart_containers_and_processes() {
+	docker stop -t 1 "$FUN_HB_CLIENT_CONTAINER_NAME" && sleep 1 && docker inspect -f '{{.State.Running}}' "$FUN_HB_CLIENT_CONTAINER_NAME" | grep "true" && docker kill "$FUN_HB_CLIENT_CONTAINER_NAME"
+	docker stop -t 1 "$HB_CLIENT_CONTAINER_NAME" && sleep 1 && docker inspect -f '{{.State.Running}}' "$HB_CLIENT_CONTAINER_NAME" | grep "true" && docker kill "$HB_CLIENT_CONTAINER_NAME"
+	docker stop -t 1 "$HB_GATEWAY_CONTAINER_NAME" && sleep 1 && docker inspect -f '{{.State.Running}}' "$HB_GATEWAY_CONTAINER_NAME" | grep "true" && docker kill "$HB_GATEWAY_CONTAINER_NAME"
+
+	docker start "$FUN_HB_CLIENT_CONTAINER_NAME"
+	docker start "$HB_CLIENT_CONTAINER_NAME"
+	docker start "$HB_GATEWAY_CONTAINER_NAME"
+
+	docker exec "$HB_GATEWAY_CONTAINER_NAME" /bin/bash -c "yarn start" > /dev/null 2>&1 &
+	docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "python app.py" > /dev/null 2>&1 &
+	docker exec "$HB_CLIENT_CONTAINER_NAME" /bin/bash -c "/root/miniconda3/envs/hummingbot/bin/python3 /root/bin/hummingbot_quickstart.py" > /dev/null 2>&1 &
+}
