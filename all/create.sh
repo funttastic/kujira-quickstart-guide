@@ -381,7 +381,7 @@ fi
 if [ "$CUSTOMIZE" == "--customize" ]
 then
   echo
-  echo "   CHOOSE A OPTION BELOW TO INSTALL"
+  echo "   CHOOSE WHICH INSTALLATION YOU WOULD LIKE TO DO:"
   echo
   echo "   [1] FUNTTASTIC HUMMINGBOT CLIENT"
   echo "   [2] HUMMINGBOT CLIENT"

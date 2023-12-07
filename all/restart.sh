@@ -80,7 +80,7 @@ choose() {
     echo
     echo "   ===============     WELCOME TO FUNTTASTIC HUMMINGBOT CLIENT SETUP     ==============="
     echo
-    echo "   CHOOSE WHICH CONTAINERS AND SERVICES YOU WOULD LIKE TO RESTART"
+    echo "   CHOOSE WHICH CONTAINERS AND SERVICES YOU WOULD LIKE TO RESTART:"
     echo
     echo "   [1] ALL"
     echo "   [2] FUNTTASTIC HUMMINGBOT CLIENT"
