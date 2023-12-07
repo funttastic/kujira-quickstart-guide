@@ -7,7 +7,7 @@ It's very recommended to watch this video from the Hummingbot Foundation and the
  - https://docs.hummingbot.org/quickstart/
 
 ## Prerequisites:
-- [Docker](https://github.com/funttastic/kujira-quickstart-guide/blob/community/how-to-install-docker.md)
+- [Docker](https://docs.docker.com/engine/install/)
 - [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/en-us/windows/wsl/install) (For Windows only)
 
 ## Installation
