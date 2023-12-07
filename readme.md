@@ -4,7 +4,6 @@
 It's very recommended to watch this video from the Hummingbot Foundation and their installation guide:
  - <a href="https://www.youtube.com/watch?v=t3Su_F_SY_0" target="_blank">https://www.youtube.com/watch?v=t3Su_F_SY_0</a>
  - <a href="https://docs.hummingbot.org/installation/" target="_blank">https://docs.hummingbot.org/installation/</a>
- - <a href="https://docs.hummingbot.org/quickstart/" target="_blank">https://docs.hummingbot.org/quickstart/</a>
 
 ## Prerequisites:
 - <a href="https://docs.docker.com/engine/install/" target="_blank">Docker</a>
