@@ -35,6 +35,8 @@ get_container_name() {
             fi
         fi
     done
+
+    export TEST="aloha"
 }
 
 # General function to stop and restart a container
