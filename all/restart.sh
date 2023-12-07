@@ -16,8 +16,11 @@ get_container_name() {
     local container_name
 
     while true; do
-        read -p "Enter the container name for $container_var_name [Press enter to use $container_name]: " input_name
-        if [ -z "$input_name" ] && [ -n "${!container_var_name}" ]; then
+        read -p "Enter the container name for $container_var_name [Type 'skip' to bypass]: " input_name
+        if [ "$input_name" == "skip" ]; then
+            echo "Skipping restart for $container_var_name."
+            return 1
+        elif [ -z "$input_name" ] && [ -n "${!container_var_name}" ]; then
             # Use the existing container name if the user presses enter and a name is already set
             break
         elif [ -n "$input_name" ]; then
