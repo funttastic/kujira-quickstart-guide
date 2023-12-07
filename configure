@@ -1,6 +1,7 @@
 #!/bin/bash
 
 choose() {
+		clear
     echo
     echo "   ===============     WELCOME TO FUNTTASTIC HUMMINGBOT CLIENT SETUP     ==============="
     echo
@@ -20,14 +21,17 @@ choose() {
     while true; do
         case $CHOICE in
             1)
+            		clear
                 ./all/create.sh
                 break
                 ;;
             2)
+            		clear
                 ./all/restart.sh
                 break
                 ;;
             3)
+            		clear
                 ./all/utils.sh
                 break
                 ;;
