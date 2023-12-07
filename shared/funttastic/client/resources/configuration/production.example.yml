@@ -1,15 +1,20 @@
 server:
   environment: production
   debug: false
+  port: 5000
 logging:
   level: 30 # 30 -> WARNING
   use_telegram: true
 telegram:
-  level: 30 # 30 -> WARNING
+  enabled: true
+  listen_commands: true
+  level: 20 # 20 -> INFO
   url: "https://api.telegram.org/bot{token}/sendMessage"
   token: "<token>"
   chat_id: "<chat_id>"
   parse_mode: "HTML"
+  notify:
+    users: []
 hummingbot:
   gateway:
     host: https://localhost
