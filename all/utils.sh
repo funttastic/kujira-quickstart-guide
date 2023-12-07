@@ -200,7 +200,7 @@ choose() {
     echo "         https://www.funttastic.com/partners/kujira"
     echo
 
-    read -p "   Enter your choice (1-3): " CHOICE
+    read -p "   Enter your choice (1-4): " CHOICE
 
     while true; do
         case $CHOICE in
