@@ -35,6 +35,8 @@ get_container_name() {
             fi
         fi
     done
+
+    echo "container_var_name: $container_var_name"
 }
 
 # General function to stop and restart a container
