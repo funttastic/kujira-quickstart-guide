@@ -22,7 +22,7 @@ choose() {
         case $CHOICE in
             1)
             		clear
-                ./all/create.sh
+                ./all/install.sh
                 break
                 ;;
             2)

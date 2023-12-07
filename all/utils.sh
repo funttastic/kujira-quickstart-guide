@@ -35,6 +35,8 @@ send_request() {
 	port=${port:-$PORT}
 	certificates_folder=${certificates_folder:-$CERTIFICATES_FOLDER}
 
+	echo
+
 	curl -X "$method" \
 		--cert "$certificates_folder/client_cert.pem" \
 		--key "$certificates_folder/client_key.pem" \
@@ -42,6 +44,8 @@ send_request() {
 		--header "Content-Type: application/json" \
 		-d "$payload" \
 		"$host:$port$url"
+
+	echo
 }
 
 start() {
