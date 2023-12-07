@@ -53,4 +53,4 @@ After that you should receive some Kujira tokens on your balance.
 ### How to contact us
 If you need more info you can contact us here:
 
-> https://discord.gg/6CxA7PWV
+> https://funttastic.com/discord
