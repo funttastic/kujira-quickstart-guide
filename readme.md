@@ -37,7 +37,7 @@ In order to add funds to your wallet, you can use a faucet inside the Kujira Dis
 
 To join their discord you can use this link:
 
-> (https://discord.gg/teamkujira)[https://discord.gg/teamkujira]
+> [https://discord.gg/teamkujira](https://discord.gg/teamkujira)
 
 After joining and doing their verification process, you can look for this channel:
 
