@@ -364,20 +364,6 @@ pre_installation_hb_gateway () {
   GATEWAY_LOGS_FOLDER="$GATEWAY_FOLDER/logs"
 }
 
-restart_containers_and_processes() {
-	docker stop -t 1 "$FUN_HB_CLIENT_CONTAINER_NAME" && sleep 1 && docker inspect -f '{{.State.Running}}' "$FUN_HB_CLIENT_CONTAINER_NAME" | grep "true" && docker kill "$FUN_HB_CLIENT_CONTAINER_NAME"
-	docker stop -t 1 "$HB_CLIENT_CONTAINER_NAME" && sleep 1 && docker inspect -f '{{.State.Running}}' "$HB_CLIENT_CONTAINER_NAME" | grep "true" && docker kill "$HB_CLIENT_CONTAINER_NAME"
-	docker stop -t 1 "$HB_GATEWAY_CONTAINER_NAME" && sleep 1 && docker inspect -f '{{.State.Running}}' "$HB_GATEWAY_CONTAINER_NAME" | grep "true" && docker kill "$HB_GATEWAY_CONTAINER_NAME"
-
-	docker start "$FUN_HB_CLIENT_CONTAINER_NAME"
-	docker start "$HB_CLIENT_CONTAINER_NAME"
-	docker start "$HB_GATEWAY_CONTAINER_NAME"
-
-	docker exec "$HB_GATEWAY_CONTAINER_NAME" /bin/bash -c "yarn start" > /dev/null 2>&1 &
-	docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "python app.py" > /dev/null 2>&1 &
-	docker exec "$HB_CLIENT_CONTAINER_NAME" /bin/bash -c "/root/miniconda3/envs/hummingbot/bin/python3 /root/bin/hummingbot_quickstart.py" > /dev/null 2>&1 &
-}
-
 echo
 echo "   ===============     WELCOME TO FUNTTASTIC HUMMINGBOT CLIENT SETUP     ==============="
 echo
@@ -402,14 +388,13 @@ then
   echo "   [3] HUMMINGBOT GATEWAY"
   echo "   [4] FUNTTASTIC HUMMINGBOT CLIENT and HUMMINGBOT GATEWAY [RECOMMENDED]"
   echo "   [5] ALL"
-  echo "   [6] RESTART ALL CONTAINERS AND PROCESSES"
   echo
   echo "   For more information about the FUNTTASTIC HUMMINGBOT CLIENT, please visit:"
   echo
   echo "         https://www.funttastic.com/partners/kujira"
   echo
 
-  read -p "   Enter your choice (1-6): " CHOICE
+  read -p "   Enter your choice (1-5): " CHOICE
 
 #  if [[ -z $choice || ! $choice =~ ^[1-5]$ ]]; then
 #      CHOICE=4
@@ -417,15 +402,15 @@ then
 
   while true; do
     case $CHOICE in
-        1|2|3|4|5|6)
+        1|2|3|4|5)
             break
             ;;
         *)
-            echo "   Invalid Input. Enter a number between 1 and 6."
+            echo "   Invalid Input. Enter a number between 1 and 5."
             ;;
     esac
 
-    read -p "   Enter your choice (1-6): " CHOICE
+    read -p "   Enter your choice (1-5): " CHOICE
   done
 
   case $CHOICE in
@@ -446,9 +431,6 @@ then
           pre_installation_fun_hb_client
           pre_installation_hb_gateway
           pre_installation_hb_client
-          ;;
-      6)
-          restart_containers_and_processes
           ;;
   esac
 else
