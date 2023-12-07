@@ -10,7 +10,7 @@ SHARED_FOLDER_SUFFIX="shared"
 SHARED_FOLDER=$PWD/$SHARED_FOLDER_SUFFIX
 COMMON_FOLDER="$SHARED_FOLDER/common"
 ENTRYPOINT="/bin/bash"
-NETWORK="bridge"
+NETWORK="host"
 CERTS_FOLDER="$COMMON_FOLDER/certificates"
 
 generate_passphrase() {
@@ -131,7 +131,7 @@ pre_installation_fun_hb_client () {
 pre_installation_hb_client () {
   echo
   echo
-  echo "   ===============   HB CLIENT INSTALLATION SETUP   ==============="
+  echo "   ===============   HUMMINGBOT CLIENT INSTALLATION SETUP   ==============="
   echo
 
   if [ "$CHOICE" == 2 ]; then
@@ -142,7 +142,7 @@ pre_installation_hb_client () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter a HB Client image name you want to use (default = \"hb-client\") >>> " RESPONSE
+    read -p "   Enter a Hummingbot Client image name you want to use (default = \"hb-client\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -156,7 +156,7 @@ pre_installation_hb_client () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Do you want to use an existing HB Client image (\"y/N\") >>> " RESPONSE
+    read -p "   Do you want to use an existing Hummingbot Client image (\"y/N\") >>> " RESPONSE
   fi
   if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]
   then
@@ -172,7 +172,7 @@ pre_installation_hb_client () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter a name for your new HB Client instance (default = \"hb-client\") >>> " RESPONSE
+    read -p "   Enter a name for your new Hummingbot Client instance (default = \"hb-client\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -187,7 +187,7 @@ pre_installation_hb_client () {
   then
     HB_CLIENT_FOLDER_SUFFIX="client"
     echo
-    read -p "   Enter a folder name where your HB Client files will be saved (default = \"$HB_CLIENT_FOLDER_SUFFIX\") >>> " RESPONSE
+    read -p "   Enter a folder name where your Hummingbot Client files will be saved (default = \"$HB_CLIENT_FOLDER_SUFFIX\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -235,7 +235,7 @@ pre_installation_hb_client () {
 pre_installation_hb_gateway () {
   echo
   echo
-  echo "   ===============   HB GATEWAY INSTALLATION SETUP   ==============="
+  echo "   ===============   HUMMINGBOT GATEWAY INSTALLATION SETUP   ==============="
   echo
 
   if [ "$CHOICE" == 3 ]; then
@@ -246,7 +246,7 @@ pre_installation_hb_gateway () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter a HB Gateway image name you want to use (default = \"hb-gateway\") >>> " RESPONSE
+    read -p "   Enter a Hummingbot Gateway image name you want to use (default = \"hb-gateway\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -260,7 +260,7 @@ pre_installation_hb_gateway () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Do you want to use an existing HB Gateway image (\"y/N\") >>> " RESPONSE
+    read -p "   Do you want to use an existing Hummingbot Gateway image (\"y/N\") >>> " RESPONSE
   fi
   if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]
   then
@@ -276,7 +276,7 @@ pre_installation_hb_gateway () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter a name for your new HB Gateway instance (default = \"hb-gateway\") >>> " RESPONSE
+    read -p "   Enter a name for your new Hummingbot Gateway instance (default = \"hb-gateway\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -290,7 +290,7 @@ pre_installation_hb_gateway () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter a port for expose your new HB Gateway instance (default = \"15888\") >>> " RESPONSE
+    read -p "   Enter a port for expose your new Hummingbot Gateway instance (default = \"15888\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -305,7 +305,7 @@ pre_installation_hb_gateway () {
   then
     GATEWAY_FOLDER_SUFFIX="gateway"
     echo
-    read -p "   Enter a folder name where your HB Gateway files will be saved (default = \"$GATEWAY_FOLDER_SUFFIX\") >>> " RESPONSE
+    read -p "   Enter a folder name where your Hummingbot Gateway files will be saved (default = \"$GATEWAY_FOLDER_SUFFIX\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -434,7 +434,7 @@ then
           ;;
   esac
 else
-  # Default settings to install Funttastic Hummingbot Client, HB Gateway and HB Client
+  # Default settings to install Funttastic Hummingbot Client, Hummingbot Gateway and Hummingbot Client
 
   # Funttastic Hummingbot Client Settings
   FUN_HB_CLIENT_IMAGE_NAME="fun-hb-client"
@@ -443,7 +443,7 @@ else
   FUN_HB_CLIENT_FOLDER="$SHARED_FOLDER"/"$FUN_HB_CLIENT_FOLDER_SUFFIX"
   FUN_HB_CLIENT_BUILD_CACHE="--no-cache"
 
-  # HB Client Settings
+  # Hummingbot Client Settings
   HB_CLIENT_IMAGE_NAME=${HB_CLIENT_IMAGE_NAME:-"hb-client"}
   HB_CLIENT_BUILD_CACHE=${HB_CLIENT_BUILD_CACHE:-"--no-cache"}
   HB_CLIENT_CONTAINER_NAME=${HB_CLIENT_CONTAINER_NAME:-"hb-client"}
@@ -457,7 +457,7 @@ else
   HB_CLIENT_PMM_SCRIPTS_FOLDER="$HB_CLIENT_FOLDER/pmm_scripts"
   HB_CLIENT_SCRIPTS_FOLDER="$HB_CLIENT_FOLDER/scripts"
 
-  # HB Gateway Settings
+  # Hummingbot Gateway Settings
   GATEWAY_IMAGE_NAME=${GATEWAY_IMAGE_NAME:-"hb-gateway"}
   GATEWAY_BUILD_CACHE=${GATEWAY_BUILD_CACHE:-"--no-cache"}
   GATEWAY_CONTAINER_NAME=${GATEWAY_CONTAINER_NAME:-"hb-gateway"}
@@ -648,7 +648,7 @@ choice_two_installation () {
 
   chmod a+rw "$HB_CLIENT_CONF_FOLDER"
 
-  # Create a new separated image for HB Client
+  # Create a new separated image for Hummingbot Client
   docker_create_image_hb_client
 
   # Create a new separated container from image
@@ -669,7 +669,7 @@ choice_three_installation () {
 
   chmod a+rw "$GATEWAY_CONF_FOLDER"
 
-  # Create a new separated image for HB Gateway
+  # Create a new separated image for Hummingbot Gateway
   docker_create_image_hb_gateway
 
   # Create a new separated container from image
