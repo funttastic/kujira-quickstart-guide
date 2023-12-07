@@ -15,7 +15,9 @@ It's very recommended to watch this video from the Hummingbot Foundation and the
 [![Video tutorial](http://img.youtube.com/vi/t3Su_F_SY_0/0.jpg)](http://www.youtube.com/watch?v=t3Su_F_SY_0 "Video tutorial")
 
 > git clone https://github.com/funttastic/kujira-quickstart-guide.git
+
 > cd kujira-quickstart-guide
+> 
 > ./configure
 
 ## Extra (optional)
