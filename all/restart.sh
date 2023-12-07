@@ -62,8 +62,44 @@ choose() {
     echo
     echo "   ===============     WELCOME TO FUNTTASTIC HUMMINGBOT CLIENT SETUP     ==============="
     echo
-    # ... existing text ...
-    # ... existing choice logic ...
+    echo "   CHOOSE WHICH CONTAINERS AND SERVICES YOU WOULD LIKE TO RESTART"
+    echo
+    echo "   [1] ALL"
+    echo "   [2] FUNTTASTIC HUMMINGBOT CLIENT"
+    echo "   [3] HUMMINGBOT CLIENT"
+    echo "   [4] HUMMINGBOT GATEWAY"
+    echo
+    echo "   For more information about the FUNTTASTIC HUMMINGBOT CLIENT, please visit:"
+    echo
+    echo "         https://www.funttastic.com/partners/kujira"
+    echo
+
+    read -p "   Enter your choice (1-4): " CHOICE
+
+    while true; do
+        case $CHOICE in
+            1)
+                restart_all
+                break
+                ;;
+            2)
+                restart_fun_hb_client
+                break
+                ;;
+            3)
+                restart_hb_client
+                break
+                ;;
+            4)
+                restart_hb_gateway
+                break
+                ;;
+            *)
+                echo "   Invalid Input. Enter a number between 1 and 4."
+                read -p "   Enter your choice (1-4): " CHOICE
+                ;;
+        esac
+    done
 }
 
 # =====================================================================================================================
