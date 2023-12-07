@@ -1,2 +1,4 @@
+state:
+  recreate_on_start: false
 logger:
   level: INFO
