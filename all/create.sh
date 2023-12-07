@@ -403,15 +403,15 @@ then
 
   while true; do
     case $CHOICE in
-        1|2|3|4|5)
+        1|2|3|4|5|6)
             break
             ;;
         *)
-            echo "   Invalid Input. Enter a number between 1 and 5."
+            echo "   Invalid Input. Enter a number between 1 and 6."
             ;;
     esac
 
-    read -p "   Enter your choice (1-5): " CHOICE
+    read -p "   Enter your choice (1-6): " CHOICE
   done
 
   case $CHOICE in
