@@ -57,6 +57,13 @@ restart_hb_gateway() {
     restart_container "$HB_GATEWAY_CONTAINER_NAME" "yarn start"
 }
 
+# Function to restart all containers
+restart_all() {
+    restart_fun_hb_client
+    restart_hb_client
+    restart_hb_gateway
+}
+
 # Function to choose which container to restart
 choose() {
     echo
