@@ -15,19 +15,22 @@ get_container_name() {
     local container_var_name=$1
     local skip_keyword="skip"
 
+    # Using indirect variable reference to get the value of the container variable
+    local current_value=${!container_var_name}
+
     while true; do
-        read -p "Enter the container name for $container_var_name [Type '$skip_keyword' to bypass]: " input_name
+        read -p "Enter the container name for $container_var_name [Type '$skip_keyword' to bypass or press Enter to use '$current_value']: " input_name
         if [ "$input_name" == "$skip_keyword" ]; then
             echo "Skipping restart for $container_var_name."
-            # Set the variable to 'skip' to indicate skipping
-            declare -g $container_var_name=$skip_keyword
+            declare -g $container_var_name="$skip_keyword"
             return 1
-        elif [ -z "$input_name" ] && [ -n "${!container_var_name}" ]; then
-            # Use the existing container name if the user presses enter and a name is already set
+        elif [ -z "$input_name" ] && [ -n "$current_value" ]; then
+            # If the user presses enter and a name is already set, use the existing name
+            declare -g $container_var_name="$current_value"
             break
         elif [ -n "$input_name" ]; then
             if container_exists "$input_name"; then
-                declare -g $container_var_name=$input_name
+                declare -g $container_var_name="$input_name"
                 break
             fi
         fi
