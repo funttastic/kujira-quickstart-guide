@@ -433,7 +433,7 @@ then
           pre_installation_hb_gateway
           pre_installation_hb_client
           ;;
-      5)
+      6)
           restart_containers_and_processes
           ;;
   esac
