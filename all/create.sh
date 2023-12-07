@@ -364,6 +364,20 @@ pre_installation_hb_gateway () {
   GATEWAY_LOGS_FOLDER="$GATEWAY_FOLDER/logs"
 }
 
+restart_containers_and_processes() {
+	docker stop -t 1 "$FUN_HB_CLIENT_CONTAINER_NAME" && sleep 1 && docker inspect -f '{{.State.Running}}' "$FUN_HB_CLIENT_CONTAINER_NAME" | grep "true" && docker kill "$FUN_HB_CLIENT_CONTAINER_NAME"
+	docker stop -t 1 "$HB_CLIENT_CONTAINER_NAME" && sleep 1 && docker inspect -f '{{.State.Running}}' "$HB_CLIENT_CONTAINER_NAME" | grep "true" && docker kill "$HB_CLIENT_CONTAINER_NAME"
+	docker stop -t 1 "$HB_GATEWAY_CONTAINER_NAME" && sleep 1 && docker inspect -f '{{.State.Running}}' "$HB_GATEWAY_CONTAINER_NAME" | grep "true" && docker kill "$HB_GATEWAY_CONTAINER_NAME"
+
+	docker start "$FUN_HB_CLIENT_CONTAINER_NAME"
+	docker start "$HB_CLIENT_CONTAINER_NAME"
+	docker start "$HB_GATEWAY_CONTAINER_NAME"
+
+	docker exec "$HB_GATEWAY_CONTAINER_NAME" /bin/bash -c "yarn start" > /dev/null 2>&1 &
+	docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "python app.py" > /dev/null 2>&1 &
+	docker exec "$HB_CLIENT_CONTAINER_NAME" /bin/bash -c "/root/miniconda3/envs/hummingbot/bin/python3 /root/bin/hummingbot_quickstart.py" > /dev/null 2>&1 &
+}
+
 echo
 echo "   ===============     WELCOME TO FUNTTASTIC HUMMINGBOT CLIENT SETUP     ==============="
 echo
@@ -395,7 +409,7 @@ then
   echo "         https://www.funttastic.com/partners/kujira"
   echo
 
-  read -p "   Enter your choice (1-5): " CHOICE
+  read -p "   Enter your choice (1-6): " CHOICE
 
 #  if [[ -z $choice || ! $choice =~ ^[1-5]$ ]]; then
 #      CHOICE=4
@@ -912,17 +926,3 @@ else
     install_docker
   fi
 fi
-
-restart_containers_and_processes() {
-	docker stop -t 1 "$FUN_HB_CLIENT_CONTAINER_NAME" && sleep 1 && docker inspect -f '{{.State.Running}}' "$FUN_HB_CLIENT_CONTAINER_NAME" | grep "true" && docker kill "$FUN_HB_CLIENT_CONTAINER_NAME"
-	docker stop -t 1 "$HB_CLIENT_CONTAINER_NAME" && sleep 1 && docker inspect -f '{{.State.Running}}' "$HB_CLIENT_CONTAINER_NAME" | grep "true" && docker kill "$HB_CLIENT_CONTAINER_NAME"
-	docker stop -t 1 "$HB_GATEWAY_CONTAINER_NAME" && sleep 1 && docker inspect -f '{{.State.Running}}' "$HB_GATEWAY_CONTAINER_NAME" | grep "true" && docker kill "$HB_GATEWAY_CONTAINER_NAME"
-
-	docker start "$FUN_HB_CLIENT_CONTAINER_NAME"
-	docker start "$HB_CLIENT_CONTAINER_NAME"
-	docker start "$HB_GATEWAY_CONTAINER_NAME"
-
-	docker exec "$HB_GATEWAY_CONTAINER_NAME" /bin/bash -c "yarn start" > /dev/null 2>&1 &
-	docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "python app.py" > /dev/null 2>&1 &
-	docker exec "$HB_CLIENT_CONTAINER_NAME" /bin/bash -c "/root/miniconda3/envs/hummingbot/bin/python3 /root/bin/hummingbot_quickstart.py" > /dev/null 2>&1 &
-}
