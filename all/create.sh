@@ -47,7 +47,7 @@ default_values_info () {
 pre_installation_fun_hb_client () {
   echo
   echo
-  echo "   ===============    FUN HB CLIENT INSTALLATION SETUP    ==============="
+  echo "   ===============    FUNTTASTIC HUMMINGBOT CLIENT INSTALLATION SETUP    ==============="
   echo
 
   default_values_info
@@ -57,7 +57,7 @@ pre_installation_fun_hb_client () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter a FUN HB Client image name you want to use (default = \"fun-hb-client\") >>> " RESPONSE
+    read -p "   Enter a Funttastic Hummingbot Client image name you want to use (default = \"fun-hb-client\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -71,7 +71,7 @@ pre_installation_fun_hb_client () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Do you want to use an existing FUN HB Client image (\"y/N\") >>> " RESPONSE
+    read -p "   Do you want to use an existing Funttastic Hummingbot Client image (\"y/N\") >>> " RESPONSE
   fi
   if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]
   then
@@ -87,7 +87,7 @@ pre_installation_fun_hb_client () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter a name for your new FUN HB Client instance (default = \"fun-hb-client\") >>> " RESPONSE
+    read -p "   Enter a name for your new Funttastic Hummingbot Client instance (default = \"fun-hb-client\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -116,7 +116,7 @@ pre_installation_fun_hb_client () {
   then
     FUN_HB_CLIENT_FOLDER_SUFFIX="funttastic"
     echo
-    read -p "   Enter a folder name where your FUN HB Client files will be saved (default = \"$FUN_HB_CLIENT_FOLDER_SUFFIX\") >>> " RESPONSE
+    read -p "   Enter a folder name where your Funttastic Hummingbot Client files will be saved (default = \"$FUN_HB_CLIENT_FOLDER_SUFFIX\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -365,7 +365,7 @@ pre_installation_hb_gateway () {
 }
 
 echo
-echo "   ===============     WELCOME TO FUN HB CLIENT SETUP     ==============="
+echo "   ===============     WELCOME TO FUNTTASTIC HUMMINGBOT CLIENT SETUP     ==============="
 echo
 
 RESPONSE=""
@@ -383,13 +383,13 @@ then
   echo
   echo "   CHOOSE A OPTION BELOW TO INSTALL"
   echo
-  echo "   [1] FUN HB CLIENT"
+  echo "   [1] FUNTTASTIC HUMMINGBOT CLIENT"
   echo "   [2] HUMMINGBOT CLIENT"
   echo "   [3] HUMMINGBOT GATEWAY"
-  echo "   [4] FUN HB CLIENT and HB GATEWAY [RECOMMENDED]"
+  echo "   [4] FUNTTASTIC HUMMINGBOT CLIENT and HB GATEWAY [RECOMMENDED]"
   echo "   [5] ALL"
   echo
-  echo "   For more information about the FUN HB CLIENT, please visit:"
+  echo "   For more information about the FUNTTASTIC HUMMINGBOT CLIENT, please visit:"
   echo
   echo "         https://www.funttastic.com/partners/kujira"
   echo
@@ -434,9 +434,9 @@ then
           ;;
   esac
 else
-  # Default settings to install FUN HB Client, HB Gateway and HB Client
+  # Default settings to install Funttastic Hummingbot Client, HB Gateway and HB Client
 
-  # FUN HB Client Settings
+  # Funttastic Hummingbot Client Settings
   FUN_HB_CLIENT_IMAGE_NAME="fun-hb-client"
   FUN_HB_CLIENT_CONTAINER_NAME="fun-hb-client"
   FUN_HB_CLIENT_FOLDER_SUFFIX="funttastic"
@@ -622,7 +622,7 @@ choice_one_installation () {
   mkdir -p "$CERTS_FOLDER"
   mkdir -p "$RESOURCES_FOLDER"
 
-  # Create a new separated image for FUN HB Client
+  # Create a new separated image for Funttastic Hummingbot Client
   docker_create_image_fun_hb_client
 
   # Create a new separated container from image
@@ -699,7 +699,7 @@ execute_installation () {
         echo
         echo "   Installing:"
         echo
-        echo "     > FUN HB Client"
+        echo "     > Funttastic Hummingbot Client"
         echo
 
         choice_one_installation
@@ -726,7 +726,7 @@ execute_installation () {
         echo
         echo "   Automatically installing:"
         echo
-        echo "     > FUN HB Client"
+        echo "     > Funttastic Hummingbot Client"
         echo "     > Hummingbot Gateway"
         echo
 
@@ -736,7 +736,7 @@ execute_installation () {
         echo
         echo "   Automatically installing:"
         echo
-        echo "     > FUN HB Client"
+        echo "     > Funttastic Hummingbot Client"
         echo "     > Hummingbot Client"
         echo "     > Hummingbot Gateway"
         echo
@@ -837,12 +837,12 @@ if [[ "$CUSTOMIZE" == "--customize" &&  ! "$NOT_IMPLEMENTED" ]]
 then
   if [[ "$CHOICE" == 1 || "$CHOICE" == 4 || "$CHOICE" == 5 ]]; then
     echo
-    echo "ℹ️  Confirm below if the FUN HB Client instance and its folders are correct:"
+    echo "ℹ️  Confirm below if the Funttastic Hummingbot Client instance and its folders are correct:"
     echo
     printf "%25s %5s\n" "Instance name:" "$FUN_HB_CLIENT_CONTAINER_NAME"
     printf "%25s %5s\n" "Version:" "$TAG"
     printf "%25s %5s\n" "Base folder:" "$SHARED_FOLDER_SUFFIX"
-    printf "%25s %5s\n" "FUN HB Client folder:" "├── $FUN_HB_CLIENT_FOLDER"
+    printf "%25s %5s\n" "Funttastic Hummingbot Client folder:" "├── $FUN_HB_CLIENT_FOLDER"
     printf "%25s %5s\n" "Resources folder:" "├── $RESOURCES_FOLDER"
     echo
   fi
