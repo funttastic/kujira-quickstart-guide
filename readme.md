@@ -12,7 +12,10 @@ It's very recommended to watch this video from the Hummingbot Foundation and the
 
 ## Installation
 
-[![Video tutorial](http://img.youtube.com/vi/t3Su_F_SY_0/0.jpg)](http://www.youtube.com/watch?v=t3Su_F_SY_0 "Video tutorial")
+### Video
+[![Video tutorial](resources/images/Funttastic_Kujira__Hummingbot.png)](http://www.youtube.com/watch?v=t3Su_F_SY_0 "Video tutorial")
+
+### Code
 
 > git clone https://github.com/funttastic/kujira-quickstart-guide.git
 
