@@ -37,6 +37,9 @@ get_container_name() {
     done
 
     export TEST="aloha"
+    declare -g TEST2="aloha2"
+    echo $TEST
+    echo $TEST2
 }
 
 # General function to stop and restart a container
