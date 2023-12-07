@@ -13,21 +13,21 @@ container_exists() {
 # Function to get container name from the user
 get_container_name() {
     local container_var_name=$1
-    local container_name
+    local skip_keyword="skip"
 
     while true; do
-        read -p "Enter the container name for $container_var_name [Type 'skip' to bypass]: " input_name
-        if [ "$input_name" == "skip" ]; then
+        read -p "Enter the container name for $container_var_name [Type '$skip_keyword' to bypass]: " input_name
+        if [ "$input_name" == "$skip_keyword" ]; then
             echo "Skipping restart for $container_var_name."
+            # Set the variable to 'skip' to indicate skipping
+            declare -g $container_var_name=$skip_keyword
             return 1
         elif [ -z "$input_name" ] && [ -n "${!container_var_name}" ]; then
             # Use the existing container name if the user presses enter and a name is already set
             break
         elif [ -n "$input_name" ]; then
             if container_exists "$input_name"; then
-                container_name=$input_name
-                # Export the variable for later use in the session
-                declare -g $container_var_name=$container_name
+                declare -g $container_var_name=$input_name
                 break
             fi
         fi
@@ -38,6 +38,11 @@ get_container_name() {
 restart_container() {
     local container_name=$1
     local exec_command=$2
+
+    # Check if the container restart was skipped
+    if [ "$container_name" == "skip" ]; then
+        return 0
+    fi
 
     docker stop -t 1 "$container_name" && sleep 1 && docker inspect -f '{{.State.Running}}' "$container_name" | grep "true" && docker kill "$container_name"
     docker start "$container_name"
