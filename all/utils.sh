@@ -195,12 +195,14 @@ choose() {
     echo "   [3] STATUS"
     echo "   [4] ADD WALLET"
     echo
+    echo "   [0] RETURN TO MAIN MENU"
+    echo
     echo "   For more information about the FUNTTASTIC HUMMINGBOT CLIENT, please visit:"
     echo
     echo "         https://www.funttastic.com/partners/kujira"
     echo
 
-    read -p "   Enter your choice (1-3): " CHOICE
+    read -p "   Enter your choice (1-4): " CHOICE
 
     while true; do
         case $CHOICE in
@@ -218,6 +220,11 @@ choose() {
                 ;;
             4)
                 add_wallet
+                break
+                ;;
+            0)
+                clear
+                ./configure
                 break
                 ;;
             *)

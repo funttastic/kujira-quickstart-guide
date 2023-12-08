@@ -87,6 +87,8 @@ choose() {
     echo "   [3] HUMMINGBOT CLIENT"
     echo "   [4] HUMMINGBOT GATEWAY"
     echo
+    echo "   [0] RETURN TO MAIN MENU"
+    echo
     echo "   For more information about the FUNTTASTIC HUMMINGBOT CLIENT, please visit:"
     echo
     echo "         https://www.funttastic.com/partners/kujira"
@@ -110,6 +112,10 @@ choose() {
                 ;;
             4)
                 restart_hb_gateway
+                break
+                ;;
+            0)
+                ./configure
                 break
                 ;;
             *)
