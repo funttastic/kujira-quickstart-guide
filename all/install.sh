@@ -609,8 +609,8 @@ post_installation_fun_hb_client () {
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "rm -rf /root/app/resources_temp"
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'python /root/app/resources/scripts/generate_ssl_certificates.py --passphrase "$SELECTED_PASSPHRASE" --cert-path /root/app/resources/certificates'
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'sed -i "s/<password>/$SELECTED_PASSPHRASE/g" /root/app/resources/configuration/production.yml'
-  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' resources/configuration/common.yml"
-  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i '/logging:/,/use_telegram: true/ s/use_telegram: true/use_telegram: false/' resources/configuration/production.yml"
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' resources/configuration/common.yml"
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i -e '/logging:/,/use_telegram: true/ s/use_telegram: true/use_telegram: false/' -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' resources/configuration/production.yml"
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "groupadd -f $GROUP"
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd resources && chown -RH :$GROUP ."
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd resources && chmod -R a+rwX ."
