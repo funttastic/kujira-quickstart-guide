@@ -17,7 +17,7 @@ It's very recommended to watch this video from the Hummingbot Foundation and the
 ### Code
 
 > git clone <a href="https://github.com/funttastic/kujira-quickstart-guide.git" target="_blank">https://github.com/funttastic/kujira-quickstart-guide.git</a>
-
+>
 > cd kujira-quickstart-guide
 > 
 > ./configure
