@@ -272,7 +272,7 @@ pre_installation_hb_gateway () {
   fi
 
   # Create a new instance?
-  RESPONSE="$HB_GATEWAY_CONTAINER_NAME"
+  RESPONSE="$GATEWAY_CONTAINER_NAME"
   if [ "$RESPONSE" == "" ]
   then
     echo
@@ -590,7 +590,7 @@ docker_create_container_hb_gateway () {
   --log-opt max-size=10m \
   --log-opt max-file=5 \
   -p "$GATEWAY_PORT":"$GATEWAY_PORT" \
-  --name "$HB_GATEWAY_CONTAINER_NAME" \
+  --name "$GATEWAY_CONTAINER_NAME" \
   --network "$NETWORK" \
   --mount type=bind,source="$CERTS_FOLDER",target=/root/certs \
   --mount type=bind,source="$GATEWAY_CONF_FOLDER",target=/root/conf \
@@ -622,13 +622,13 @@ post_installation_hb_client () {
 }
 
 post_installation_hb_gateway () {
-  docker exec "$HB_GATEWAY_CONTAINER_NAME" /bin/bash -c "cp -R /root/src/templates/. /root/conf"
-  docker exec "$HB_GATEWAY_CONTAINER_NAME" /bin/bash -c "groupadd -f $GROUP"
-  docker exec "$HB_GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/conf && chown -RH :$GROUP ."
-  docker exec "$HB_GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/conf && chmod -R a+rw ."
-  docker exec "$HB_GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/logs && chown -RH :$GROUP ."
-  docker exec "$HB_GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/logs && chmod -R a+rw ."
-  docker exec "$HB_GATEWAY_CONTAINER_NAME" /bin/bash -c "yarn start" > /dev/null 2>&1 &
+  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cp -R /root/src/templates/. /root/conf"
+  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "groupadd -f $GROUP"
+  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/conf && chown -RH :$GROUP ."
+  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/conf && chmod -R a+rw ."
+  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/logs && chown -RH :$GROUP ."
+  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/logs && chmod -R a+rw ."
+  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "yarn start" > /dev/null 2>&1 &
 }
 
 choice_one_installation () {
@@ -750,7 +750,7 @@ execute_installation () {
         ;;
     5)
         echo
-        echo "   Automatically installing:"
+        echo "   Installing:"
         echo
         echo "     > Funttastic Hummingbot Client"
         echo "     > Hummingbot Client"
@@ -891,7 +891,7 @@ then
     echo "ℹ️  Confirm below if the instance and its folders are correct:"
     echo
     printf "%25s %5s\n" "Image:"              	"$GATEWAY_IMAGE_NAME:$TAG"
-    printf "%25s %5s\n" "Instance:"        			"$HB_GATEWAY_CONTAINER_NAME"
+    printf "%25s %5s\n" "Instance:"        			"$GATEWAY_CONTAINER_NAME"
     printf "%25s %5s\n" "Exposed port:"					"$GATEWAY_PORT"
     printf "%25s %5s\n" "Repository url:"       "$GATEWAY_REPOSITORY_URL"
     printf "%25s %5s\n" "Repository branch:"    "$GATEWAY_REPOSITORY_BRANCH"
