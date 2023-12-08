@@ -369,11 +369,21 @@ echo "   ===============     WELCOME TO FUNTTASTIC HUMMINGBOT CLIENT SETUP     =
 echo
 
 RESPONSE=""
-read -p "   Do you want to automate the entire process,
-   including setting a random passphrase? [Y/n] >>> " RESPONSE
+echo "   Do you want to automate the entire process,
+   including setting a random passphrase? [Y/n]"
+
+echo
+echo "ℹ️  Enter the value [0] to return to the main menu."
+echo
+
+read -p "   >>> " RESPONSE
 if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "" ]]
 then
   echo
+elif [[ "$RESPONSE" == "0" ]]; then
+  clear
+  ./configure
+  exit 0
 else
   CUSTOMIZE="--customize"
 fi
@@ -389,6 +399,8 @@ then
   echo "   [4] FUNTTASTIC HUMMINGBOT CLIENT and HUMMINGBOT GATEWAY [RECOMMENDED]"
   echo "   [5] ALL"
   echo
+  echo "   [0] RETURN TO MAIN MENU"
+  echo
   echo "   For more information about the FUNTTASTIC HUMMINGBOT CLIENT, please visit:"
   echo
   echo "         https://www.funttastic.com/partners/kujira"
@@ -402,7 +414,7 @@ then
 
   while true; do
     case $CHOICE in
-        1|2|3|4|5)
+        1|2|3|4|5|0)
             break
             ;;
         *)
@@ -431,6 +443,10 @@ then
           pre_installation_fun_hb_client
           pre_installation_hb_gateway
           pre_installation_hb_client
+          ;;
+      0)
+          clear
+          ./configure
           ;;
   esac
 else
