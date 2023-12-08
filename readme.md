@@ -2,17 +2,18 @@
 
 ## Hummingbot Installation Guide
 It's very recommended to watch this video from the Hummingbot Foundation and their installation guide:
- - <a href="https://docs.hummingbot.org/installation/" target="_blank">https://docs.hummingbot.org/installation/</a>
- - <a href="https://www.youtube.com/watch?v=t3Su_F_SY_0" target="_blank">https://www.youtube.com/watch?v=t3Su_F_SY_0</a>
+- <a href="https://docs.hummingbot.org/installation/" target="_blank">Hummingbot Docs</a>
+- <a href="https://www.youtube.com/watch?v=t3Su_F_SY_0" target="_blank">Hummingbot Guide (Vídeo Tutorial)</a>
+- <a href="https://www.youtube.com/watch?v=NubBPj3N0RE" target="_blank">Kujira Connector for Hummingbot (Vídeo Demonstration)</a>
 
 ## Prerequisites:
+- *nix OS (Linux, Unix, macOS) or <a href="https://learn.microsoft.com/en-us/windows/wsl/install" target="_blank">WSL</a> (for Windows)
 - <a href="https://docs.docker.com/engine/install/" target="_blank">Docker</a>
-- <a href="https://learn.microsoft.com/en-us/windows/wsl/install" target="_blank">Windows Subsystem for Linux (WSL)</a> (For Windows only)
 
 ## Installation
 
 ### Video
-<a href="http://www.youtube.com/watch?v=t3Su_F_SY_0" target="_blank">![Video Tutorial](resources/images/Funttastic_Kujira__Hummingbot.png)</a>
+<a href="http://www.youtube.com/watch?v=t3Su_F_SY_0" target="_blank">![Video Tutorial](assets/images/Funttastic_Kujira_Hummingbot.png)</a>
 ### Code
 
 > git clone <a href="https://github.com/funttastic/kujira-quickstart-guide.git" target="_blank">https://github.com/funttastic/kujira-quickstart-guide.git</a>
