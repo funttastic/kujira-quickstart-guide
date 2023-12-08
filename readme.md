@@ -3,8 +3,8 @@
 ## Hummingbot Installation Guide
 It's very recommended to watch this video from the Hummingbot Foundation and their installation guide:
 - <a href="https://docs.hummingbot.org/installation/" target="_blank">Hummingbot Docs</a>
-- <a href="https://www.youtube.com/watch?v=t3Su_F_SY_0" target="_blank">Hummingbot Guide (Vídeo Tutorial)</a>
-- <a href="https://www.youtube.com/watch?v=NubBPj3N0RE" target="_blank">Kujira Connector for Hummingbot (Vídeo Demonstration)</a>
+- <a href="https://www.youtube.com/watch?v=t3Su_F_SY_0" target="_blank">Hummingbot Guide (Video Tutorial)</a>
+- <a href="https://www.youtube.com/watch?v=NubBPj3N0RE" target="_blank">Kujira Connector for Hummingbot (Video Demonstration)</a>
 
 ## Prerequisites:
 - *nix OS (Linux, Unix, macOS) or <a href="https://learn.microsoft.com/en-us/windows/wsl/install" target="_blank">WSL</a> (for Windows)
@@ -19,7 +19,7 @@ It's very recommended to watch this video from the Hummingbot Foundation and the
 > git clone <a href="https://github.com/funttastic/kujira-quickstart-guide.git" target="_blank">https://github.com/funttastic/kujira-quickstart-guide.git</a>
 >
 > cd kujira-quickstart-guide
-> 
+>
 > ./configure
 
 ## Extra (optional)
@@ -30,7 +30,7 @@ To configure your strategy and workers go to this folder and check the configura
 
 > shared/funttastic/client/resources/strategies/pure_market_making/1.0.0/
 
-### Adding funds to a testnet Wallet
+### Adding funds to a testnet wallet
 
 In order to add funds to your wallet, you can use a faucet inside the Kujira Discord.
 
@@ -52,7 +52,7 @@ Then you can use the following command there:
 
 After that you should receive some Kujira tokens on your balance.
 
-### How to contact us
+## How to contact us
 If you need more info you can contact us here:
 
 > <a href="https://funttastic.com/discord" target="_blank">https://funttastic.com/discord</a>
