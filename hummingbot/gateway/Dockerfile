@@ -44,7 +44,7 @@ RUN <<-EOF
 	set -ex
 
 	git clone -b $REPOSITORY_BRANCH $REPOSITORY_URL /tmp/app
-	cp -R /tmp/app/. .
+	mv /tmp/app/* /tmp/app/.* .
   rm -rf /tmp/app
 
   set +ex
