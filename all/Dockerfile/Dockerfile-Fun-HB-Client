@@ -7,7 +7,7 @@ FROM ubuntu:latest
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ="Etc/GMT"
 
-ARG CLONE_BRANCH="development"
+ARG CLONE_BRANCH="community"
 
 ARG DEFINED_PASSPHRASE
 
