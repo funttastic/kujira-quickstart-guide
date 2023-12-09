@@ -4,7 +4,7 @@ FROM node:16.3.0
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ="Etc/GMT"
 ARG REPOSITORY_URL=${REPOSITORY_URL:-https://github.com/Team-Kujira/gateway.git}
-ARG REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-production}
+ARG REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-community}
 
 LABEL application="gateway-v2"
 LABEL branch=${BRANCH}
