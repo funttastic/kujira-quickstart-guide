@@ -65,7 +65,7 @@ strategy:
   sleep_time_after_orders_cancellation: 5
   minimize_fees_cost:
     active: true
-    spread:
+    tolerance:
       orders:
         absolute:
           price: 0.1
