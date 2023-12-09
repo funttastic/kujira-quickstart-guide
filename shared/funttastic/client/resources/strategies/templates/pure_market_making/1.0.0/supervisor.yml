@@ -2,8 +2,8 @@ id: supervisor
 title: Pure Market Making (1.0.0)
 workers: [
    "01",
-   "02",
-   "03"
+#   "02",
+#   "03"
 ]
 strategy:
   tick_interval: 59

@@ -19,38 +19,38 @@ strategy:
         budget:
           absolute: 1 # in USD
           percentage: 0.1
-    - bid:
-        quantity: 1
-        spread:
-          absolute: 25
-          percentage: 25
-        budget:
-          absolute: 1 # in USD
-          percentage: 0.1
-      ask:
-        quantity: 1
-        spread:
-          absolute: 25
-          percentage: 25
-        budget:
-          absolute: 1 # in USD
-          percentage: 0.1
-    - bid:
-        quantity: 1
-        spread:
-          absolute: 50
-          percentage: 50
-        budget:
-          absolute: 1 # in USD
-          percentage: 0.1
-      ask:
-        quantity: 1
-        spread:
-          absolute: 50
-          percentage: 50
-        budget:
-          absolute: 1 # in USD
-          percentage: 0.1
+#    - bid:
+#        quantity: 1
+#        spread:
+#          absolute: 25
+#          percentage: 25
+#        budget:
+#          absolute: 1 # in USD
+#          percentage: 0.1
+#      ask:
+#        quantity: 1
+#        spread:
+#          absolute: 25
+#          percentage: 25
+#        budget:
+#          absolute: 1 # in USD
+#          percentage: 0.1
+#    - bid:
+#        quantity: 1
+#        spread:
+#          absolute: 50
+#          percentage: 50
+#        budget:
+#          absolute: 1 # in USD
+#          percentage: 0.1
+#      ask:
+#        quantity: 1
+#        spread:
+#          absolute: 50
+#          percentage: 50
+#        budget:
+#          absolute: 1 # in USD
+#          percentage: 0.1
   tick_interval: 59
   order_type: LIMIT
   price_strategy: MIDDLE
