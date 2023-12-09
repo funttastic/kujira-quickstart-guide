@@ -32,7 +32,7 @@ RUN set -ex \
 RUN set -ex \
   && git clone -b $CLONE_BRANCH https://github.com/funttastic/fun-hb-client.git /tmp/app \
   && mkdir /root/app \
-  && mv /tmp/app/* /tmp/app/.* /root/app/ \
+  && cp -a /tmp/app/. /root/app/ \
   && rm -rf /tmp/app \
   && cd /root/app \
   && pip install -r requirements.txt \

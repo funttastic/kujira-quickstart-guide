@@ -75,7 +75,7 @@ RUN <<-EOF
 	set -ex
 
 	git clone -b $REPOSITORY_BRANCH $REPOSITORY_URL /tmp/app
-  mv /tmp/app/* /tmp/app/.* .
+  cp -a /tmp/app/. .
   rm -rf /tmp/app
   pip install -r requirements.txt
 
