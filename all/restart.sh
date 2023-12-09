@@ -1,11 +1,16 @@
 #!/bin/bash
 
+DIR_NAME=$(dirname "$0")
+SCRIPT_NAME="$(basename $0)"
+SCRIPT_RELATIVE_PATH="$DIR_NAME/$SCRIPT_NAME"
+
 # Function to check if a container exists
 container_exists() {
     if [ "$(docker ps -a -q -f name=^/"$1"$)" ]; then
         return 0
     else
-        echo "Container $1 does not exist."
+        echo
+        echo "      Container $1 does not exist."
         return 1
     fi
 }
@@ -19,9 +24,11 @@ get_container_name() {
     local current_value=${!container_var_name}
 
     while true; do
-        read -p "Enter the container name for $container_var_name [Type '$skip_keyword' to bypass or press Enter to use '$current_value']: " input_name
+        echo
+        read -p "   Enter the container name for $container_var_name [Type '$skip_keyword' to bypass or press Enter to use '$current_value']: " input_name
         if [ "$input_name" == "$skip_keyword" ]; then
-            echo "Skipping restart for $container_var_name."
+            echo
+            echo "      Skipping restart for $container_var_name."
             declare -g $container_var_name="$skip_keyword"
             return 1
         elif [ -z "$input_name" ] && [ -n "$current_value" ]; then
@@ -47,8 +54,19 @@ restart_container() {
         return 0
     fi
 
-    docker stop -t 1 "$container_name" && sleep 1 && docker inspect -f '{{.State.Running}}' "$container_name" | grep "true" && docker kill "$container_name"
-    docker start "$container_name"
+    echo
+
+    echo "      Stopping: $({
+            docker stop -t 1 "$container_name" && sleep 1 && \
+            if [ "$(docker inspect -f '{{.State.Running}}' "$container_name")" == "true" ]; then
+                docker kill "$container_name"
+            fi
+        } 2>&1)"
+
+    echo
+
+    echo "      Starting: $(docker start "$container_name" 2>&1)"
+
     docker exec "$container_name" /bin/bash -c "$exec_command" > /dev/null 2>&1 &
 }
 
@@ -100,18 +118,30 @@ choose() {
         case $CHOICE in
             1)
                 restart_all
+                sleep 3
+                clear
+                exec "$SCRIPT_RELATIVE_PATH"
                 break
                 ;;
             2)
                 restart_fun_hb_client
+                sleep 3
+                clear
+                exec "$SCRIPT_RELATIVE_PATH"
                 break
                 ;;
             3)
                 restart_hb_client
+                sleep 3
+                clear
+                exec "$SCRIPT_RELATIVE_PATH"
                 break
                 ;;
             4)
                 restart_hb_gateway
+                sleep 3
+                clear
+                exec "$SCRIPT_RELATIVE_PATH"
                 break
                 ;;
             0)

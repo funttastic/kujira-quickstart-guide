@@ -10,6 +10,10 @@ STRATEGY="pure_market_making"
 VERSION="1.0.0"
 ID="id"
 
+DIR_NAME=$(dirname "$0")
+SCRIPT_NAME="$(basename $0)"
+SCRIPT_RELATIVE_PATH="$DIR_NAME/$SCRIPT_NAME"
+
 send_request() {
 	local method=""
 	local host=""
@@ -208,18 +212,30 @@ choose() {
         case $CHOICE in
             1)
                 start
+                sleep 3
+                clear
+                exec "$SCRIPT_RELATIVE_PATH"
                 break
                 ;;
             2)
                 stop
+                sleep 3
+                clear
+                exec "$SCRIPT_RELATIVE_PATH"
                 break
                 ;;
             3)
                 status
+                sleep 3
+                clear
+                exec "$SCRIPT_RELATIVE_PATH"
                 break
                 ;;
             4)
                 add_wallet
+                sleep 3
+                clear
+                exec "$SCRIPT_RELATIVE_PATH"
                 break
                 ;;
             0)
