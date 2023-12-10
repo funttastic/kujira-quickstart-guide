@@ -9,6 +9,11 @@ It's very recommended to watch this video from the Hummingbot Foundation and the
 ## Prerequisites:
 - *nix OS (Linux, Unix, macOS) or <a href="https://learn.microsoft.com/en-us/windows/wsl/install" target="_blank">WSL</a> (for Windows)
 - <a href="https://docs.docker.com/engine/install/" target="_blank">Docker</a>
+- CoinGecko API Key: You will need a CoinGecko API key so that the trading bot can get up-to-date information about tokens and markets, such as the current price. To create a demo account to get a free API key, go to: <a href="https://www.coingecko.com/en/api/pricing" target="_blank">CoinGecko Crypto API</a>
+- Kujira Wallet: You can create a new wallet using wallet apps like <a href="https://sonar.kujira.network/" target="_blank">Sonar</a>, <a href="https://setup-station.terra.money/" target="_blank">Keplr</a>, <a href="https://www.keplr.app/download" target="_blank">Station</a>, <a href="https://www.leapwallet.io/download" target="_blank">Leap</a> and <a href="https://www.xdefi.io/" target="_blank">XDEFI Wallet</a>.
+
+## Optional:
+- Telegram Integration: You can use your own Telegram bot to inspect trading progress. To find out how you can create your own Telegram bot, access: <a href="https://core.telegram.org/bots/features#botfather" target="_blank">Telegram Bots</a>
 
 ## Installation
 
