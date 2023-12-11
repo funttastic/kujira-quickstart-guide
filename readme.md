@@ -104,7 +104,7 @@ Or try this link:
 
 Then you can use the following command there:
 
-> !faucet &lt;change to your kujira wallet address here&gt;
+> !faucet &lt;change to your Kujira wallet address here&gt;
 
 After that you should receive some Kujira tokens on your balance.
 
