@@ -18,7 +18,7 @@ It's very recommended to watch this video from the Hummingbot Foundation and the
 ## Installation
 
 ### Video
-<a href="http://www.youtube.com/watch?v=t3Su_F_SY_0" target="_blank">![Video Tutorial](assets/images/Funttastic_Kujira_Hummingbot.png)</a>
+<a href="https://youtu.be/F-8GJS1h5RA" target="_blank">![Video Tutorial](assets/images/Funttastic_Kujira_Hummingbot.png)</a>
 ### Code
 
 > git clone <a href="https://github.com/funttastic/kujira-quickstart-guide.git" target="_blank">https://github.com/funttastic/kujira-quickstart-guide.git</a>
@@ -28,6 +28,8 @@ It's very recommended to watch this video from the Hummingbot Foundation and the
 > ./configure
 
 ## Extra (optional)
+
+> <a href="https://www.youtube.com/playlist?list=PLmJF3KyUOI1zgFBoQ0AzP9kt40Vjk2srp" target="_blank">More tutorial videos</a>
 
 ### How to configure your strategy and workers
 
