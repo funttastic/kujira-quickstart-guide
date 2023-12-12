@@ -25,19 +25,20 @@ get_container_name() {
 
     while true; do
         echo
-        read -p "   Enter the container name for $container_var_name [Type '$skip_keyword' to bypass or press Enter to use '$current_value']: " input_name
+        read -p "   Enter the container name for $container_var_name
+   [Type '$skip_keyword' to bypass or press Enter to use '$current_value']: " input_name
         if [ "$input_name" == "$skip_keyword" ]; then
             echo
             echo "      Skipping restart for $container_var_name."
-            declare -g $container_var_name="$skip_keyword"
+            declare -g "$container_var_name"="$skip_keyword"
             return 1
         elif [ -z "$input_name" ] && [ -n "$current_value" ]; then
             # If the user presses enter and a name is already set, use the existing name
-            declare -g $container_var_name="$current_value"
+            declare -g "$container_var_name"="$current_value"
             break
         elif [ -n "$input_name" ]; then
             if container_exists "$input_name"; then
-                declare -g $container_var_name="$input_name"
+                declare -g "$container_var_name"="$input_name"
                 break
             fi
         fi
