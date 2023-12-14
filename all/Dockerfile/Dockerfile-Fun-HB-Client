@@ -40,8 +40,6 @@ RUN set -ex \
 
 WORKDIR /root/app
 
-RUN if [ -n "$RANDOM_PASSPHRASE" ]; then echo "$RANDOM_PASSPHRASE" > resources/random_passphrase.txt; fi
-
 ENV SELECTED_PASSPHRASE=${RANDOM_PASSPHRASE:-$DEFINED_PASSPHRASE}
 
 RUN set -ex \
