@@ -9,13 +9,7 @@ ARG TZ="Etc/GMT"
 
 ARG CLONE_BRANCH="community"
 
-ARG DEFINED_PASSPHRASE
-
-ARG RANDOM_PASSPHRASE
-
 ENV PORT="${PORT:-5000}"
-
-ENV HOST_USER_GROUP=""
 
 RUN set -ex \
   && apt-get update \
@@ -39,8 +33,6 @@ RUN set -ex \
   && set +ex
 
 WORKDIR /root/app
-
-ENV SELECTED_PASSPHRASE=${RANDOM_PASSPHRASE:-$DEFINED_PASSPHRASE}
 
 RUN set -ex \
   && mkdir -p resources/certificates \
