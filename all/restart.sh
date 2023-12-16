@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DIR_NAME=$(dirname "$0")
-SCRIPT_NAME="$(basename $0)"
+SCRIPT_NAME="$(basename "$0")"
 SCRIPT_RELATIVE_PATH="$DIR_NAME/$SCRIPT_NAME"
 
 # Function to check if a container exists
@@ -25,7 +25,7 @@ get_container_name() {
 
     while true; do
         echo
-        read -p "   Enter the container name for $container_var_name
+        read -rp "   Enter the container name for $container_var_name
    [Type '$skip_keyword' to bypass or press Enter to use '$current_value']: " input_name
         if [ "$input_name" == "$skip_keyword" ]; then
             echo
@@ -107,13 +107,14 @@ choose() {
     echo "   [4] HUMMINGBOT GATEWAY"
     echo
     echo "   [0] RETURN TO MAIN MENU"
+    echo "   [exit] STOP SCRIPT EXECUTION"
     echo
     echo "   For more information about the FUNTTASTIC HUMMINGBOT CLIENT, please visit:"
     echo
     echo "         https://www.funttastic.com/partners/kujira"
     echo
 
-    read -p "   Enter your choice (1-4): " CHOICE
+    read -rp "   Enter your choice (1-4): " CHOICE
 
     while true; do
         case $CHOICE in
@@ -149,9 +150,17 @@ choose() {
                 ./configure
                 break
                 ;;
+            "exit")
+                echo
+                echo
+                echo "      The script will close automatically in 3 seconds..."
+                echo
+                sleep 3
+                exit 0
+                ;;
             *)
                 echo "   Invalid Input. Enter a number between 1 and 4."
-                read -p "   Enter your choice (1-4): " CHOICE
+                read -rp "   Enter your choice (1-4): " CHOICE
                 ;;
         esac
     done

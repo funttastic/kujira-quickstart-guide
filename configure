@@ -11,6 +11,8 @@ choose() {
     echo "   [2] RESTART"
     echo "   [3] DISPATCH ACTIONS"
     echo
+    echo "   [exit] STOP SCRIPT EXECUTION"
+    echo
     echo "   For more information about the FUNTTASTIC HUMMINGBOT CLIENT, please visit:"
     echo
     echo "         https://www.funttastic.com/partners/kujira"
@@ -34,6 +36,14 @@ choose() {
             		clear
                 ./all/utils.sh
                 break
+                ;;
+            "exit")
+                echo
+                echo
+                echo "      The script will close automatically in 3 seconds..."
+                echo
+                sleep 3
+                exit 0
                 ;;
             *)
                 echo "   Invalid Input. Enter a number between 1 and 3."

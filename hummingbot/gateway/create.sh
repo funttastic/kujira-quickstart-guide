@@ -24,7 +24,7 @@ then
   RESPONSE="$IMAGE_NAME"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Enter the image you want to use (default = \"hb-gateway\") >>> " RESPONSE
+    read -rp "   Enter the image you want to use (default = \"hb-gateway\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -37,7 +37,7 @@ then
   RESPONSE="$TAG"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Enter the version you want to use [latest/development] (default = \"latest\") >>> " RESPONSE
+    read -rp "   Enter the version you want to use [latest/development] (default = \"latest\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -50,7 +50,7 @@ then
   RESPONSE="$BUILD_CACHE"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Do you want to use an existing image (\"y/N\") >>> " RESPONSE
+    read -rp "   Do you want to use an existing image (\"y/N\") >>> " RESPONSE
   fi
   if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]
   then
@@ -64,7 +64,7 @@ then
   RESPONSE="$INSTANCE_NAME"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Enter a name for your new instance (default = \"hb-gateway\") >>> " RESPONSE
+    read -rp "   Enter a name for your new instance (default = \"hb-gateway\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -78,7 +78,7 @@ then
   if [ "$RESPONSE" == "" ]
   then
     FOLDER_SUFFIX="shared"
-    read -p "   Enter a folder path where do you want your files to be saved (default = \"$FOLDER_SUFFIX\") >>> " RESPONSE
+    read -rp "   Enter a folder path where do you want your files to be saved (default = \"$FOLDER_SUFFIX\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -93,7 +93,7 @@ then
   RESPONSE="$PORT"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Enter a port for expose your new instance (default = \"15888\") >>> " RESPONSE
+    read -rp "   Enter a port for expose your new instance (default = \"15888\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -106,7 +106,7 @@ then
   RESPONSE="$PASSWORD"
   while [ "$RESPONSE" == "" ]
   do
-    read -sp "   Inform the password for the Gateway certificates  >>> " RESPONSE
+    read -srp "   Inform the password for the Gateway certificates  >>> " RESPONSE
     echo "   It is necessary to inform the password for the certificates, which is the same as the one entered when executing the \"gateway generate-certs\" command on the Client. Try again."
   done
   PASSWORD=$RESPONSE
@@ -114,7 +114,7 @@ then
   RESPONSE="$REPOSITORY_URL"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Enter the url from the repository to be cloned (default = \"https://github.com/Team-Kujira/hummingbot.git\") >>> " RESPONSE
+    read -rp "   Enter the url from the repository to be cloned (default = \"https://github.com/Team-Kujira/hummingbot.git\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -126,7 +126,7 @@ then
   RESPONSE="$REPOSITORY_BRANCH"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Enter the branch from the repository to be cloned (default = \"production\") >>> " RESPONSE
+    read -rp "   Enter the branch from the repository to be cloned (default = \"production\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -162,7 +162,7 @@ else
   # Prompts user for a password for the gateway certificates
   while [ "$PASSWORD" == "" ]
   do
-    read -sp "   Define a password for the Gateway certificate  >>> " PASSWORD
+    read -srp "   Define a password for the Gateway certificate  >>> " PASSWORD
     echo "   It is necessary to define a password for the certificate, which is the same as the one entered when executing the \"gateway generate-certs\" command on the client. Try again."
   done
 fi
@@ -172,6 +172,7 @@ CERTS_FOLDER="$COMMON_FOLDER/certificates"
 GATEWAY_FOLDER="$FOLDER/hummingbot/gateway"
 CONF_FOLDER="$GATEWAY_FOLDER/conf"
 LOGS_FOLDER="$GATEWAY_FOLDER/logs"
+COMMAND="yarn start"
 
 echo
 echo "ℹ️  Confirm below if the instance and its folders are correct:"
@@ -195,7 +196,7 @@ echo
 
 prompt_proceed () {
   RESPONSE=""
-  read -p "   Do you want to proceed? [Y/n] >>> " RESPONSE
+  read -rp "   Do you want to proceed? [Y/n] >>> " RESPONSE
   if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "" ]]
   then
     PROCEED="Y"
@@ -208,21 +209,21 @@ create_instance () {
   echo "Creating instance ..."
   echo
   # 1) Create main folder for your new instance
-  mkdir -p $FOLDER
-  mkdir -p $GATEWAY_FOLDER
+  mkdir -p "$FOLDER"
+  mkdir -p "$GATEWAY_FOLDER"
   # 2) Create subfolders
-  mkdir -p $CERTS_FOLDER
-  mkdir -p $CONF_FOLDER
-  mkdir -p $LOGS_FOLDER
+  mkdir -p "$CERTS_FOLDER"
+  mkdir -p "$CONF_FOLDER"
+  mkdir -p "$LOGS_FOLDER"
 
   # 3) Set required permissions to save hummingbot password the first time
-  chmod a+rw $CONF_FOLDER
+  chmod a+rw "$CONF_FOLDER"
 
   # 4) Create a new image?
   BUILT=true
   if [ ! "$BUILD_CACHE" == "" ]
   then
-    BUILT=$(DOCKER_BUILDKIT=1 docker build $BUILD_CACHE --build-arg REPOSITORY_URL="$REPOSITORY_URL" --build-arg REPOSITORY_BRANCH="$REPOSITORY_BRANCH" -t $IMAGE_NAME -f hummingbot/gateway/Dockerfile .)
+    BUILT=$(DOCKER_BUILDKIT=1 docker build "$BUILD_CACHE" --build-arg REPOSITORY_URL="$REPOSITORY_URL" --build-arg REPOSITORY_BRANCH="$REPOSITORY_BRANCH" -t "$IMAGE_NAME" -f ./all/Dockerfile/hb-gateway/Dockerfile .)
   fi
 
   # 5) Launch a new instance
@@ -245,6 +246,7 @@ $BUILT \
 	-e LOGS_FOLDER="/root/logs" \
 	-e GATEWAY_PORT=$PORT \
 	-e GATEWAY_PASSPHRASE="***" \
+	-e COMMAND=$COMMAND \
 	$ENTRYPOINT \
 	$IMAGE_NAME:$TAG
 EOF
@@ -253,20 +255,21 @@ EOF
 		-dt \
     --log-opt max-size=10m \
     --log-opt max-file=5 \
-    -p $PORT:$PORT \
-    --name $INSTANCE_NAME \
+    -p "$PORT":"$PORT" \
+    --name "$INSTANCE_NAME" \
     --network host \
-    --mount type=bind,source=$CERTS_FOLDER,target=/root/certs \
-    --mount type=bind,source=$CONF_FOLDER,target=/root/conf \
-    --mount type=bind,source=$LOGS_FOLDER,target=/root/logs \
+    --mount type=bind,source="$CERTS_FOLDER",target=/root/certs \
+    --mount type=bind,source="$CONF_FOLDER",target=/root/conf \
+    --mount type=bind,source="$LOGS_FOLDER",target=/root/logs \
     --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
     -e CERTS_FOLDER="/root/certs" \
     -e CONF_FOLDER="/root/conf" \
     -e LOGS_FOLDER="/root/logs" \
-    -e GATEWAY_PORT=$PORT \
+    -e GATEWAY_PORT="$PORT" \
     -e GATEWAY_PASSPHRASE="$PASSWORD" \
-    $ENTRYPOINT \
-    $IMAGE_NAME:$TAG
+    -e COMMAND="$COMMAND" \
+    "$ENTRYPOINT" \
+    "$IMAGE_NAME":"$TAG"
 }
 
 if [ "$CUSTOMIZE" == "--customize" ]

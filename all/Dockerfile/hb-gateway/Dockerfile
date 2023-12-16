@@ -3,10 +3,8 @@ FROM node:16.3.0
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ="Etc/GMT"
-ARG REPOSITORY_URL=${REPOSITORY_URL:-"https://github.com/Team-Kujira/gateway.git"}
-ARG REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-"community"}
-ARG DEFINED_PASSPHRASE
-ARG RANDOM_PASSPHRASE
+ARG REPOSITORY_URL=${REPOSITORY_URL:-https://github.com/Team-Kujira/gateway.git}
+ARG REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-community}
 
 LABEL application="gateway-v2"
 LABEL branch=${BRANCH}
@@ -17,7 +15,7 @@ ENV COMMIT_BRANCH=${BRANCH}
 ENV COMMIT_SHA=${COMMIT}
 ENV BUILD_DATE=${DATE}
 ENV GATEWAY_PORT=${GATEWAY_PORT}
-ENV GATEWAY_PASSPHRASE=${RANDOM_PASSPHRASE:-$DEFINED_PASSPHRASE}
+ENV COMMAND=${COMMAND}
 
 WORKDIR /root
 
@@ -27,56 +25,80 @@ RUN :> /root/.bashrc
 SHELL [ "/bin/bash", "-lc" ]
 
 RUN <<-EOF
-	set -ex; \
-	apt-get update; \
+	set -ex
+
+	apt-get update
+
 	apt-get install --no-install-recommends -y \
 		ca-certificates \
 		openssh-server \
 		git \
 		vim \
 		tree \
-		psmisc; \
-	set +ex;
+		psmisc
+
+	set +ex
 EOF
 
 RUN <<-EOF
 	set -ex
-	git clone -b "$REPOSITORY_BRANCH" "$REPOSITORY_URL" /tmp/app
+
+	git clone -b $REPOSITORY_BRANCH $REPOSITORY_URL /tmp/app
 	cp -a /tmp/app/. .
-	rm -rf /tmp/app
-	set +ex
+  rm -rf /tmp/app
+
+  set +ex
 EOF
+# COPY . .
 
 EXPOSE 15888
 
 RUN <<-EOF
 	set -ex
+
 	mkdir -p \
 		/root/certs \
 		/root/db \
 		/root/conf \
 		/root/logs \
 		/var/lib
+
 	set +ex
 EOF
 
 RUN <<-EOF
 	set -ex
+
+	cp -R /root/src/templates/. /root/conf/
+
+	set +ex
+EOF
+
+RUN <<-EOF
+	set -ex
+
 	yarn
 	yarn prebuild
 	yarn build
+
 	set +ex
 EOF
 
 #RUN <<-EOF
 #	set -ex
+#
 #	apt autoremove -y
+#
 #	apt clean autoclean
+#
 #	rm -rf \
 #		/var/lib/apt/lists/* \
 #		/etc/apt/sources.list \
 #		/etc/apt/sources.list.d/* \
 #		/tmp/* \
 #		/var/tmp/*
+#
 #	set +ex
 #EOF
+
+CMD $COMMAND

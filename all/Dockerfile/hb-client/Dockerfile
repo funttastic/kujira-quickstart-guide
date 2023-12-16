@@ -24,6 +24,8 @@ ENV CONFIG_PASSWORD=${CONFIG_PASSWORD}
 
 ENV INSTALLATION_TYPE=docker
 
+ENV COMMAND=${COMMAND}
+
 WORKDIR /root
 
 # Dropping default /root/.bashrc because it will return if not running as interactive shell, thus not invoking PATH settings
@@ -65,6 +67,7 @@ RUN <<-EOF
 
 	set +ex
 EOF
+# COPY . .
 
 # Install miniconda
 RUN <<-EOF
@@ -215,3 +218,5 @@ EOF
 #
 #	set +ex
 #EOF
+
+CMD $COMMAND

@@ -31,7 +31,7 @@ generate_passphrase() {
 
 prompt_proceed () {
   RESPONSE=""
-  read -p "   Do you want to proceed? [Y/n] >>> " RESPONSE
+  read -rp "   Do you want to proceed? [Y/n] >>> " RESPONSE
   if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "" ]]
   then
     PROCEED="Y"
@@ -57,7 +57,7 @@ pre_installation_fun_hb_client () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter a Funttastic Hummingbot Client image name you want to use (default = \"fun-hb-client\") >>> " RESPONSE
+    read -rp "   Enter a Funttastic Hummingbot Client image name you want to use (default = \"fun-hb-client\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -71,7 +71,7 @@ pre_installation_fun_hb_client () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Do you want to use an existing Funttastic Hummingbot Client image (\"y/N\") >>> " RESPONSE
+    read -rp "   Do you want to use an existing Funttastic Hummingbot Client image (\"y/N\") >>> " RESPONSE
   fi
   if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]
   then
@@ -87,7 +87,7 @@ pre_installation_fun_hb_client () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter a name for your new Funttastic Hummingbot Client instance (default = \"fun-hb-client\") >>> " RESPONSE
+    read -rp "   Enter a name for your new Funttastic Hummingbot Client instance (default = \"fun-hb-client\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -99,7 +99,7 @@ pre_installation_fun_hb_client () {
   # Prompt the user for the passphrase to encrypt the certificates
   while true; do
       echo
-      read -s -p "   Enter a passphrase to encrypt the certificates with at least $PASSPHRASE_LENGTH characters >>> " DEFINED_PASSPHRASE
+      read -s -rp "   Enter a passphrase to encrypt the certificates with at least $PASSPHRASE_LENGTH characters >>> " DEFINED_PASSPHRASE
       if [ -z "$DEFINED_PASSPHRASE" ] || [ ${#DEFINED_PASSPHRASE} -lt "$PASSPHRASE_LENGTH" ]; then
           echo
           echo
@@ -116,7 +116,7 @@ pre_installation_fun_hb_client () {
   then
     FUN_HB_CLIENT_FOLDER_SUFFIX="funttastic"
     echo
-    read -p "   Enter a folder name where your Funttastic Hummingbot Client files will be saved (default = \"$FUN_HB_CLIENT_FOLDER_SUFFIX\") >>> " RESPONSE
+    read -rp "   Enter a folder name where your Funttastic Hummingbot Client files will be saved (default = \"$FUN_HB_CLIENT_FOLDER_SUFFIX\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -142,7 +142,7 @@ pre_installation_hb_client () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter a Hummingbot Client image name you want to use (default = \"hb-client\") >>> " RESPONSE
+    read -rp "   Enter a Hummingbot Client image name you want to use (default = \"hb-client\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -156,7 +156,7 @@ pre_installation_hb_client () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Do you want to use an existing Hummingbot Client image (\"y/N\") >>> " RESPONSE
+    read -rp "   Do you want to use an existing Hummingbot Client image (\"y/N\") >>> " RESPONSE
   fi
   if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]
   then
@@ -172,7 +172,7 @@ pre_installation_hb_client () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter a name for your new Hummingbot Client instance (default = \"hb-client\") >>> " RESPONSE
+    read -rp "   Enter a name for your new Hummingbot Client instance (default = \"hb-client\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -187,7 +187,7 @@ pre_installation_hb_client () {
   then
     HB_CLIENT_FOLDER_SUFFIX="client"
     echo
-    read -p "   Enter a folder name where your Hummingbot Client files will be saved (default = \"$HB_CLIENT_FOLDER_SUFFIX\") >>> " RESPONSE
+    read -rp "   Enter a folder name where your Hummingbot Client files will be saved (default = \"$HB_CLIENT_FOLDER_SUFFIX\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -202,7 +202,7 @@ pre_installation_hb_client () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter the url from the repository to be cloned
+    read -rp "   Enter the url from the repository to be cloned
    (default = \"https://github.com/Team-Kujira/hummingbot.git\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
@@ -216,7 +216,7 @@ pre_installation_hb_client () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
+    read -rp "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -246,7 +246,7 @@ pre_installation_hb_gateway () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter a Hummingbot Gateway image name you want to use (default = \"hb-gateway\") >>> " RESPONSE
+    read -rp "   Enter a Hummingbot Gateway image name you want to use (default = \"hb-gateway\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -260,7 +260,7 @@ pre_installation_hb_gateway () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Do you want to use an existing Hummingbot Gateway image (\"y/N\") >>> " RESPONSE
+    read -rp "   Do you want to use an existing Hummingbot Gateway image (\"y/N\") >>> " RESPONSE
   fi
   if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]
   then
@@ -276,7 +276,7 @@ pre_installation_hb_gateway () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter a name for your new Hummingbot Gateway instance (default = \"hb-gateway\") >>> " RESPONSE
+    read -rp "   Enter a name for your new Hummingbot Gateway instance (default = \"hb-gateway\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -290,7 +290,7 @@ pre_installation_hb_gateway () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter a port for expose your new Hummingbot Gateway instance (default = \"15888\") >>> " RESPONSE
+    read -rp "   Enter a port for expose your new Hummingbot Gateway instance (default = \"15888\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -305,7 +305,7 @@ pre_installation_hb_gateway () {
   then
     GATEWAY_FOLDER_SUFFIX="gateway"
     echo
-    read -p "   Enter a folder name where your Hummingbot Gateway files will be saved (default = \"$GATEWAY_FOLDER_SUFFIX\") >>> " RESPONSE
+    read -rp "   Enter a folder name where your Hummingbot Gateway files will be saved (default = \"$GATEWAY_FOLDER_SUFFIX\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -316,28 +316,11 @@ pre_installation_hb_gateway () {
     GATEWAY_FOLDER=$RESPONSE
   fi
 
-  # Executes only if the choice is 3
-  if [ "$CHOICE" == 3 ]; then
-    # Prompts user for a password for the gateway certificates
-    while true; do
-        echo
-        read -s -p "   Enter a passphrase to encrypt the certificates with at least $PASSPHRASE_LENGTH characters >>> " DEFINED_PASSPHRASE
-        if [ -z "$DEFINED_PASSPHRASE" ] || [ ${#DEFINED_PASSPHRASE} -lt "$PASSPHRASE_LENGTH" ]; then
-            echo
-            echo
-            echo "      Weak passphrase, please try again."
-        else
-            echo
-            break
-        fi
-    done
-  fi
-
   RESPONSE="$GATEWAY_REPOSITORY_URL"
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter the url from the repository to be cloned
+    read -rp "   Enter the url from the repository to be cloned
    (default = \"https://github.com/Team-Kujira/gateway.git\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
@@ -351,7 +334,7 @@ pre_installation_hb_gateway () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -p "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
+    read -rp "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -376,7 +359,7 @@ echo
 echo "ℹ️  Enter the value [0] to return to the main menu."
 echo
 
-read -p "   >>> " RESPONSE
+read -rp "   >>> " RESPONSE
 if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "" ]]
 then
   echo
@@ -406,7 +389,7 @@ then
   echo "         https://www.funttastic.com/partners/kujira"
   echo
 
-  read -p "   Enter your choice (1-5): " CHOICE
+  read -rp "   Enter your choice (1-5): " CHOICE
 
 #  if [[ -z $choice || ! $choice =~ ^[1-5]$ ]]; then
 #      CHOICE=4
@@ -422,7 +405,7 @@ then
             ;;
     esac
 
-    read -p "   Enter your choice (1-5): " CHOICE
+    read -rp "   Enter your choice (1-5): " CHOICE
   done
 
   case $CHOICE in
@@ -514,7 +497,7 @@ docker_create_image_fun_hb_client () {
     "$FUN_HB_CLIENT_BUILD_CACHE" \
     --build-arg RANDOM_PASSPHRASE="$RANDOM_PASSPHRASE" \
     --build-arg DEFINED_PASSPHRASE="$DEFINED_PASSPHRASE" \
-    -t $FUN_HB_CLIENT_IMAGE_NAME -f ./all/Dockerfile/Dockerfile-Fun-HB-Client .)
+    -t $FUN_HB_CLIENT_IMAGE_NAME -f ./all/Dockerfile/fun-hb-client/Dockerfile .)
   fi
 }
 
@@ -542,7 +525,7 @@ docker_create_image_hb_client () {
     "$HB_CLIENT_BUILD_CACHE" \
     --build-arg REPOSITORY_URL="$HB_CLIENT_REPOSITORY_URL" \
     --build-arg REPOSITORY_BRANCH="$HB_CLIENT_REPOSITORY_BRANCH" \
-    -t "$HB_CLIENT_IMAGE_NAME" -f ./all/Dockerfile/Dockerfile-HB-Client .)
+    -t "$HB_CLIENT_IMAGE_NAME" -f ./all/Dockerfile/hb-client/Dockerfile .)
   fi
 }
 
@@ -577,9 +560,7 @@ docker_create_image_hb_gateway () {
       "$GATEWAY_BUILD_CACHE" \
       --build-arg REPOSITORY_URL="$GATEWAY_REPOSITORY_URL" \
       --build-arg REPOSITORY_BRANCH="$GATEWAY_REPOSITORY_BRANCH" \
-      --build-arg RANDOM_PASSPHRASE="$RANDOM_PASSPHRASE" \
-      --build-arg DEFINED_PASSPHRASE="$DEFINED_PASSPHRASE" \
-      -t "$GATEWAY_IMAGE_NAME" -f ./all/Dockerfile/Dockerfile-HB-Gateway .)
+      -t "$GATEWAY_IMAGE_NAME" -f ./all/Dockerfile/hb-gateway/Dockerfile .)
   fi
 }
 
@@ -632,7 +613,6 @@ post_installation_hb_client () {
 }
 
 post_installation_hb_gateway () {
-  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cp -R /root/src/templates/. /root/conf"
   docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "groupadd -f $GROUP"
   docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/conf && chown -RH :$GROUP ."
   docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/conf && chmod -R a+rw ."
@@ -777,7 +757,7 @@ install_docker () {
   else
     echo "   Docker is not installed."
     echo "   Installing Docker will require superuser permissions."
-    read -p "   Do you want to continue? [y/N] >>> " RESPONSE
+    read -rp "   Do you want to continue? [y/N] >>> " RESPONSE
     echo
 
     if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" ]]

@@ -24,7 +24,7 @@ then
   RESPONSE="$IMAGE_NAME"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Enter the image you want to use (default = \"fun-hb-client\") >>> " RESPONSE
+    read -rp "   Enter the image you want to use (default = \"fun-hb-client\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -37,7 +37,7 @@ then
   RESPONSE="$TAG"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Enter the version you want to use [latest/development] (default = \"latest\") >>> " TAG
+    read -rp "   Enter the version you want to use [latest/development] (default = \"latest\") >>> " TAG
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -50,7 +50,7 @@ then
   RESPONSE="$BUILD_CACHE"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Do you want to use an existing image (\"y/N\") >>> " RESPONSE
+    read -rp "   Do you want to use an existing image (\"y/N\") >>> " RESPONSE
   fi
   if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]
   then
@@ -64,7 +64,7 @@ then
   RESPONSE="$INSTANCE_NAME"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Enter a name for your new Funttastic Client instance (default = \"fun-hb-client\") >>> " RESPONSE
+    read -rp "   Enter a name for your new Funttastic Client instance (default = \"fun-hb-client\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -78,7 +78,7 @@ then
   if [ "$RESPONSE" == "" ]
   then
     FOLDER_SUFFIX="shared"
-    read -p "   Enter a folder name where your files will be saved (default = \"$FOLDER_SUFFIX\") >>> " RESPONSE
+    read -rp "   Enter a folder name where your files will be saved (default = \"$FOLDER_SUFFIX\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -93,7 +93,7 @@ then
   RESPONSE="$PORT"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Enter a port for expose your new instance (default = \"5000\") >>> " RESPONSE
+    read -rp "   Enter a port for expose your new instance (default = \"5000\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -106,7 +106,7 @@ then
   RESPONSE="$PASSWORD"
   while [ "$RESPONSE" == "" ]
   do
-    read -sp "   Inform the password for the certificates  >>> " RESPONSE
+    read -srp "   Inform the password for the certificates  >>> " RESPONSE
     echo "   It is necessary to inform the password for the certificates. Try again."
   done
   PASSWORD=$RESPONSE
@@ -114,7 +114,7 @@ then
   RESPONSE="$REPOSITORY_URL"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Enter the url from the repository to be cloned (default = \"git@github.com:funttastic/fun-hb-client.git\") >>> " RESPONSE
+    read -rp "   Enter the url from the repository to be cloned (default = \"git@github.com:funttastic/fun-hb-client.git\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -126,7 +126,7 @@ then
   RESPONSE="$REPOSITORY_BRANCH"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Enter the branch from the repository to be cloned (default = \"production\") >>> " RESPONSE
+    read -rp "   Enter the branch from the repository to be cloned (default = \"production\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -193,7 +193,7 @@ echo
 
 prompt_proceed () {
   RESPONSE=""
-  read -p "   Do you want to proceed? [Y/n] >>> " RESPONSE
+  read -rp "   Do you want to proceed? [Y/n] >>> " RESPONSE
   if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "" ]]
   then
     PROCEED="Y"
@@ -206,7 +206,7 @@ create_instance () {
   echo "Creating instance..."
   echo
   # 1) Create main folder for your new instance
-  mkdir -p $FOLDER
+  mkdir -p "$FOLDER"
   # 2) Create subfolders
   mkdir -p RESOURCES_FOLDER
   mkdir -p CERTIFICATES_FOLDER
@@ -218,7 +218,7 @@ create_instance () {
   BUILT=true
   if [ ! "$BUILD_CACHE" == "" ]
   then
-    BUILT=$(DOCKER_BUILDKIT=1 docker buildx build $BUILD_CACHE --build-arg SSH_PUBLIC_KEY="$SSH_PUBLIC_KEY" --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --build-arg REPOSITORY_URL="$REPOSITORY_URL" --build-arg REPOSITORY_BRANCH="$REPOSITORY_BRANCH" -t $IMAGE_NAME -f funttastic/client/Dockerfile .)
+    BUILT=$(DOCKER_BUILDKIT=1 docker buildx build "$BUILD_CACHE" --build-arg SSH_PUBLIC_KEY="$SSH_PUBLIC_KEY" --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --build-arg REPOSITORY_URL="$REPOSITORY_URL" --build-arg REPOSITORY_BRANCH="$REPOSITORY_BRANCH" -t "$IMAGE_NAME" -f ./all/Dockerfile/fun-hb-client/Dockerfile .)
   fi
 
   # 5) Launch a new instance
@@ -244,15 +244,15 @@ EOF
   	-dt \
     --log-opt max-size=10m \
     --log-opt max-file=5 \
-    -p $PORT:$PORT \
-    --name $INSTANCE_NAME \
+    -p "$PORT":"$PORT" \
+    --name "$INSTANCE_NAME" \
     --network host \
-    --mount type=bind,source=$RESOURCES_FOLDER,target=/root/resources \
-    --mount type=bind,source=$CERTIFICATES_FOLDER,target=/root/resources/certificates \
-    -e PORT=$PORT \
+    --mount type=bind,source="$RESOURCES_FOLDER",target=/root/resources \
+    --mount type=bind,source="$CERTIFICATES_FOLDER",target=/root/resources/certificates \
+    -e PORT="$PORT" \
     -e PASSWORD="$PASSWORD" \
-    $ENTRYPOINT \
-    $IMAGE_NAME:$TAG
+    "$ENTRYPOINT" \
+    "$IMAGE_NAME":"$TAG"
 }
 
 if [ "$CUSTOMIZE" == "--customize" ]

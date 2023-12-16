@@ -11,7 +11,7 @@ VERSION="1.0.0"
 ID="id"
 
 DIR_NAME=$(dirname "$0")
-SCRIPT_NAME="$(basename $0)"
+SCRIPT_NAME="$(basename "$0")"
 SCRIPT_RELATIVE_PATH="$DIR_NAME/$SCRIPT_NAME"
 
 send_request() {
@@ -165,7 +165,7 @@ add_wallet() {
 
 	while true; do
 		echo
-		read -s -p "   Enter your Kujira wallet mnemonic>>> " mnemonic
+		read -s -rp "   Enter your Kujira wallet mnemonic>>> " mnemonic
 		if [ -z "$mnemonic" ]; then
 			echo
 			echo
@@ -200,13 +200,14 @@ choose() {
     echo "   [4] ADD WALLET"
     echo
     echo "   [0] RETURN TO MAIN MENU"
+    echo "   [exit] STOP SCRIPT EXECUTION"
     echo
     echo "   For more information about the FUNTTASTIC HUMMINGBOT CLIENT, please visit:"
     echo
     echo "         https://www.funttastic.com/partners/kujira"
     echo
 
-    read -p "   Enter your choice (1-4): " CHOICE
+    read -rp "   Enter your choice (1-4): " CHOICE
 
     while true; do
         case $CHOICE in
@@ -243,9 +244,17 @@ choose() {
                 ./configure
                 break
                 ;;
+            "exit")
+                echo
+                echo
+                echo "      The script will close automatically in 3 seconds..."
+                echo
+                sleep 3
+                exit 0
+                ;;
             *)
                 echo "   Invalid Input. Enter a number between 1 and 4."
-                read -p "   Enter your choice (1-4): " CHOICE
+                read -rp "   Enter your choice (1-4): " CHOICE
                 ;;
         esac
     done

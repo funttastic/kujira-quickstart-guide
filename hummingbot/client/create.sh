@@ -24,7 +24,7 @@ then
   RESPONSE="$IMAGE_NAME"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Enter the image you want to use (default = \"hb-client\") >>> " RESPONSE
+    read -rp "   Enter the image you want to use (default = \"hb-client\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -37,7 +37,7 @@ then
   RESPONSE="$TAG"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Enter the version you want to use [latest/development] (default = \"latest\") >>> " TAG
+    read -rp "   Enter the version you want to use [latest/development] (default = \"latest\") >>> " TAG
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -50,7 +50,7 @@ then
   RESPONSE="$BUILD_CACHE"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Do you want to use an existing image (\"y/N\") >>> " RESPONSE
+    read -rp "   Do you want to use an existing image (\"y/N\") >>> " RESPONSE
   fi
   if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]
   then
@@ -64,7 +64,7 @@ then
   RESPONSE="$INSTANCE_NAME"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Enter a name for your new instance (default = \"hb-client\") >>> " RESPONSE
+    read -rp "   Enter a name for your new instance (default = \"hb-client\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -78,7 +78,7 @@ then
   if [ "$RESPONSE" == "" ]
   then
     FOLDER_SUFFIX="shared"
-    read -p "   Enter a folder name where your files will be saved (default = \"$FOLDER_SUFFIX\") >>> " RESPONSE
+    read -rp "   Enter a folder name where your files will be saved (default = \"$FOLDER_SUFFIX\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -92,7 +92,7 @@ then
   RESPONSE="$REPOSITORY_URL"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Enter the url from the repository to be cloned (default = \"https://github.com/Team-Kujira/hummingbot.git\") >>> " RESPONSE
+    read -rp "   Enter the url from the repository to be cloned (default = \"https://github.com/Team-Kujira/hummingbot.git\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -104,7 +104,7 @@ then
   RESPONSE="$REPOSITORY_BRANCH"
   if [ "$RESPONSE" == "" ]
   then
-    read -p "   Enter the branch from the repository to be cloned (default = \"production\") >>> " RESPONSE
+    read -rp "   Enter the branch from the repository to be cloned (default = \"production\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -144,6 +144,7 @@ LOGS_FOLDER="$CLIENT_FOLDER/logs"
 DATA_FOLDER="$CLIENT_FOLDER/data"
 SCRIPTS_FOLDER="$CLIENT_FOLDER/scripts"
 PMM_SCRIPTS_FOLDER="$CLIENT_FOLDER/pmm_scripts"
+COMMAND="/root/miniconda3/envs/hummingbot/bin/python3 /root/bin/hummingbot_quickstart.py"
 
 echo
 echo "ℹ️  Confirm below if the instance and its folders are correct:"
@@ -169,7 +170,7 @@ echo
 
 prompt_proceed () {
   RESPONSE=""
-  read -p "   Do you want to proceed? [Y/n] >>> " RESPONSE
+  read -rp "   Do you want to proceed? [Y/n] >>> " RESPONSE
   if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "" ]]
   then
     PROCEED="Y"
@@ -182,26 +183,26 @@ create_instance () {
   echo "Creating instance..."
   echo
   # 1) Create main folder for your new instance
-  mkdir -p $FOLDER
-  mkdir -p $CLIENT_FOLDER
+  mkdir -p "$FOLDER"
+  mkdir -p "$CLIENT_FOLDER"
   # 2) Create subfolders for hummingbot files
-  mkdir -p $CONF_FOLDER
-  mkdir -p $CONF_FOLDER/connectors
-  mkdir -p $CONF_FOLDER/strategies
-  mkdir -p $LOGS_FOLDER
-  mkdir -p $DATA_FOLDER
-  mkdir -p $PMM_SCRIPTS_FOLDER
-  mkdir -p $CERTS_FOLDER
-  mkdir -p $SCRIPTS_FOLDER
+  mkdir -p "$CONF_FOLDER"
+  mkdir -p "$CONF_FOLDER"/connectors
+  mkdir -p "$CONF_FOLDER"/strategies
+  mkdir -p "$LOGS_FOLDER"
+  mkdir -p "$DATA_FOLDER"
+  mkdir -p "$PMM_SCRIPTS_FOLDER"
+  mkdir -p "$CERTS_FOLDER"
+  mkdir -p "$SCRIPTS_FOLDER"
 
   # 3) Set required permissions to save hummingbot password the first time
-  chmod a+rw $CONF_FOLDER
+  chmod a+rw "$CONF_FOLDER"
 
   # 4) Create a new image?
   BUILT=true
   if [ ! "$BUILD_CACHE" == "" ]
   then
-    BUILT=$(DOCKER_BUILDKIT=1 docker build $BUILD_CACHE --build-arg REPOSITORY_URL="$REPOSITORY_URL" --build-arg REPOSITORY_BRANCH="$REPOSITORY_BRANCH" -t $IMAGE_NAME -f hummingbot/client/Dockerfile .)
+    BUILT=$(DOCKER_BUILDKIT=1 docker build "$BUILD_CACHE" --build-arg REPOSITORY_URL="$REPOSITORY_URL" --build-arg REPOSITORY_BRANCH="$REPOSITORY_BRANCH" -t "$IMAGE_NAME" -f ./all/Dockerfile/hb-client/Dockerfile .)
   fi
 
   # 5) Launch a new instance
@@ -226,6 +227,7 @@ $BUILT \
 	-e SCRIPTS_FOLDER="/root/scripts" \
 	-e PMM_SCRIPTS_FOLDER="/root/pmm_scripts" \
 	-e CERTS_FOLDER="/root/certs" \
+	-e COMMAND=$COMMAND \
 	$ENTRYPOINT \
 	$IMAGE_NAME:$TAG
 EOF
@@ -235,14 +237,14 @@ EOF
 		-dt \
     --log-opt max-size=10m \
     --log-opt max-file=5 \
-    --name $INSTANCE_NAME \
+    --name "$INSTANCE_NAME" \
     --network host \
-    --mount type=bind,source=$CONF_FOLDER,target=/root/conf \
-    --mount type=bind,source=$LOGS_FOLDER,target=/root/logs \
-    --mount type=bind,source=$DATA_FOLDER,target=/root/data \
-    --mount type=bind,source=$SCRIPTS_FOLDER,target=/root/scripts \
-    --mount type=bind,source=$PMM_SCRIPTS_FOLDER,target=/root/pmm_scripts \
-    --mount type=bind,source=$CERTS_FOLDER,target=/root/certs \
+    --mount type=bind,source="$CONF_FOLDER",target=/root/conf \
+    --mount type=bind,source="$LOGS_FOLDER",target=/root/logs \
+    --mount type=bind,source="$DATA_FOLDER",target=/root/data \
+    --mount type=bind,source="$SCRIPTS_FOLDER",target=/root/scripts \
+    --mount type=bind,source="$PMM_SCRIPTS_FOLDER",target=/root/pmm_scripts \
+    --mount type=bind,source="$CERTS_FOLDER",target=/root/certs \
     --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
     -e CONF_FOLDER="/root/conf" \
     -e LOGS_FOLDER="/root/logs" \
@@ -250,8 +252,9 @@ EOF
     -e SCRIPTS_FOLDER="/root/scripts" \
     -e PMM_SCRIPTS_FOLDER="/root/pmm_scripts" \
     -e CERTS_FOLDER="/root/certs" \
-    $ENTRYPOINT \
-    $IMAGE_NAME:$TAG
+    -e COMMAND="$COMMAND" \
+    "$ENTRYPOINT" \
+    "$IMAGE_NAME":"$TAG"
 }
 
 if [ "$CUSTOMIZE" == "--customize" ]
