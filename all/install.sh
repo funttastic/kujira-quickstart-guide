@@ -341,6 +341,23 @@ pre_installation_hb_gateway () {
     GATEWAY_FOLDER=$RESPONSE
   fi
 
+  # Executes only if the choice is 3
+  if [ "$CHOICE" == 3 ]; then
+    # Prompts user for a password for the gateway certificates
+    while true; do
+        echo
+        read -s -p "   Enter a passphrase to encrypt the certificates with at least $PASSPHRASE_LENGTH characters >>> " DEFINED_PASSPHRASE
+        if [ -z "$DEFINED_PASSPHRASE" ] || [ ${#DEFINED_PASSPHRASE} -lt "$PASSPHRASE_LENGTH" ]; then
+            echo
+            echo
+            echo "      Weak passphrase, please try again."
+        else
+            echo
+            break
+        fi
+    done
+  fi
+
   RESPONSE="$GATEWAY_REPOSITORY_URL"
   if [ "$RESPONSE" == "" ]
   then
@@ -505,6 +522,7 @@ else
 fi
 
 RESOURCES_FOLDER="$FUN_HB_CLIENT_FOLDER/client/resources"
+SELECTED_PASSPHRASE=${RANDOM_PASSPHRASE:-$DEFINED_PASSPHRASE}
 
 if [ -n "$RANDOM_PASSPHRASE" ]; then  \
 echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"; \
@@ -617,7 +635,6 @@ docker_create_container_hb_gateway () {
 }
 
 post_installation_fun_hb_client () {
-  SELECTED_PASSPHRASE=${RANDOM_PASSPHRASE:-$DEFINED_PASSPHRASE}
 
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "echo '$SELECTED_PASSPHRASE' > selected_passphrase.txt"
 
@@ -649,7 +666,7 @@ post_installation_hb_gateway () {
   docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/conf && chmod -R a+rw ."
   docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/logs && chown -RH :$GROUP ."
   docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/logs && chmod -R a+rw ."
-  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "yarn start" > /dev/null 2>&1 &
+  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "yarn start --passphrase=$SELECTED_PASSPHRASE" > /dev/null 2>&1 &
 }
 
 choice_one_installation () {
