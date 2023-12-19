@@ -126,6 +126,31 @@ pre_installation_fun_hb_client () {
   else
     FUN_HB_CLIENT_FOLDER=$RESPONSE
   fi
+
+  RESPONSE="$FUN_HB_CLIENT_REPOSITORY_URL"
+  if [ "$RESPONSE" == "" ]
+  then
+    read -rp "   Enter the url from the repository to be cloned
+   (default = \"https://github.com/funttastic/fun-hb-client.gitt\") >>> " RESPONSE
+  fi
+  if [ "$RESPONSE" == "" ]
+  then
+    FUN_HB_CLIENT_REPOSITORY_URL="https://github.com/funttastic/fun-hb-client.git"
+  else
+    FUN_HB_CLIENT_REPOSITORY_URL="$RESPONSE"
+  fi
+
+  RESPONSE="$FUN_HB_CLIENT_REPOSITORY_BRANCH"
+  if [ "$RESPONSE" == "" ]
+  then
+    read -rp "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
+  fi
+  if [ "$RESPONSE" == "" ]
+  then
+    FUN_HB_CLIENT_REPOSITORY_BRANCH="community"
+  else
+    FUN_HB_CLIENT_REPOSITORY_BRANCH="$RESPONSE"
+  fi
 }
 
 pre_installation_hb_client () {
@@ -441,6 +466,10 @@ else
   FUN_HB_CLIENT_FOLDER_SUFFIX="funttastic"
   FUN_HB_CLIENT_FOLDER="$SHARED_FOLDER"/"$FUN_HB_CLIENT_FOLDER_SUFFIX"
   FUN_HB_CLIENT_BUILD_CACHE="--no-cache"
+  FUN_HB_CLIENT_REPOSITORY_URL=${FUN_HB_CLIENT_REPOSITORY_URL:-"https://github.com/funttastic/fun-hb-client.git"}
+  FUN_HB_CLIENT_REPOSITORY_BRANCH=${FUN_HB_CLIENT_REPOSITORY_BRANCH:-"community"}
+  FUN_HB_CLIENT_SSH_PUBLIC_KEY="$FUN_HB_CLIENT_SSH_PUBLIC_KEY"
+  FUN_HB_CLIENT_SSH_PRIVATE_KEY="$FUN_HB_CLIENT_SSH_PRIVATE_KEY"
 
   # Hummingbot Client Settings
   HB_CLIENT_IMAGE_NAME=${HB_CLIENT_IMAGE_NAME:-"hb-client"}
@@ -495,8 +524,10 @@ docker_create_image_fun_hb_client () {
   then
     BUILT=$(DOCKER_BUILDKIT=1 docker build \
     "$FUN_HB_CLIENT_BUILD_CACHE" \
-    --build-arg RANDOM_PASSPHRASE="$RANDOM_PASSPHRASE" \
-    --build-arg DEFINED_PASSPHRASE="$DEFINED_PASSPHRASE" \
+    --build-arg SSH_PUBLIC_KEY="$FUN_HB_CLIENT_SSH_PUBLIC_KEY" \
+    --build-arg SSH_PRIVATE_KEY="$FUN_HB_CLIENT_SSH_PRIVATE_KEY" \
+    --build-arg REPOSITORY_URL="$FUN_HB_CLIENT_REPOSITORY_URL" \
+    --build-arg REPOSITORY_BRANCH="$FUN_HB_CLIENT_REPOSITORY_BRANCH" \
     -t $FUN_HB_CLIENT_IMAGE_NAME -f ./all/Dockerfile/fun-hb-client/Dockerfile .)
   fi
 }
@@ -509,11 +540,11 @@ docker_create_container_fun_hb_client () {
     --log-opt max-file=5 \
     --name $FUN_HB_CLIENT_CONTAINER_NAME \
     --network "$NETWORK" \
-    --mount type=bind,source="$RESOURCES_FOLDER",target=/root/app/resources \
-    --mount type=bind,source="$CERTS_FOLDER",target=/root/app/resources/certificates \
+    --mount type=bind,source="$RESOURCES_FOLDER",target=/root/resources \
+    --mount type=bind,source="$CERTS_FOLDER",target=/root/resources/certificates \
     --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
-    -e RESOURCES_FOLDER="/root/app/resources" \
-    -e CERTS_FOLDER="/root/app/resources/certificates" \
+    -e RESOURCES_FOLDER="/root/resources" \
+    -e CERTS_FOLDER="/root/resources/certificates" \
     --entrypoint="$ENTRYPOINT" \
     $FUN_HB_CLIENT_IMAGE_NAME:$TAG
 }
@@ -590,10 +621,10 @@ post_installation_fun_hb_client () {
 
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "echo '$SELECTED_PASSPHRASE' > selected_passphrase.txt"
 
-  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cp -r /root/app/resources_temp/* /root/app/resources"
-  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "rm -rf /root/app/resources_temp"
-  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'python /root/app/resources/scripts/generate_ssl_certificates.py --passphrase "$(cat selected_passphrase.txt)" --cert-path /root/app/resources/certificates'
-  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'sed -i "s/<password>/"$(cat selected_passphrase.txt)"/g" /root/app/resources/configuration/production.yml'
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cp -r /root/resources_temp/* /root/resources"
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "rm -rf /root/resources_temp"
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'python /root/resources/scripts/generate_ssl_certificates.py --passphrase "$(cat selected_passphrase.txt)" --cert-path /root/resources/certificates'
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'sed -i "s/<password>/"$(cat selected_passphrase.txt)"/g" /root/resources/configuration/production.yml'
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' resources/configuration/common.yml"
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i -e '/logging:/,/use_telegram: true/ s/use_telegram: true/use_telegram: false/' -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' resources/configuration/production.yml"
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "groupadd -f $GROUP"
@@ -730,7 +761,7 @@ execute_installation () {
         ;;
     4)
         echo
-        echo "   Automatically installing:"
+        echo "   Installing:"
         echo
         echo "     > Funttastic Hummingbot Client"
         echo "     > Hummingbot Gateway"
@@ -845,11 +876,11 @@ then
     echo
     echo "ℹ️  Confirm below if the Funttastic Hummingbot Client instance and its folders are correct:"
     echo
-    printf "%25s %5s\n" "Instance name:" "$FUN_HB_CLIENT_CONTAINER_NAME"
-    printf "%25s %5s\n" "Version:" "$TAG"
-    printf "%25s %5s\n" "Base folder:" "$SHARED_FOLDER_SUFFIX"
-    printf "%25s %5s\n" "Funttastic Hummingbot Client folder:" "├── $FUN_HB_CLIENT_FOLDER"
-    printf "%25s %5s\n" "Resources folder:" "├── $RESOURCES_FOLDER"
+    printf "%25s %5s\n" "Instance name:"        "$FUN_HB_CLIENT_CONTAINER_NAME"
+    printf "%25s %5s\n" "Version:"              "$TAG"
+    printf "%25s %5s\n" "Base folder:"          "$SHARED_FOLDER_SUFFIX"
+    printf "%25s %5s\n" "Fun HB Client folder:" "$FUN_HB_CLIENT_FOLDER"
+    printf "%25s %5s\n" "Resources folder:"     "$RESOURCES_FOLDER"
     echo
   fi
 

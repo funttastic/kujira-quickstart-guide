@@ -4,12 +4,10 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ="Etc/GMT"
 ARG SSH_PUBLIC_KEY
 ARG SSH_PRIVATE_KEY
-ARG REPOSITORY_URL="${REPOSITORY_URL:-git@github.com:funttastic/fun-hb-client.git}"
+ARG REPOSITORY_URL="${REPOSITORY_URL:-https://github.com/funttastic/fun-hb-client.git}"
 ARG REPOSITORY_BRANCH="${REPOSITORY_BRANCH:-community}"
 ARG COMMAND="${COMMAND:-}"
-
 ENV PORT=${PORT:-5000}
-ENV PASSWORD="${PASSWORD}"
 
 WORKDIR /root
 
@@ -106,5 +104,24 @@ EXPOSE $PORT
 #
 #	set +ex
 #EOF
+
+RUN <<-EOF
+  set -ex
+
+  cd resources
+  mkdir -p certificates \
+  && cp configuration/production.example.yml configuration/production.yml
+  cp -R strategies/templates/* strategies
+
+  set +ex
+EOF
+
+RUN <<-EOF
+  set -ex
+
+  mv resources resources_temp
+
+  set +ex
+EOF
 
 CMD $COMMAND
