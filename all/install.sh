@@ -482,6 +482,7 @@ else
   FUN_HB_CLIENT_CONTAINER_NAME="fun-hb-client"
   FUN_HB_CLIENT_FOLDER_SUFFIX="funttastic"
   FUN_HB_CLIENT_FOLDER="$SHARED_FOLDER"/"$FUN_HB_CLIENT_FOLDER_SUFFIX"
+  FUN_HB_CLIENT_PORT=5000
   FUN_HB_CLIENT_BUILD_CACHE="--no-cache"
   FUN_HB_CLIENT_REPOSITORY_URL=${FUN_HB_CLIENT_REPOSITORY_URL:-"https://github.com/funttastic/fun-hb-client.git"}
   FUN_HB_CLIENT_REPOSITORY_BRANCH=${FUN_HB_CLIENT_REPOSITORY_BRANCH:-"community"}
@@ -523,6 +524,7 @@ fi
 
 RESOURCES_FOLDER="$FUN_HB_CLIENT_FOLDER/client/resources"
 SELECTED_PASSPHRASE=${RANDOM_PASSPHRASE:-$DEFINED_PASSPHRASE}
+FUN_HB_CLIENT_PORT=${FUN_HB_CLIENT_PORT:-5000}
 
 if [ -n "$RANDOM_PASSPHRASE" ]; then  \
 echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"; \
@@ -563,6 +565,7 @@ docker_create_container_fun_hb_client () {
     --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
     -e RESOURCES_FOLDER="/root/resources" \
     -e CERTS_FOLDER="/root/resources/certificates" \
+    -e PORT="$FUN_HB_CLIENT_PORT" \
     --entrypoint="$ENTRYPOINT" \
     $FUN_HB_CLIENT_IMAGE_NAME:$TAG
 }
@@ -599,6 +602,7 @@ docker_create_container_hb_client () {
     -e HB_CLIENT_PMM_SCRIPTS_FOLDER="/root/pmm_scripts" \
     -e HB_CLIENT_SCRIPTS_FOLDER="/root/scripts" \
     -e CERTS_FOLDER="/root/certs" \
+    -e COMMAND="$COMMAND" \
     --entrypoint="$ENTRYPOINT" \
     "$HB_CLIENT_IMAGE_NAME":$TAG
 }
@@ -657,7 +661,7 @@ post_installation_fun_hb_client () {
 }
 
 post_installation_hb_client () {
-  docker exec "$HB_CLIENT_CONTAINER_NAME" /bin/bash -c "/root/miniconda3/envs/hummingbot/bin/python3 /root/bin/hummingbot_quickstart.py"
+  docker exec -it "$HB_CLIENT_CONTAINER_NAME" /bin/bash -c "/root/miniconda3/envs/hummingbot/bin/python3 /root/bin/hummingbot_quickstart.py"
 }
 
 post_installation_hb_gateway () {
@@ -889,13 +893,29 @@ install_docker () {
 
 if [[ "$CUSTOMIZE" == "--customize" &&  ! "$NOT_IMPLEMENTED" ]]
 then
+  echo
+  echo "ℹ️  Confirm below if the common settings are correct:"
+  echo
+  printf "%25s %5s\n" "Version:"              "$TAG"
+  printf "%25s %5s\n" "Base:"                 "$SHARED_FOLDER"
+  printf "%25s %5s\n" "Common:"               "$COMMON_FOLDER"
+  printf "%25s %5s\n" "Certificates:"         "$CERTS_FOLDER"
+  printf "%25s %5s\n" "Entrypoint:"    				"$ENTRYPOINT"
+  echo
+
   if [[ "$CHOICE" == 1 || "$CHOICE" == 4 || "$CHOICE" == 5 ]]; then
     echo
     echo "ℹ️  Confirm below if the Funttastic Hummingbot Client instance and its folders are correct:"
     echo
+    printf "%25s %5s\n" "Image:"              	"$FUN_HB_CLIENT_IMAGE_NAME:$TAG"
+    printf "%25s %5s\n" "Instance:"        			"$FUN_HB_CLIENT_CONTAINER_NAME"
+    printf "%25s %5s\n" "Repository url:"       "$FUN_HB_CLIENT_REPOSITORY_URL"
+    printf "%25s %5s\n" "Repository branch:"    "$FUN_HB_CLIENT_REPOSITORY_BRANCH"
+    printf "%25s %5s\n" "Exposed port:"					"$FUN_HB_CLIENT_PORT"
+    printf "%25s %5s\n" "Reuse image?:"    		  "$FUN_HB_CLIENT_BUILD_CACHE"
+    echo
+    printf "%25s %5s\n" "Fun HB Client folder:" "$FUN_HB_CLIENT_FOLDER"
     printf "%25s %5s\n" "Instance name:"        "$FUN_HB_CLIENT_CONTAINER_NAME"
-    printf "%25s %5s\n" "Version:"              "$TAG"
-    printf "%25s %5s\n" "Base folder:"          "$SHARED_FOLDER_SUFFIX"
     printf "%25s %5s\n" "Fun HB Client folder:" "$FUN_HB_CLIENT_FOLDER"
     printf "%25s %5s\n" "Resources folder:"     "$RESOURCES_FOLDER"
     echo
@@ -910,12 +930,8 @@ then
     printf "%25s %5s\n" "Repository url:"       "$HB_CLIENT_REPOSITORY_URL"
     printf "%25s %5s\n" "Repository branch:"    "$HB_CLIENT_REPOSITORY_BRANCH"
     printf "%25s %5s\n" "Reuse image?:"    		  "$HB_CLIENT_BUILD_CACHE"
-    printf "%25s %5s\n" "Entrypoint:"    				"$ENTRYPOINT"
     echo
-    printf "%25s %5s\n" "Base:"                 "$SHARED_FOLDER"
-    printf "%25s %5s\n" "Common:"               "$COMMON_FOLDER"
-    printf "%25s %5s\n" "Certificates:"         "$CERTS_FOLDER"
-    printf "%25s %5s\n" "Client:"               "$HB_CLIENT_FOLDER"
+    printf "%25s %5s\n" "Client folder:"        "$HB_CLIENT_FOLDER"
     printf "%25s %5s\n" "Config files:"         "$HB_CLIENT_CONF_FOLDER"
     printf "%25s %5s\n" "Log files:"            "$HB_CLIENT_LOGS_FOLDER"
     printf "%25s %5s\n" "Trade and data files:" "$HB_CLIENT_DATA_FOLDER"
@@ -934,11 +950,7 @@ then
     printf "%25s %5s\n" "Repository url:"       "$GATEWAY_REPOSITORY_URL"
     printf "%25s %5s\n" "Repository branch:"    "$GATEWAY_REPOSITORY_BRANCH"
     printf "%25s %5s\n" "Reuse image?:"    		  "$GATEWAY_BUILD_CACHE"
-    printf "%25s %5s\n" "Entrypoint:"    				"$ENTRYPOINT"
     echo
-    printf "%25s %5s\n" "Base:"                 "$SHARED_FOLDER"
-    printf "%25s %5s\n" "Common:"               "$COMMON_FOLDER"
-    printf "%25s %5s\n" "Certificates:"         "$CERTS_FOLDER"
     printf "%25s %5s\n" "Gateway folder:"       "$GATEWAY_FOLDER"
     printf "%25s %5s\n" "Gateway config files:" "$GATEWAY_CONF_FOLDER"
     printf "%25s %5s\n" "Gateway log files:"    "$GATEWAY_LOGS_FOLDER"
