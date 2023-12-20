@@ -168,6 +168,21 @@ pre_installation_fun_hb_client () {
   else
     FUN_HB_CLIENT_REPOSITORY_BRANCH="$RESPONSE"
   fi
+
+  RESPONSE="$FUN_HB_CLIENT_AUTO_START"
+  if [ "$RESPONSE" == "" ]
+  then
+    echo
+    read -rp "   Do you want to start the server automatically after installation? (\"Y/n\") >>> " RESPONSE
+  fi
+  if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]
+  then
+    echo
+    echo "      The server will start automatically after installation."
+    FUN_HB_CLIENT_AUTO_START=1
+  else
+    FUN_HB_CLIENT_AUTO_START=0
+  fi
 }
 
 pre_installation_hb_client () {
@@ -365,7 +380,7 @@ pre_installation_hb_gateway () {
     # Prompts user for a password for the gateway certificates
     while true; do
         echo
-        read -s -p "   Enter a passphrase to encrypt the certificates with at least $PASSPHRASE_LENGTH characters >>> " DEFINED_PASSPHRASE
+        read -s -rp "   Enter a passphrase to encrypt the certificates with at least $PASSPHRASE_LENGTH characters >>> " DEFINED_PASSPHRASE
         if [ -z "$DEFINED_PASSPHRASE" ] || [ ${#DEFINED_PASSPHRASE} -lt "$PASSPHRASE_LENGTH" ]; then
             echo
             echo
@@ -505,6 +520,7 @@ else
   FUN_HB_CLIENT_BUILD_CACHE=${FUN_HB_CLIENT_BUILD_CACHE:-"--no-cache"}
   FUN_HB_CLIENT_REPOSITORY_URL=${FUN_HB_CLIENT_REPOSITORY_URL:-"https://github.com/funttastic/fun-hb-client.git"}
   FUN_HB_CLIENT_REPOSITORY_BRANCH=${FUN_HB_CLIENT_REPOSITORY_BRANCH:-"community"}
+  FUN_HB_CLIENT_AUTO_START=${FUN_HB_CLIENT_AUTO_START:-1}
   SSH_PUBLIC_KEY="$SSH_PUBLIC_KEY"
   SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY"
 
@@ -569,7 +585,7 @@ docker_create_image_fun_hb_client () {
     --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" \
     --build-arg REPOSITORY_URL="$FUN_HB_CLIENT_REPOSITORY_URL" \
     --build-arg REPOSITORY_BRANCH="$FUN_HB_CLIENT_REPOSITORY_BRANCH" \
-    -t $FUN_HB_CLIENT_IMAGE_NAME -f ./all/Dockerfile/fun-hb-client/Dockerfile .)
+    -t "$FUN_HB_CLIENT_IMAGE_NAME" -f ./all/Dockerfile/fun-hb-client/Dockerfile .)
   fi
 }
 
@@ -579,7 +595,7 @@ docker_create_container_fun_hb_client () {
     -dit \
     --log-opt max-size=10m \
     --log-opt max-file=5 \
-    --name $FUN_HB_CLIENT_CONTAINER_NAME \
+    --name "$FUN_HB_CLIENT_CONTAINER_NAME" \
     --network "$NETWORK" \
     --mount type=bind,source="$RESOURCES_FOLDER",target=/root/resources \
     --mount type=bind,source="$CERTS_FOLDER",target=/root/resources/certificates \
@@ -588,7 +604,7 @@ docker_create_container_fun_hb_client () {
     -e CERTS_FOLDER="/root/resources/certificates" \
     -e PORT="$FUN_HB_CLIENT_PORT" \
     --entrypoint="$ENTRYPOINT" \
-    $FUN_HB_CLIENT_IMAGE_NAME:$TAG
+    "$FUN_HB_CLIENT_IMAGE_NAME":$TAG
 }
 
 docker_create_image_hb_client () {
@@ -672,7 +688,10 @@ post_installation_fun_hb_client () {
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "groupadd -f $GROUP"
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd resources && chown -RH :$GROUP ."
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd resources && chmod -R a+rwX ."
-  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "python app.py" > /dev/null 2>&1 &
+
+  if [ "$FUN_HB_CLIENT_AUTO_START" == 1 ]; then
+    docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "python app.py" > /dev/null 2>&1 &
+  fi
 
   if [ -n "$RANDOM_PASSPHRASE" ]; then
     docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'echo "$(cat selected_passphrase.txt)" > resources/random_passphrase.txt' &> /dev/null
