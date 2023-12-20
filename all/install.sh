@@ -110,13 +110,28 @@ pre_installation_fun_hb_client () {
       fi
   done
 
+  # Exposed port?
+  RESPONSE="$FUN_HB_CLIENT_PORT"
+  if [ "$RESPONSE" == "" ]
+  then
+    echo
+    read -rp "   Enter a port for expose your new Funttastic Hummingbot Client instance (default = \"5000\") >>> " RESPONSE
+  fi
+  if [ "$RESPONSE" == "" ]
+  then
+    FUN_HB_CLIENT_PORT=5000
+  else
+    FUN_HB_CLIENT_PORT=$RESPONSE
+  fi
+
   # Location to save files?
   RESPONSE="$FUN_HB_CLIENT_FOLDER"
   if [ "$RESPONSE" == "" ]
   then
     FUN_HB_CLIENT_FOLDER_SUFFIX="funttastic"
     echo
-    read -rp "   Enter a folder name where your Funttastic Hummingbot Client files will be saved (default = \"$FUN_HB_CLIENT_FOLDER_SUFFIX\") >>> " RESPONSE
+    read -rp "   Enter a folder name where your Funttastic Hummingbot Client files will be saved
+   (default = \"$FUN_HB_CLIENT_FOLDER_SUFFIX\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -130,6 +145,7 @@ pre_installation_fun_hb_client () {
   RESPONSE="$FUN_HB_CLIENT_REPOSITORY_URL"
   if [ "$RESPONSE" == "" ]
   then
+    echo
     read -rp "   Enter the url from the repository to be cloned
    (default = \"https://github.com/funttastic/fun-hb-client.gitt\") >>> " RESPONSE
   fi
@@ -143,6 +159,7 @@ pre_installation_fun_hb_client () {
   RESPONSE="$FUN_HB_CLIENT_REPOSITORY_BRANCH"
   if [ "$RESPONSE" == "" ]
   then
+    echo
     read -rp "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
@@ -212,7 +229,8 @@ pre_installation_hb_client () {
   then
     HB_CLIENT_FOLDER_SUFFIX="client"
     echo
-    read -rp "   Enter a folder name where your Hummingbot Client files will be saved (default = \"$HB_CLIENT_FOLDER_SUFFIX\") >>> " RESPONSE
+    read -rp "   Enter a folder name where your Hummingbot Client files will be saved
+   (default = \"$HB_CLIENT_FOLDER_SUFFIX\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -330,7 +348,8 @@ pre_installation_hb_gateway () {
   then
     GATEWAY_FOLDER_SUFFIX="gateway"
     echo
-    read -rp "   Enter a folder name where your Hummingbot Gateway files will be saved (default = \"$GATEWAY_FOLDER_SUFFIX\") >>> " RESPONSE
+    read -rp "   Enter a folder name where your Hummingbot Gateway files will be saved
+   (default = \"$GATEWAY_FOLDER_SUFFIX\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -478,16 +497,16 @@ else
   # Default settings to install Funttastic Hummingbot Client, Hummingbot Gateway and Hummingbot Client
 
   # Funttastic Hummingbot Client Settings
-  FUN_HB_CLIENT_IMAGE_NAME="fun-hb-client"
-  FUN_HB_CLIENT_CONTAINER_NAME="fun-hb-client"
-  FUN_HB_CLIENT_FOLDER_SUFFIX="funttastic"
+  FUN_HB_CLIENT_IMAGE_NAME=${FUN_HB_CLIENT_IMAGE_NAME:-"fun-hb-client"}
+  FUN_HB_CLIENT_CONTAINER_NAME=${FUN_HB_CLIENT_CONTAINER_NAME:-"fun-hb-client"}
+  FUN_HB_CLIENT_FOLDER_SUFFIX=${FUN_HB_CLIENT_FOLDER_SUFFIX:-"funttastic"}
   FUN_HB_CLIENT_FOLDER="$SHARED_FOLDER"/"$FUN_HB_CLIENT_FOLDER_SUFFIX"
-  FUN_HB_CLIENT_PORT=5000
-  FUN_HB_CLIENT_BUILD_CACHE="--no-cache"
+  FUN_HB_CLIENT_PORT=${FUN_HB_CLIENT_PORT:-5000}
+  FUN_HB_CLIENT_BUILD_CACHE=${FUN_HB_CLIENT_BUILD_CACHE:-"--no-cache"}
   FUN_HB_CLIENT_REPOSITORY_URL=${FUN_HB_CLIENT_REPOSITORY_URL:-"https://github.com/funttastic/fun-hb-client.git"}
   FUN_HB_CLIENT_REPOSITORY_BRANCH=${FUN_HB_CLIENT_REPOSITORY_BRANCH:-"community"}
-  FUN_HB_CLIENT_SSH_PUBLIC_KEY="$FUN_HB_CLIENT_SSH_PUBLIC_KEY"
-  FUN_HB_CLIENT_SSH_PRIVATE_KEY="$FUN_HB_CLIENT_SSH_PRIVATE_KEY"
+  SSH_PUBLIC_KEY="$SSH_PUBLIC_KEY"
+  SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY"
 
   # Hummingbot Client Settings
   HB_CLIENT_IMAGE_NAME=${HB_CLIENT_IMAGE_NAME:-"hb-client"}
@@ -524,7 +543,9 @@ fi
 
 RESOURCES_FOLDER="$FUN_HB_CLIENT_FOLDER/client/resources"
 SELECTED_PASSPHRASE=${RANDOM_PASSPHRASE:-$DEFINED_PASSPHRASE}
-FUN_HB_CLIENT_PORT=${FUN_HB_CLIENT_PORT:-5000}
+if [[ "$SSH_PUBLIC_KEY" && "$SSH_PRIVATE_KEY" ]]; then
+    FUN_HB_CLIENT_REPOSITORY_URL="git@github.com:funttastic/fun-hb-client.git"
+fi
 
 if [ -n "$RANDOM_PASSPHRASE" ]; then  \
 echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"; \
@@ -544,8 +565,8 @@ docker_create_image_fun_hb_client () {
   then
     BUILT=$(DOCKER_BUILDKIT=1 docker build \
     "$FUN_HB_CLIENT_BUILD_CACHE" \
-    --build-arg SSH_PUBLIC_KEY="$FUN_HB_CLIENT_SSH_PUBLIC_KEY" \
-    --build-arg SSH_PRIVATE_KEY="$FUN_HB_CLIENT_SSH_PRIVATE_KEY" \
+    --build-arg SSH_PUBLIC_KEY="$SSH_PUBLIC_KEY" \
+    --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" \
     --build-arg REPOSITORY_URL="$FUN_HB_CLIENT_REPOSITORY_URL" \
     --build-arg REPOSITORY_BRANCH="$FUN_HB_CLIENT_REPOSITORY_BRANCH" \
     -t $FUN_HB_CLIENT_IMAGE_NAME -f ./all/Dockerfile/fun-hb-client/Dockerfile .)
