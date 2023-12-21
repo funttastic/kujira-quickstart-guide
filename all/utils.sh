@@ -139,7 +139,8 @@ status() {
 	}"
 }
 
-add_wallet() {
+wallet() {
+  local method="$1"
 	local strategy=""
 	local version=""
 	local id=""
@@ -148,6 +149,7 @@ add_wallet() {
 	local connector="kujira"
 	local mnemonic=""
 	local account_number=0
+	local public_key=""
 
 #	while [[ $# -gt 0 ]]; do
 #		case "$1" in
@@ -163,29 +165,57 @@ add_wallet() {
 	version=${version:-$VERSION}
 	id=${id:-$ID}
 
-	while true; do
-		echo
-		read -s -rp "   Enter your Kujira wallet mnemonic>>> " mnemonic
-		if [ -z "$mnemonic" ]; then
-			echo
-			echo
-			echo "      Invalid mnemonic, please try again."
-		else
-			echo
-			break
-		fi
-	done
+  if [ "$method" == "POST" ]; then
+    while true; do
+      echo
+      read -s -rp "   Enter your Kujira wallet mnemonic >>> " mnemonic
+      if [ -z "$mnemonic" ]; then
+        echo
+        echo
+        echo "      Invalid mnemonic, please try again."
+      else
+        echo
+        break
+      fi
+    done
+
+    payload="{
+              \"chain\": \"$chain\",
+              \"network\": \"$network\",
+              \"connector\": \"$connector\",
+              \"privateKey\": \"$mnemonic\",
+              \"accountNumber\": $account_number
+            }"
+
+    url="/wallet/add"
+  elif [  "$method" == "DELETE"  ]; then
+    while true; do
+      echo
+      read -rp "   Enter the public key of the wallet you want to remove >>> " public_key
+      if [ -z "$public_key" ]; then
+        echo
+        echo
+        echo "      Invalid account public key, please try again."
+      else
+        echo
+        break
+      fi
+    done
+
+    payload="{
+              \"chain\": \"$chain\",
+              \"address\": \"$public_key\"
+            }"
+
+    url="/wallet/remove"
+  fi
+
+#  echo "$payload"
 
 	send_request \
-	--method "POST" \
-	--url "/wallet/add" \
-	--payload "{
-		\"chain\": \"$chain\",
-		\"network\": \"$network\",
-		\"connector\": \"$connector\",
-		\"privateKey\": \"$mnemonic\",
-		\"accountNumber\": $account_number
-	}"
+	--method "$method" \
+	--url "$url" \
+	--payload "$payload"
 }
 
 choose() {
@@ -198,6 +228,7 @@ choose() {
     echo "   [2] STOP"
     echo "   [3] STATUS"
     echo "   [4] ADD WALLET"
+    echo "   [5] REMOVE WALLET"
     echo
     echo "   [0] RETURN TO MAIN MENU"
     echo "   [exit] STOP SCRIPT EXECUTION"
@@ -207,7 +238,7 @@ choose() {
     echo "         https://www.funttastic.com/partners/kujira"
     echo
 
-    read -rp "   Enter your choice (1-4): " CHOICE
+    read -rp "   Enter your choice (1-5): " CHOICE
 
     while true; do
         case $CHOICE in
@@ -233,7 +264,14 @@ choose() {
                 break
                 ;;
             4)
-                add_wallet
+                wallet "POST"
+                sleep 3
+                clear
+                exec "$SCRIPT_RELATIVE_PATH"
+                break
+                ;;
+            5)
+                wallet "DELETE"
                 sleep 3
                 clear
                 exec "$SCRIPT_RELATIVE_PATH"
