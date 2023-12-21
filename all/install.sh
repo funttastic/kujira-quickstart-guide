@@ -283,6 +283,21 @@ pre_installation_hb_client () {
     HB_CLIENT_REPOSITORY_BRANCH="$RESPONSE"
   fi
 
+  RESPONSE="$HB_CLIENT_AUTO_START"
+  if [ "$RESPONSE" == "" ]
+  then
+    echo
+    read -rp "   Do you want to start the app automatically after installation? (\"Y/n\") >>> " RESPONSE
+  fi
+  if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]
+  then
+    echo
+    echo "      The app will start automatically after installation."
+    HB_CLIENT_AUTO_START=1
+  else
+    HB_CLIENT_AUTO_START=0
+  fi
+
   HB_CLIENT_CONF_FOLDER="$HB_CLIENT_FOLDER/conf"
   HB_CLIENT_LOGS_FOLDER="$HB_CLIENT_FOLDER/logs"
   HB_CLIENT_DATA_FOLDER="$HB_CLIENT_FOLDER/data"
@@ -419,6 +434,21 @@ pre_installation_hb_gateway () {
     GATEWAY_REPOSITORY_BRANCH="$RESPONSE"
   fi
 
+  RESPONSE="$GATEWAY_AUTO_START"
+  if [ "$RESPONSE" == "" ]
+  then
+    echo
+    read -rp "   Do you want to start the server automatically after installation? (\"Y/n\") >>> " RESPONSE
+  fi
+  if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]
+  then
+    echo
+    echo "      The server will start automatically after installation."
+    GATEWAY_AUTO_START=1
+  else
+    GATEWAY_AUTO_START=0
+  fi
+
   GATEWAY_CONF_FOLDER="$GATEWAY_FOLDER/conf"
   GATEWAY_LOGS_FOLDER="$GATEWAY_FOLDER/logs"
 }
@@ -435,7 +465,7 @@ echo
 echo "ℹ️  Enter the value [0] to return to the main menu."
 echo
 
-read -rp "   >>> " RESPONSE
+read -rp "   [Y/n/0] >>> " RESPONSE
 if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "" ]]
 then
   echo
@@ -537,6 +567,7 @@ else
   HB_CLIENT_DATA_FOLDER="$HB_CLIENT_FOLDER/data"
   HB_CLIENT_PMM_SCRIPTS_FOLDER="$HB_CLIENT_FOLDER/pmm_scripts"
   HB_CLIENT_SCRIPTS_FOLDER="$HB_CLIENT_FOLDER/scripts"
+  HB_CLIENT_AUTO_START=${HB_CLIENT_AUTO_START:-1}
 
   # Hummingbot Gateway Settings
   GATEWAY_IMAGE_NAME=${GATEWAY_IMAGE_NAME:-"hb-gateway"}
@@ -549,6 +580,7 @@ else
   GATEWAY_REPOSITORY_BRANCH=${GATEWAY_REPOSITORY_BRANCH:-"community"}
   GATEWAY_CONF_FOLDER="$GATEWAY_FOLDER/conf"
   GATEWAY_LOGS_FOLDER="$GATEWAY_FOLDER/logs"
+  GATEWAY_AUTO_START=${GATEWAY_AUTO_START:-1}
 
   # Settings for both
   TAG=${TAG:-"latest"}
@@ -701,7 +733,9 @@ post_installation_fun_hb_client () {
 }
 
 post_installation_hb_client () {
-  docker exec -it "$HB_CLIENT_CONTAINER_NAME" /bin/bash -c "/root/miniconda3/envs/hummingbot/bin/python3 /root/bin/hummingbot_quickstart.py"
+  if [ "$HB_CLIENT_AUTO_START" == 1 ]; then
+    docker exec -it "$HB_CLIENT_CONTAINER_NAME" /bin/bash -c "/root/miniconda3/envs/hummingbot/bin/python3 /root/bin/hummingbot_quickstart.py"
+  fi
 }
 
 post_installation_hb_gateway () {
@@ -710,7 +744,10 @@ post_installation_hb_gateway () {
   docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/conf && chmod -R a+rw ."
   docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/logs && chown -RH :$GROUP ."
   docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/logs && chmod -R a+rw ."
-  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "yarn start --passphrase=$SELECTED_PASSPHRASE" > /dev/null 2>&1 &
+
+  if [ "$GATEWAY_AUTO_START" == 1 ]; then
+    docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "yarn start --passphrase=$SELECTED_PASSPHRASE" > /dev/null 2>&1 &
+  fi
 }
 
 choice_one_installation () {
@@ -953,9 +990,8 @@ then
     printf "%25s %5s\n" "Repository branch:"    "$FUN_HB_CLIENT_REPOSITORY_BRANCH"
     printf "%25s %5s\n" "Exposed port:"					"$FUN_HB_CLIENT_PORT"
     printf "%25s %5s\n" "Reuse image?:"    		  "$FUN_HB_CLIENT_BUILD_CACHE"
+    printf "%25s %5s\n" "Autostart:"    		    "$FUN_HB_CLIENT_AUTO_START"
     echo
-    printf "%25s %5s\n" "Fun HB Client folder:" "$FUN_HB_CLIENT_FOLDER"
-    printf "%25s %5s\n" "Instance name:"        "$FUN_HB_CLIENT_CONTAINER_NAME"
     printf "%25s %5s\n" "Fun HB Client folder:" "$FUN_HB_CLIENT_FOLDER"
     printf "%25s %5s\n" "Resources folder:"     "$RESOURCES_FOLDER"
     echo
@@ -970,6 +1006,7 @@ then
     printf "%25s %5s\n" "Repository url:"       "$HB_CLIENT_REPOSITORY_URL"
     printf "%25s %5s\n" "Repository branch:"    "$HB_CLIENT_REPOSITORY_BRANCH"
     printf "%25s %5s\n" "Reuse image?:"    		  "$HB_CLIENT_BUILD_CACHE"
+    printf "%25s %5s\n" "Autostart:"    		    "$HB_CLIENT_AUTO_START"
     echo
     printf "%25s %5s\n" "Client folder:"        "$HB_CLIENT_FOLDER"
     printf "%25s %5s\n" "Config files:"         "$HB_CLIENT_CONF_FOLDER"
@@ -990,6 +1027,7 @@ then
     printf "%25s %5s\n" "Repository url:"       "$GATEWAY_REPOSITORY_URL"
     printf "%25s %5s\n" "Repository branch:"    "$GATEWAY_REPOSITORY_BRANCH"
     printf "%25s %5s\n" "Reuse image?:"    		  "$GATEWAY_BUILD_CACHE"
+    printf "%25s %5s\n" "Autostart:"    		    "$GATEWAY_AUTO_START"
     echo
     printf "%25s %5s\n" "Gateway folder:"       "$GATEWAY_FOLDER"
     printf "%25s %5s\n" "Gateway config files:" "$GATEWAY_CONF_FOLDER"
