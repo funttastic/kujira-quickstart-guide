@@ -77,6 +77,10 @@ RUN <<-EOF
     tree \
     psmisc
 
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+  nvm install 16.3.0
+  nvm use 16.3.0
+
   set +ex
 EOF
 
