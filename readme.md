@@ -112,3 +112,38 @@ After that you should receive some Kujira tokens on your balance.
 If you need more info you can contact us here:
 
 > <a href="https://funttastic.com/discord" target="_blank">https://funttastic.com/discord</a>
+
+<details>
+  <summary>
+    <span style="font-size:22px; font-weight:bold">CoinGecko</span>
+  </summary>
+  
+  <details>
+  <summary>
+    <span style="font-size:16px;">How to create a free API key?</span>
+  </summary>
+
+  <span style="font-size:14px;">Step 1: ...</span>
+  <br><br>
+  <span style="font-size:14px;">Step 2: ...</span>
+  <br><br>
+  <span style="font-size:14px;">Step 3: ...</span>
+  <br><br>
+  <span style="font-size:14px;">Step 4: ...</span>
+  </details>
+
+  <details>
+  <summary>
+    <span style="font-size:16px;">How to use my API key?</span>
+  </summary>
+
+  <span style="font-size:14px;">Step 1: ...</span>
+  <br><br>
+  <span style="font-size:14px;">Step 2: ...</span>
+  <br><br>
+  <span style="font-size:14px;">Step 3: ...</span>
+  <br><br>
+  <span style="font-size:14px;">Step 4: ...</span>
+  </details>
+
+</details>
