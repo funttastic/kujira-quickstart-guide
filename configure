@@ -23,17 +23,14 @@ choose() {
     while true; do
         case $CHOICE in
             1)
-            		clear
                 ./all/install.sh
                 break
                 ;;
             2)
-            		clear
                 ./all/restart.sh
                 break
                 ;;
             3)
-            		clear
                 ./all/utils.sh
                 break
                 ;;

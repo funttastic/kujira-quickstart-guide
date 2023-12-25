@@ -4,6 +4,32 @@ DIR_NAME=$(dirname "$0")
 SCRIPT_NAME="$(basename "$0")"
 SCRIPT_RELATIVE_PATH="$DIR_NAME/$SCRIPT_NAME"
 
+# Function to filter containers
+filter_containers() {
+    # Getting the list of containers
+    local containers
+
+    containers=$(docker ps -a --format "{{.Names}}")
+
+    # Filtering the containers
+    for name in $containers; do
+        # Checking if the name contains 'fun' and 'client'
+        if [[ $name =~ fun ]] && [[ $name =~ client ]] && [ -z "$FUN_HB_CLIENT_CONTAINER_NAME" ]; then
+            FUN_HB_CLIENT_CONTAINER_NAME=$name
+        fi
+
+        # Checking if the name contains 'hb' and 'client', but not 'fun'
+        if [[ $name =~ hb ]] && [[ $name =~ client ]] && ! [[ $name =~ fun ]] && [ -z "$HB_CLIENT_CONTAINER_NAME" ]; then
+            HB_CLIENT_CONTAINER_NAME=$name
+        fi
+
+        # Checking if the name contains 'hb' and 'gateway'
+        if [[ $name =~ hb ]] && [[ $name =~ gateway ]] && [ -z "$HB_GATEWAY_CONTAINER_NAME" ]; then
+            HB_GATEWAY_CONTAINER_NAME=$name
+        fi
+    done
+}
+
 # Function to check if a container exists
 container_exists() {
     if [ "$(docker ps -a -q -f name=^/"$1"$)" ]; then
@@ -20,12 +46,27 @@ get_container_name() {
     local container_var_name=$1
     local skip_keyword="skip"
 
+    filter_containers
+
     # Using indirect variable reference to get the value of the container variable
     local current_value=${!container_var_name}
 
+    if [ "$container_var_name" == "FUN_HB_CLIENT_CONTAINER_NAME" ]; then
+        app_name="Funttastic Hummingbot Client"
+        current_value="$FUN_HB_CLIENT_CONTAINER_NAME"
+    elif [ "$container_var_name" == "HB_CLIENT_CONTAINER_NAME" ]; then
+        app_name="Hummingbot Client"
+        current_value="$HB_CLIENT_CONTAINER_NAME"
+    elif [ "$container_var_name" == "HB_GATEWAY_CONTAINER_NAME" ]; then
+        app_name="Hummingbot Gateway"
+        current_value="$HB_GATEWAY_CONTAINER_NAME"
+    else
+        app_name="$container_var_name"
+    fi
+
     while true; do
         echo
-        read -rp "   Enter the container name for $container_var_name
+        read -rp "   Enter the container name for $app_name
    [Type '$skip_keyword' to bypass or press Enter to use '$current_value']: " input_name
         if [ "$input_name" == "$skip_keyword" ]; then
             echo
@@ -96,8 +137,9 @@ restart_all() {
 
 # Function to choose which container to restart
 choose() {
+    clear
     echo
-    echo "   ===============     WELCOME TO FUNTTASTIC HUMMINGBOT CLIENT SETUP     ==============="
+    echo "   =====================     DOCKER CONTAINERS START / RESTART     ====================="
     echo
     echo "   CHOOSE WHICH CONTAINERS AND SERVICES YOU WOULD LIKE TO RESTART:"
     echo
@@ -115,6 +157,8 @@ choose() {
     echo
 
     read -rp "   Enter your choice (1-4): " CHOICE
+
+    clear
 
     while true; do
         case $CHOICE in

@@ -168,7 +168,16 @@ wallet() {
   if [ "$method" == "POST" ]; then
     while true; do
       echo
-      read -s -rp "   Enter your Kujira wallet mnemonic >>> " mnemonic
+      read -s -rp "   Enter your Kujira wallet mnemonic
+   [or type 'back' to return to menu] >>> " mnemonic
+
+      if [ "$mnemonic" == 'back' ]; then
+        echo -e "\n\n   [!] Returning to the menu..."
+        echo
+        sleep 2
+        break
+      fi
+
       if [ -z "$mnemonic" ]; then
         echo
         echo
@@ -191,9 +200,17 @@ wallet() {
   elif [  "$method" == "DELETE"  ]; then
     while true; do
       echo
-      read -rp "   Enter the public key of the wallet you want to remove >>> " public_key
-      if [ -z "$public_key" ]; then
+      read -rp "   Enter the public key of the wallet you want to remove
+   [or type 'back' to return to menu] >>> " public_key
+
+      if [ "$public_key" == 'back' ]; then
+        echo -e "\n   [!] Returning to the menu..."
         echo
+        sleep 2
+        break
+      fi
+
+      if [ -z "$public_key" ]; then
         echo
         echo "      Invalid account public key, please try again."
       else
@@ -212,15 +229,18 @@ wallet() {
 
 #  echo "$payload"
 
-	send_request \
-	--method "$method" \
-	--url "$url" \
-	--payload "$payload"
+  if [[ "$method" == "POST" && ! "$mnemonic" == "back" || "$method" == "DELETE" && ! "$public_key" == "back" ]]; then
+    send_request \
+    --method "$method" \
+    --url "$url" \
+    --payload "$payload"
+  fi
 }
 
 choose() {
+    clear
     echo
-    echo "   ===============     WELCOME TO FUNTTASTIC HUMMINGBOT CLIENT SETUP     ==============="
+    echo "   ==========      BOT CONTROL -> FUNTTASTIC HUMMINGBOT CLIENT / GATEWAY      =========="
     echo
     echo "   CHOOSE WHICH ACTION YOU WOULD LIKE TO PERFORM:"
     echo

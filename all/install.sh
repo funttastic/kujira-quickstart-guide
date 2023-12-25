@@ -45,6 +45,7 @@ default_values_info () {
 }
 
 pre_installation_fun_hb_client () {
+  clear
   echo
   echo
   echo "   ===============    FUNTTASTIC HUMMINGBOT CLIENT INSTALLATION SETUP    ==============="
@@ -186,6 +187,7 @@ pre_installation_fun_hb_client () {
 }
 
 pre_installation_hb_client () {
+  clear
   echo
   echo
   echo "   ===============   HUMMINGBOT CLIENT INSTALLATION SETUP   ==============="
@@ -306,6 +308,7 @@ pre_installation_hb_client () {
 }
 
 pre_installation_hb_gateway () {
+  clear
   echo
   echo
   echo "   ===============   HUMMINGBOT GATEWAY INSTALLATION SETUP   ==============="
@@ -453,8 +456,9 @@ pre_installation_hb_gateway () {
   GATEWAY_LOGS_FOLDER="$GATEWAY_FOLDER/logs"
 }
 
+clear
 echo
-echo "   ===============     WELCOME TO FUNTTASTIC HUMMINGBOT CLIENT SETUP     ==============="
+echo "   ============================     INSTALLATION OPTIONS     ==========================="
 echo
 
 RESPONSE=""
@@ -479,6 +483,7 @@ fi
 
 if [ "$CUSTOMIZE" == "--customize" ]
 then
+  clear
   echo
   echo "   CHOOSE WHICH INSTALLATION YOU WOULD LIKE TO DO:"
   echo
