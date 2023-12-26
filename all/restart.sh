@@ -112,10 +112,31 @@ restart_container() {
     docker exec "$container_name" /bin/bash -c "$exec_command" > /dev/null 2>&1 &
 }
 
+authentication() {
+    echo
+    echo "   Please enter your SSL certificates passphrase"
+    echo
+    echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+    echo "   | [i] This password was set during the Funttastic HB Client installation            |"
+    echo "   |     or by running the 'gateway generate-certs' command in the Hummingbot Client   |"
+    echo "   |     or during the Hummingbot Gateway installation if you installed it separately. |"
+    echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+    echo
+
+    read -srp "   >>> " passphrase
+
+    echo $passphrase > /dev/null 2>&1
+}
+
 # Specific functions to restart containers
 restart_fun_hb_client() {
     get_container_name FUN_HB_CLIENT_CONTAINER_NAME
-    restart_container "$FUN_HB_CLIENT_CONTAINER_NAME" "python app.py"
+
+    if [ ! "$FUN_HB_CLIENT_CONTAINER_NAME" == "skip" ]; then
+        authentication
+    fi
+
+    restart_container "$FUN_HB_CLIENT_CONTAINER_NAME" "python app.py $passphrase"
 }
 
 restart_hb_client() {
@@ -125,7 +146,12 @@ restart_hb_client() {
 
 restart_hb_gateway() {
     get_container_name HB_GATEWAY_CONTAINER_NAME
-    restart_container "$HB_GATEWAY_CONTAINER_NAME" "yarn start"
+
+    if [[ ! "$HB_GATEWAY_CONTAINER_NAME" == "skip" && ! "$CHOICE" == 1 ]]; then
+        authentication
+    fi
+    
+    restart_container "$HB_GATEWAY_CONTAINER_NAME" "yarn start --passphrase=$passphrase"
 }
 
 # Function to restart all containers
