@@ -193,9 +193,7 @@ pre_installation_hb_client () {
   echo "   ===============   HUMMINGBOT CLIENT INSTALLATION SETUP   ==============="
   echo
 
-  if [ "$CHOICE" == 2 ]; then
-    default_values_info
-  fi
+  default_values_info
 
   RESPONSE="$HB_CLIENT_IMAGE_NAME"
   if [ "$RESPONSE" == "" ]
@@ -314,9 +312,7 @@ pre_installation_hb_gateway () {
   echo "   ===============   HUMMINGBOT GATEWAY INSTALLATION SETUP   ==============="
   echo
 
-  if [ "$CHOICE" == 3 ]; then
-    default_values_info
-  fi
+  default_values_info
 
   RESPONSE="$GATEWAY_IMAGE_NAME"
   if [ "$RESPONSE" == "" ]
@@ -393,8 +389,8 @@ pre_installation_hb_gateway () {
     GATEWAY_FOLDER=$RESPONSE
   fi
 
-  # Executes only if the choice is 3
-  if [ "$CHOICE" == 3 ]; then
+  # Executes only if the choice is 3 or U2
+  if [[ "$CHOICE" == 3 || "$CHOICE" == "U2" ]]; then
     # Prompts user for a password for the gateway certificates
     while true; do
         echo
@@ -461,12 +457,34 @@ echo
 echo "   ============================     INSTALLATION OPTIONS     ==========================="
 echo
 
-RESPONSE=""
+echo "   Do you want to install apps in individual containers? [Y/n]"
+echo
+echo "ℹ️  Enter the value [0] to return to the main menu."
+echo
+
+read -rp "   [Y/n/0] >>> " RESPONSE
+if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "" ]]
+then
+  INDIVIDUAL_CONTAINERS="True"
+  echo
+  echo "   [i] You chose 'Yes'"
+elif [[ "$RESPONSE" == "0" ]]; then
+  clear
+  ./configure
+  exit 0
+else
+  INDIVIDUAL_CONTAINERS="False"
+  echo
+  echo "   [i] You chose 'No'"
+fi
+
+echo
+echo
 echo "   Do you want to automate the entire process,
    including setting a random passphrase? [Y/n]"
 
 echo
-echo "ℹ️  Enter the value [0] to return to the main menu."
+echo "ℹ️  Enter the value [0] to return to the previous question."
 echo
 
 read -rp "   [Y/n/0] >>> " RESPONSE
@@ -475,7 +493,7 @@ then
   echo
 elif [[ "$RESPONSE" == "0" ]]; then
   clear
-  ./configure
+  ./all/install.sh
   exit 0
 else
   CUSTOMIZE="--customize"
@@ -483,66 +501,130 @@ fi
 
 if [ "$CUSTOMIZE" == "--customize" ]
 then
-  clear
-  echo
-  echo "   CHOOSE WHICH INSTALLATION YOU WOULD LIKE TO DO:"
-  echo
-  echo "   [1] FUNTTASTIC HUMMINGBOT CLIENT"
-  echo "   [2] HUMMINGBOT CLIENT"
-  echo "   [3] HUMMINGBOT GATEWAY"
-  echo "   [4] FUNTTASTIC HUMMINGBOT CLIENT and HUMMINGBOT GATEWAY [RECOMMENDED]"
-  echo "   [5] ALL"
-  echo
-  echo "   [0] RETURN TO MAIN MENU"
-  echo
-  echo "   For more information about the FUNTTASTIC HUMMINGBOT CLIENT, please visit:"
-  echo
-  echo "         https://www.funttastic.com/partners/kujira"
-  echo
-
-  read -rp "   Enter your choice (1-5): " CHOICE
-
-#  if [[ -z $choice || ! $choice =~ ^[1-5]$ ]]; then
-#      CHOICE=4
-#  fi
-
-  while true; do
-    case $CHOICE in
-        1|2|3|4|5|0)
-            break
-            ;;
-        *)
-            echo "   Invalid Input. Enter a number between 1 and 5."
-            ;;
-    esac
+  if [ "$INDIVIDUAL_CONTAINERS" == "True" ]; then
+    clear
+    echo
+    echo "   CHOOSE WHICH INSTALLATION YOU WOULD LIKE TO DO:"
+    echo
+    echo "   [1] FUNTTASTIC HUMMINGBOT CLIENT"
+    echo "   [2] HUMMINGBOT CLIENT"
+    echo "   [3] HUMMINGBOT GATEWAY"
+    echo "   [4] FUNTTASTIC HUMMINGBOT CLIENT and HUMMINGBOT GATEWAY [RECOMMENDED]"
+    echo "   [5] ALL"
+    echo
+    echo "   [0] RETURN TO MAIN MENU"
+    echo
+    echo "   For more information about the FUNTTASTIC HUMMINGBOT CLIENT, please visit:"
+    echo
+    echo "         https://www.funttastic.com/partners/kujira"
+    echo
 
     read -rp "   Enter your choice (1-5): " CHOICE
-  done
 
-  case $CHOICE in
-      1)
-          pre_installation_fun_hb_client
-          ;;
-      2)
-          pre_installation_hb_client
-          ;;
-      3)
-          pre_installation_hb_gateway
-          ;;
-      4)
-          pre_installation_fun_hb_client
-          pre_installation_hb_gateway
-          ;;
-      5)
-          pre_installation_fun_hb_client
-          pre_installation_hb_gateway
-          pre_installation_hb_client
-          ;;
-      0)
-          clear
-          ./configure
-          ;;
-  esac
+    while true; do
+      case $CHOICE in
+          1|2|3|4|5|0)
+              break
+              ;;
+          *)
+              echo
+              echo "   [!] Invalid Input. Enter a number between 1 and 5."
+              echo
+              ;;
+      esac
+
+      read -rp "   Enter your choice (1-5): " CHOICE
+    done
+
+    case $CHOICE in
+        1)
+            pre_installation_fun_hb_client
+            ;;
+        2)
+            pre_installation_hb_client
+            ;;
+        3)
+            pre_installation_hb_gateway
+            ;;
+        4)
+            pre_installation_fun_hb_client
+            pre_installation_hb_gateway
+            ;;
+        5)
+            pre_installation_fun_hb_client
+            pre_installation_hb_gateway
+            pre_installation_hb_client
+            ;;
+        0)
+            clear
+            ./configure
+            ;;
+    esac
+  else
+    clear
+    echo
+    echo "   CHOOSE WHICH INSTALLATION YOU WOULD LIKE TO DO:"
+    echo
+    echo "   [1] FUNTTASTIC HUMMINGBOT CLIENT and HUMMINGBOT GATEWAY [RECOMMENDED]"
+    echo "   [2] HUMMINGBOT CLIENT and HUMMINGBOT GATEWAY"
+    echo "   [3] ALL"
+    echo
+    echo "   [0] RETURN TO MAIN MENU"
+    echo "   [exit] STOP SCRIPT EXECUTION"
+    echo
+    echo "   For more information about the FUNTTASTIC HUMMINGBOT CLIENT, please visit:"
+    echo
+    echo "         https://www.funttastic.com/partners/kujira"
+    echo
+
+    read -rp "   Enter your choice (1-3): " CHOICE
+
+    while true; do
+      case $CHOICE in
+          1|2|3|0)
+              break
+              ;;
+          *)
+              echo
+              echo "   [!] Invalid Input. Enter a number between 1 and 3."
+              echo
+              ;;
+      esac
+
+      read -rp "   Enter your choice (1-3): " CHOICE
+    done
+
+    case $CHOICE in
+        1)
+            CHOICE="U1"
+            pre_installation_fun_hb_client
+            pre_installation_hb_gateway
+            ;;
+        2)
+            CHOICE="U2"
+            pre_installation_hb_client
+            pre_installation_hb_gateway
+            ;;
+        3)
+            CHOICE="U3"
+            pre_installation_fun_hb_client
+            pre_installation_hb_gateway
+            pre_installation_hb_client
+            ;;
+        0)
+            clear
+            ./configure
+            ;;
+        "exit")
+            echo
+            echo
+            echo "      The script will close automatically in 2 seconds..."
+            echo
+            sleep 2
+            exit 0
+            ;;
+    esac
+  fi
 else
   # Default settings to install Funttastic Hummingbot Client, Hummingbot Gateway and Hummingbot Client
 
@@ -691,7 +773,6 @@ docker_create_image_hb_gateway () {
   fi
 }
 
-
 docker_create_container_hb_gateway () {
   $BUILT && docker run \
   -dt \
@@ -710,6 +791,152 @@ docker_create_container_hb_gateway () {
   -e GATEWAY_PORT="$GATEWAY_PORT" \
   --entrypoint="$ENTRYPOINT" \
   "$GATEWAY_IMAGE_NAME":$TAG
+}
+
+unified_docker_create_image_choice_one () {
+  if [[ ! "$FUN_HB_CLIENT_BUILD_CACHE" == "" || ! "$GATEWAY_BUILD_CACHE" == ""  ]]
+  then
+    BUILT=$(DOCKER_BUILDKIT=1 docker build \
+    --build-arg SSH_PUBLIC_KEY="$SSH_PUBLIC_KEY" \
+    --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" \
+    --build-arg FUN_HB_CLIENT_REPOSITORY_URL="$FUN_HB_CLIENT_REPOSITORY_URL" \
+    --build-arg FUN_HB_CLIENT_REPOSITORY_BRANCH="$FUN_HB_CLIENT_REPOSITORY_BRANCH" \
+    --build-arg GATEWAY_REPOSITORY_URL="$GATEWAY_REPOSITORY_URL" \
+    --build-arg GATEWAY_REPOSITORY_BRANCH="$GATEWAY_REPOSITORY_BRANCH" \
+    -t "fun-hb-client-and-hb-gateway" -f ./all/Dockerfile/unified/Dockerfile .)
+  fi
+}
+
+unified_docker_create_container_choice_one () {
+  $BUILT \
+  && docker run \
+    -dit \
+    --log-opt max-size=10m \
+    --log-opt max-file=5 \
+    --name "fun-hb-client-and-hb-gateway" \
+    --network "$NETWORK" \
+    --mount type=bind,source="$RESOURCES_FOLDER",target=/root/funttastic/client/resources \
+    --mount type=bind,source="$CERTS_FOLDER",target=/root/hummingbot/gateway/certs \
+    --mount type=bind,source="$GATEWAY_CONF_FOLDER",target=/root/hummingbot/gateway/conf \
+    --mount type=bind,source="$GATEWAY_LOGS_FOLDER",target=/root/hummingbot/gateway/logs \
+    --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
+    -e RESOURCES_FOLDER="/root/funttastic/client/resources" \
+    -e CERTS_FOLDER="/root/hummingbot/gateway/certs" \
+    -e CONF_FOLDER="/root/hummingbot/gateway/conf" \
+    -e LOGS_FOLDER="/root/hummingbot/gateway/logs" \
+    -e FUN_HB_CLIENT_PORT="$FUN_HB_CLIENT_PORT" \
+    -e GATEWAY_PORT="$GATEWAY_PORT" \
+    --entrypoint="$ENTRYPOINT" \
+    "fun-hb-client-and-hb-gateway":$TAG
+
+#    --mount type=bind,source="$CERTS_FOLDER",target=/root/funttastic/client/resources/certificates \
+#    -e CERTS_FOLDER="/root/funttastic/client/resources/certificates" \
+}
+
+unified_docker_create_image_choice_two () {
+  if [[ ! "$HB_CLIENT_BUILD_CACHE" == "" || ! "$GATEWAY_BUILD_CACHE" == ""  ]]
+  then
+    BUILT=$(DOCKER_BUILDKIT=1 docker build \
+    --build-arg SSH_PUBLIC_KEY="$SSH_PUBLIC_KEY" \
+    --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" \
+    --build-arg HB_CLIENT_REPOSITORY_URL="$HB_CLIENT_REPOSITORY_URL" \
+    --build-arg HB_CLIENT_REPOSITORY_BRANCH="$HB_CLIENT_REPOSITORY_BRANCH" \
+    --build-arg GATEWAY_REPOSITORY_URL="$GATEWAY_REPOSITORY_URL" \
+    --build-arg GATEWAY_REPOSITORY_BRANCH="$GATEWAY_REPOSITORY_BRANCH" \
+    -t "hb-client-and-hb-gateway" -f ./all/Dockerfile/unified/Dockerfile .)
+  fi
+}
+
+unified_docker_create_container_choice_two () {
+  $BUILT \
+  && docker run \
+    -dit \
+    --log-opt max-size=10m \
+    --log-opt max-file=5 \
+    --name "hb-client-and-hb-gateway" \
+    --network "$NETWORK" \
+    --mount type=bind,source="$HB_CLIENT_CONF_FOLDER",target=/root/hummingbot/client/conf/connectors \
+    --mount type=bind,source="$HB_CLIENT_LOGS_FOLDER",target=/root/hummingbot/client/logs \
+    --mount type=bind,source="$HB_CLIENT_DATA_FOLDER",target=/root/hummingbot/client/data \
+    --mount type=bind,source="$HB_CLIENT_SCRIPTS_FOLDER",target=/root/hummingbot/client/scripts \
+    --mount type=bind,source="$HB_CLIENT_PMM_SCRIPTS_FOLDER",target=/root/hummingbot/client/pmm_scripts \
+    --mount type=bind,source="$CERTS_FOLDER",target=/root/hummingbot/gateway/certs \
+    --mount type=bind,source="$GATEWAY_CONF_FOLDER",target=/root/hummingbot/gateway/conf \
+    --mount type=bind,source="$GATEWAY_LOGS_FOLDER",target=/root/hummingbot/gateway/logs \
+    --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
+    -e HB_CLIENT_LOGS_FOLDER="/root/hummingbot/client/logs" \
+    -e HB_CLIENT_DATA_FOLDER="/root/hummingbot/client/data" \
+    -e HB_CLIENT_SCRIPTS_FOLDER="/root/hummingbot/client/scripts" \
+    -e HB_CLIENT_PMM_SCRIPTS_FOLDER="/root/hummingbot/client/pmm_scripts" \
+    -e RESOURCES_FOLDER="/root/funttastic/client/resources" \
+    -e CERTS_FOLDER="/root/hummingbot/gateway/certs" \
+    -e CONF_FOLDER="/root/hummingbot/gateway/conf" \
+    -e LOGS_FOLDER="/root/hummingbot/gateway/logs" \
+    -e FUN_HB_CLIENT_PORT="$FUN_HB_CLIENT_PORT" \
+    -e GATEWAY_PORT="$GATEWAY_PORT" \
+    -e GATEWAY_COMMAND="$GATEWAY_COMMAND" \
+    -e HB_CLIENT_COMMAND="$HB_CLIENT_COMMAND" \
+    --entrypoint="$ENTRYPOINT" \
+    "hb-client-and-hb-gateway":$TAG
+
+#    --mount type=bind,source="$CERTS_FOLDER",target=/root/hummingbot/client/certs \
+#    -e CERTS_FOLDER="/root/hummingbot/client/certs" \
+}
+
+unified_docker_create_image_choice_three () {
+  if [[ ! "$FUN_HB_CLIENT_BUILD_CACHE" == "" || ! "$HB_CLIENT_BUILD_CACHE" == "" || ! "$GATEWAY_BUILD_CACHE" == ""  ]]
+  then
+    BUILT=$(DOCKER_BUILDKIT=1 docker build \
+    --build-arg SSH_PUBLIC_KEY="$SSH_PUBLIC_KEY" \
+    --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" \
+    --build-arg FUN_HB_CLIENT_REPOSITORY_URL="$FUN_HB_CLIENT_REPOSITORY_URL" \
+    --build-arg FUN_HB_CLIENT_REPOSITORY_BRANCH="$FUN_HB_CLIENT_REPOSITORY_BRANCH" \
+    --build-arg HB_CLIENT_REPOSITORY_URL="$HB_CLIENT_REPOSITORY_URL" \
+    --build-arg HB_CLIENT_REPOSITORY_BRANCH="$HB_CLIENT_REPOSITORY_BRANCH" \
+    --build-arg GATEWAY_REPOSITORY_URL="$GATEWAY_REPOSITORY_URL" \
+    --build-arg GATEWAY_REPOSITORY_BRANCH="$GATEWAY_REPOSITORY_BRANCH" \
+    -t "all-apps" -f ./all/Dockerfile/unified/Dockerfile .)
+  fi
+}
+
+unified_docker_create_container_choice_three () {
+  $BUILT \
+  && docker run \
+    -dit \
+    --log-opt max-size=10m \
+    --log-opt max-file=5 \
+    --name "all-apps" \
+    --network "$NETWORK" \
+    --mount type=bind,source="$RESOURCES_FOLDER",target=/root/funttastic/client/resources \
+    --mount type=bind,source="$HB_CLIENT_CONF_FOLDER",target=/root/hummingbot/client/conf/connectors \
+    --mount type=bind,source="$HB_CLIENT_LOGS_FOLDER",target=/root/hummingbot/client/logs \
+    --mount type=bind,source="$HB_CLIENT_DATA_FOLDER",target=/root/hummingbot/client/data \
+    --mount type=bind,source="$HB_CLIENT_SCRIPTS_FOLDER",target=/root/hummingbot/client/scripts \
+    --mount type=bind,source="$HB_CLIENT_PMM_SCRIPTS_FOLDER",target=/root/hummingbot/client/pmm_scripts \
+    --mount type=bind,source="$CERTS_FOLDER",target=/root/hummingbot/gateway/certs \
+    --mount type=bind,source="$GATEWAY_CONF_FOLDER",target=/root/hummingbot/gateway/conf \
+    --mount type=bind,source="$GATEWAY_LOGS_FOLDER",target=/root/hummingbot/gateway/logs \
+    --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
+    -e RESOURCES_FOLDER="/root/funttastic/client/resources" \
+    -e HB_CLIENT_LOGS_FOLDER="/root/hummingbot/client/logs" \
+    -e HB_CLIENT_DATA_FOLDER="/root/hummingbot/client/data" \
+    -e HB_CLIENT_SCRIPTS_FOLDER="/root/hummingbot/client/scripts" \
+    -e HB_CLIENT_PMM_SCRIPTS_FOLDER="/root/hummingbot/client/pmm_scripts" \
+    -e RESOURCES_FOLDER="/root/funttastic/client/resources" \
+    -e CERTS_FOLDER="/root/hummingbot/gateway/certs" \
+    -e CONF_FOLDER="/root/hummingbot/gateway/conf" \
+    -e LOGS_FOLDER="/root/hummingbot/gateway/logs" \
+    -e FUN_HB_CLIENT_PORT="$FUN_HB_CLIENT_PORT" \
+    -e GATEWAY_PORT="$GATEWAY_PORT" \
+    -e GATEWAY_COMMAND="$GATEWAY_COMMAND" \
+    -e HB_CLIENT_COMMAND="$HB_CLIENT_COMMAND" \
+    --entrypoint="$ENTRYPOINT" \
+    "all-apps":$TAG
+
+#    --mount type=bind,source="$CERTS_FOLDER",target=/root/funttastic/client/resources/certificates \
+#    -e CERTS_FOLDER="/root/funttastic/client/resources/certificates" \
+#    --mount type=bind,source="$CERTS_FOLDER",target=/root/hummingbot/client/certs \
+#    -e CERTS_FOLDER="/root/hummingbot/client/certs" \
 }
 
 post_installation_fun_hb_client () {
@@ -830,9 +1057,91 @@ choice_five_installation () {
   choice_three_installation
 }
 
+unified_default_installation () {
+  mkdir -p "$SHARED_FOLDER"
+  mkdir -p "$CERTS_FOLDER"
+
+  mkdir -p "$RESOURCES_FOLDER"
+
+  mkdir -p "$GATEWAY_FOLDER"
+  mkdir -p "$GATEWAY_CONF_FOLDER"
+  mkdir -p "$GATEWAY_LOGS_FOLDER"
+
+  chmod a+rw "$GATEWAY_CONF_FOLDER"
+
+  unified_docker_create_image_choice_one
+  unified_docker_create_container_choice_one
+}
+
+unified_choice_two_installation () {
+  mkdir -p "$SHARED_FOLDER"
+  mkdir -p "$CERTS_FOLDER"
+
+  mkdir -p "$HB_CLIENT_FOLDER"
+  mkdir -p "$HB_CLIENT_CONF_FOLDER"
+  mkdir -p "$HB_CLIENT_CONF_FOLDER"/connectors
+  mkdir -p "$HB_CLIENT_CONF_FOLDER"/strategies
+  mkdir -p "$HB_CLIENT_LOGS_FOLDER"
+  mkdir -p "$HB_CLIENT_DATA_FOLDER"
+  mkdir -p "$HB_CLIENT_PMM_SCRIPTS_FOLDER"
+  mkdir -p "$HB_CLIENT_SCRIPTS_FOLDER"
+
+  chmod a+rw "$HB_CLIENT_CONF_FOLDER"
+
+  mkdir -p "$GATEWAY_FOLDER"
+  mkdir -p "$GATEWAY_CONF_FOLDER"
+  mkdir -p "$GATEWAY_LOGS_FOLDER"
+
+  chmod a+rw "$GATEWAY_CONF_FOLDER"
+
+  unified_docker_create_image_choice_two
+  unified_docker_create_container_choice_two
+}
+
+unified_choice_three_installation () {
+  mkdir -p "$SHARED_FOLDER"
+  mkdir -p "$CERTS_FOLDER"
+
+  mkdir -p "$RESOURCES_FOLDER"
+
+  mkdir -p "$HB_CLIENT_FOLDER"
+  mkdir -p "$HB_CLIENT_CONF_FOLDER"
+  mkdir -p "$HB_CLIENT_CONF_FOLDER"/connectors
+  mkdir -p "$HB_CLIENT_CONF_FOLDER"/strategies
+  mkdir -p "$HB_CLIENT_LOGS_FOLDER"
+  mkdir -p "$HB_CLIENT_DATA_FOLDER"
+  mkdir -p "$HB_CLIENT_PMM_SCRIPTS_FOLDER"
+  mkdir -p "$HB_CLIENT_SCRIPTS_FOLDER"
+
+  chmod a+rw "$HB_CLIENT_CONF_FOLDER"
+
+  mkdir -p "$GATEWAY_FOLDER"
+  mkdir -p "$GATEWAY_CONF_FOLDER"
+  mkdir -p "$GATEWAY_LOGS_FOLDER"
+
+  chmod a+rw "$GATEWAY_CONF_FOLDER"
+
+  unified_docker_create_image_choice_three
+  unified_docker_create_container_choice_three
+}
+
 execute_installation () {
   mkdir -p "$SHARED_FOLDER"
   mkdir -p "$COMMON_FOLDER"
+
+  if [ "$INDIVIDUAL_CONTAINERS" == "False" ]; then
+    case $CHOICE in
+      1)
+          CHOICE="U1"
+          ;;
+      2)
+          CHOICE="U2"
+          ;;
+      3)
+          CHOICE="U3"
+          ;;
+    esac
+  fi
 
   case $CHOICE in
     1)
@@ -882,6 +1191,44 @@ execute_installation () {
         echo
 
         choice_five_installation
+        ;;
+    "U1")
+        echo
+        echo "   Installing:"
+        echo
+        echo "     > Funttastic Hummingbot Client"
+        echo "     > Hummingbot Gateway"
+        echo
+        echo "     [i] Both in just one container."
+        echo
+
+        unified_default_installation
+        ;;
+    "U2")
+        echo
+        echo "   Installing:"
+        echo
+        echo "     > Hummingbot Client"
+        echo "     > Hummingbot Gateway"
+        echo
+        echo "     [i] Both in just one container."
+        echo
+
+        unified_choice_two_installation
+        ;;
+    "U3")
+        echo
+        echo "   Installing:"
+        echo
+        echo "     > Funttastic Hummingbot Client"
+        echo "     > Hummingbot Client"
+        echo "     > Hummingbot Gateway"
+        echo
+        echo "     [i] All in just one container."
+        echo
+
+        unified_choice_three_installation
+        ;;
   esac
 }
 
@@ -975,6 +1322,8 @@ install_docker () {
 
 if [[ "$CUSTOMIZE" == "--customize" &&  ! "$NOT_IMPLEMENTED" ]]
 then
+  clear
+
   echo
   echo "ℹ️  Confirm below if the common settings are correct:"
   echo
@@ -985,7 +1334,7 @@ then
   printf "%25s %5s\n" "Entrypoint:"    				"$ENTRYPOINT"
   echo
 
-  if [[ "$CHOICE" == 1 || "$CHOICE" == 4 || "$CHOICE" == 5 ]]; then
+  if [[ "$CHOICE" == 1 || "$CHOICE" == 4 || "$CHOICE" == 5 || "$CHOICE" == "U1" || "$CHOICE" == "U3" ]]; then
     echo
     echo "ℹ️  Confirm below if the Funttastic Hummingbot Client instance and its folders are correct:"
     echo
@@ -1002,9 +1351,9 @@ then
     echo
   fi
 
-  if [[ "$CHOICE" == 2 || "$CHOICE" == 5 ]]; then
+  if [[ "$CHOICE" == 2 || "$CHOICE" == 5 || "$CHOICE" == "U2" || "$CHOICE" == "U3" ]]; then
     echo
-    echo "ℹ️  Confirm below if the instance and its folders are correct:"
+    echo "ℹ️  Confirm below if the Hummingbot Client instance and its folders are correct:"
     echo
     printf "%25s %5s\n" "Image:"              	"$HB_CLIENT_IMAGE_NAME:$TAG"
     printf "%25s %5s\n" "Instance:"        			"$HB_CLIENT_CONTAINER_NAME"
@@ -1022,9 +1371,9 @@ then
     echo
   fi
 
-  if [[ "$CHOICE" == 3 || "$CHOICE" == 4 || "$CHOICE" == 5 ]]; then
+  if [[ ! "$CHOICE" == 1 && ! "$CHOICE" == 2 ]]; then
     echo
-    echo "ℹ️  Confirm below if the instance and its folders are correct:"
+    echo "ℹ️  Confirm below if the Hummingbot Gateway instance and its folders are correct:"
     echo
     printf "%25s %5s\n" "Image:"              	"$GATEWAY_IMAGE_NAME:$TAG"
     printf "%25s %5s\n" "Instance:"        			"$GATEWAY_CONTAINER_NAME"
@@ -1053,7 +1402,11 @@ then
   fi
 else
   if [ ! "$NOT_IMPLEMENTED" ]; then
-    CHOICE=4
+    if [ "$INDIVIDUAL_CONTAINERS" == "True" ]; then
+      CHOICE=4
+    else
+      CHOICE="U1"
+    fi
     install_docker
   fi
 fi

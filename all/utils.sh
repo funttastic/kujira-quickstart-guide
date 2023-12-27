@@ -181,7 +181,7 @@ wallet() {
       if [ -z "$mnemonic" ]; then
         echo
         echo
-        echo "      Invalid mnemonic, please try again."
+        echo "      [!] Invalid mnemonic, please try again."
       else
         echo
         break
@@ -212,7 +212,7 @@ wallet() {
 
       if [ -z "$public_key" ]; then
         echo
-        echo "      Invalid account public key, please try again."
+        echo "      [!] Invalid account public key, please try again."
       else
         echo
         break
@@ -311,7 +311,9 @@ choose() {
                 exit 0
                 ;;
             *)
-                echo "   Invalid Input. Enter a number between 1 and 5."
+                echo
+                echo "   [!] Invalid Input. Enter a number between 1 and 5."
+                echo
                 read -rp "   Enter your choice (1-5): " CHOICE
                 ;;
         esac

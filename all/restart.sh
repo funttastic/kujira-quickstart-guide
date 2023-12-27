@@ -229,7 +229,9 @@ choose() {
                 exit 0
                 ;;
             *)
-                echo "   Invalid Input. Enter a number between 1 and 4."
+                echo
+                echo "   [!] Invalid Input. Enter a number between 1 and 4."
+                echo
                 read -rp "   Enter your choice (1-4): " CHOICE
                 ;;
         esac
