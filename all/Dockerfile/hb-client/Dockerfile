@@ -45,7 +45,6 @@ RUN <<-EOF
 		libusb-1.0 \
 		build-essential \
 		pkg-config \
-		libusb-1.0 \
 		libsecret-1-0 \
 		libssl-dev \
 		curl \
