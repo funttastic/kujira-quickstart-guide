@@ -58,36 +58,32 @@ RUN <<-EOF
   apt-get update
 
   apt-get install --no-install-recommends -y \
-    ca-certificates \
-    openssh-server \
     git \
-    python3 \
-    python3-pip \
-    postgresql-server-dev-all \
-    build-essential \
     gcc \
-    libusb-1.0 \
-    pkg-config \
-    libusb-1.0 \
-    libsecret-1-0 \
-    libssl-dev \
-    curl \
-    python3-dev \
     vim \
     tree \
-    psmisc
-
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
-  nvm install 16.3.0
-  nvm use 16.3.0
+    psmisc \
+    curl \
+    python3 \
+    python3-pip \
+    python3-dev \
+    libusb-1.0 \
+    libssl-dev \
+    pkg-config \
+    libsecret-1-0 \
+    openssh-server \
+    build-essential \
+    ca-certificates \
+    postgresql-server-dev-all
 
   set +ex
 EOF
 
+RUN echo "Starting Funttastic Hummingbot Client build process"
+
 RUN <<-EOF
   set -ex
 
-#  unlink /usr/bin/python
   unlink /usr/bin/pip
   ln -s /usr/bin/python3 /usr/bin/python
   ln -s /usr/bin/pip3 /usr/bin/pip
@@ -133,7 +129,39 @@ RUN <<-EOF
   mkdir -p funttastic/client
   cp -a /tmp/funttastic/. funttastic/client
   rm -rf /tmp/funttastic
-  pip install -r requirements.txt
+  pip install -r funttastic/client/requirements.txt
+
+  set +ex
+EOF
+
+RUN <<-EOF
+  set -ex
+
+  mkdir -p funttastic/client/certificates
+  cp funttastic/client/resources/configuration/production.example.yml funttastic/client/resources/configuration/production.yml
+  cp -R funttastic/client/resources/strategies/templates/* funttastic/client/resources/strategies
+
+  set +ex
+EOF
+
+RUN <<-EOF
+  set -ex
+
+  mv funttastic/client/resources funttastic/client/resources_temp
+
+  set +ex
+EOF
+
+RUN echo "Ending Funttastic Hummingbot Client build process"
+
+RUN echo "Starting Hummingbot Gateway build process"
+
+RUN <<-EOF
+	set -ex
+
+	git clone -b $GATEWAY_REPOSITORY_BRANCH $GATEWAY_REPOSITORY_URL /tmp/hummingbot/gateway
+	mkdir -p hummingbot/gateway
+	cp -a /tmp/hummingbot/gateway/. hummingbot/gateway
 
   set +ex
 EOF
@@ -141,12 +169,69 @@ EOF
 RUN <<-EOF
 	set -ex
 
-	git clone -b $GATEWAY_REPOSITORY_BRANCH $GATEWAY_REPOSITORY_URL /tmp/hummingbot/gateway
+	mkdir -p \
+		hummingbot/gateway/certs \
+		hummingbot/gateway/db \
+		hummingbot/gateway/conf \
+		hummingbot/gateway/logs \
+		/var/lib
+
+	set +ex
+EOF
+
+RUN <<-EOF
+  set -ex
+
+  cp -R hummingbot/gateway/src/templates/. hummingbot/gateway/conf
+
+  set +ex
+EOF
+
+# Install nvm and CeloCLI; note: nvm adds own section to /root/.bashrc
+RUN <<-EOF
+	set -ex
+
+	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+
+  export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+
+	nvm install 16.3.0
+	nvm use 16.3.0
+	nvm cache clear
+
+#	if [ ! "$ARCHITECTURE" == "aarch64" ]
+#	then
+#		npm install --unsafe-perm --only=production -g @celo/celocli@1.0.3
+#	fi
+
+	npm install --global yarn
+	npm cache clean --force
+
+	rm -rf /root/.cache
+
+	set +ex
+EOF
+
+RUN <<-EOF
+	set -ex
+
+  cd hummingbot/gateway
+	yarn
+	yarn prebuild
+	yarn build
+
+	set +ex
+EOF
+
+RUN echo "Ending Hummingbot Gateway build process"
+
+RUN echo "Starting Hummingbot Client build process"
+
+RUN <<-EOF
+	set -ex
+
 	git clone -b $HB_CLIENT_REPOSITORY_BRANCH $HB_CLIENT_REPOSITORY_URL /tmp/hummingbot/client
-
-	mkdir -p hummingbot/gateway
-	cp -a /tmp/hummingbot/gateway/. hummingbot/gateway
-
 	mkdir -p hummingbot/client
 	cp -a /tmp/hummingbot/client/. hummingbot/client
 
@@ -216,32 +301,10 @@ RUN <<-EOF
 	set +ex
 EOF
 
-# Install nvm and CeloCLI; note: nvm adds own section to /root/.bashrc
 RUN <<-EOF
 	set -ex
 
-	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-	NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-	[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-
-	nvm install 10
-
-	if [ ! "$ARCHITECTURE" == "aarch64" ]
-	then
-		npm install --unsafe-perm --only=production -g @celo/celocli@1.0.3
-	fi
-
-	nvm cache clear
-	npm cache clean --force
-	rm -rf /root/.cache
-
-	set +ex
-EOF
-
-RUN <<-EOF
-	set -ex
-
-	MINICONDA_ENVIRONMENT=$(head -1 /root/hummingbot/client/setup/environment.yml | cut -d' ' -f2)
+	MINICONDA_ENVIRONMENT=$(head -1 hummingbot/client/setup/environment.yml | cut -d' ' -f2)
 	if [ -z "$MINICONDA_ENVIRONMENT" ]
 	then
 		echo "The MINICONDA_ENVIRONMENT environment variable could not be defined."
@@ -249,7 +312,7 @@ RUN <<-EOF
 	fi
 	echo "export MINICONDA_ENVIRONMENT=$MINICONDA_ENVIRONMENT" >> /root/.bashrc
 
-	/root/miniconda3/bin/conda env create -f /root/hummingbot/client/setup/environment.yml
+	/root/miniconda3/bin/conda env create -f hummingbot/client/setup/environment.yml
 	/root/miniconda3/bin/conda clean -tipy
 	rm -rf /root/.cache
 
@@ -259,20 +322,9 @@ EOF
 RUN <<-EOF
 	set -ex
 
-  cd hummingbot/gateway
-	yarn
-	yarn prebuild
-	yarn build
-
-	set +ex
-EOF
-
-RUN <<-EOF
-	set -ex
-
 	echo "source /root/miniconda3/etc/profile.d/conda.sh && conda activate $MINICONDA_ENVIRONMENT" >> /root/.bashrc
 	/root/miniconda3/envs/$MINICONDA_ENVIRONMENT/bin/python3 hummingbot/client/setup.py build_ext --inplace -j 8
-	rm -rf /root/hummingbot/client/build/
+	rm -rf hummingbot/client/build/
 	find . -type f -name "*.cpp" -delete
 
 	set +ex
@@ -282,44 +334,19 @@ RUN <<-EOF
 	set -ex
 
 	mkdir -p \
-		/root/hummingbot/gateway/certs \
-		/root/hummingbot/gateway/db \
-		/root/hummingbot/gateway/conf \
-		/root/hummingbot/gateway/logs
-
-	mkdir -p \
-  	/root/hummingbot/client/certs \
-  	/root/hummingbot/client/conf/connectors \
-  	/root/hummingbot/client/conf/strategies \
-  	/root/hummingbot/client/conf/scripts \
-  	/root/hummingbot/client/logs \
-  	/root/hummingbot/client/data \
-  	/root/hummingbot/client/scripts \
-  	/root/hummingbot/client/pmm_scripts \
-  	/var/lib/gateway
+  	hummingbot/client/certs \
+  	hummingbot/client/conf/connectors \
+  	hummingbot/client/conf/strategies \
+  	hummingbot/client/conf/scripts \
+  	hummingbot/client/logs \
+  	hummingbot/client/data \
+  	hummingbot/client/scripts \
+  	hummingbot/client/pmm_scripts
 
 	set +ex
 EOF
 
-RUN <<-EOF
-  set -ex
-
-  mkdir -p funttastic/client/certificates
-  cp funttastic/client/configuration/production.example.yml funttastic/client/configuration/production.yml
-  cp -R funttastic/client/strategies/templates/* funttastic/client/strategies
-
-  set +ex
-EOF
-
-RUN <<-EOF
-  set -ex
-
-  mv funttastic/client/resources funttastic/client/resources_temp
-
-  cp -R /root/hummingbot/client/src/templates/. /root/hummingbot/client/conf/
-
-  set +ex
-EOF
+RUN echo "Ending Hummingbot Gateway build process"
 
 LABEL CONCATENATED_COMMAND="$FUN_HB_CLIENT_COMMAND; $GATEWAY_COMMAND; $HB_CLIENT_COMMAND"
 
