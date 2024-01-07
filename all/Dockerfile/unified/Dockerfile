@@ -2,6 +2,7 @@ FROM ubuntu:latest
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ="Etc/GMT"
+ARG CHOICE
 ARG SSH_PUBLIC_KEY
 ARG SSH_PRIVATE_KEY
 ENV BUILD_DATE=${DATE}
@@ -12,7 +13,7 @@ ENV CONFIG_PASSWORD=${CONFIG_PASSWORD}
 ARG FUN_HB_CLIENT_REPOSITORY_URL="${FUN_HB_CLIENT_REPOSITORY_URL:-https://github.com/funttastic/fun-hb-client.git}"
 ARG FUN_HB_CLIENT_REPOSITORY_BRANCH="${FUN_HB_CLIENT_REPOSITORY_BRANCH:-community}"
 ENV FUN_HB_CLIENT_PORT=${FUN_HB_CLIENT_PORT:-5000}
-ENV FUN_HB_CLIENT_COMMAND="${FUN_HB_CLIENT_COMMAND:-}"
+ENV FUN_HB_CLIENT_COMMAND="${FUN_HB_CLIENT_COMMAND:-echo}"
 ENV FUN_HB_CLIENT_COMMIT_BRANCH=${FUN_HB_CLIENT_BRANCH}
 ENV FUN_HB_CLIENT_COMMIT_SHA=${FUN_HB_CLIENT_COMMIT}
 ENV FUN_HB_CLIENT_BUILD_DATE=${FUN_HB_CLIENT_BUILD_DATE}
@@ -20,7 +21,7 @@ ENV FUN_HB_CLIENT_BUILD_DATE=${FUN_HB_CLIENT_BUILD_DATE}
 ARG GATEWAY_REPOSITORY_URL=${GATEWAY_REPOSITORY_URL:-https://github.com/Team-Kujira/gateway.git}
 ARG GATEWAY_REPOSITORY_BRANCH=${GATEWAY_REPOSITORY_BRANCH:-community}
 ENV GATEWAY_PORT=${GATEWAY_PORT:-15888}
-ENV GATEWAY_COMMAND=${GATEWAY_COMMAND}
+ENV GATEWAY_COMMAND=${GATEWAY_COMMAND:-echo}
 ENV GATEWAY_COMMIT_BRANCH=${GATEWAY_BRANCH}
 ENV GATEWAY_COMMIT_SHA=${GATEWAY_COMMIT}
 ENV GATEWAY_BUILD_DATE=${GATEWAY_BUILD_DATE}
@@ -32,7 +33,9 @@ ENV HB_CLIENT_CONFIG_FILE_NAME=${HB_CLIENT_CONFIG_FILE_NAME}
 ENV HB_CLIENT_COMMIT_BRANCH=${HB_CLIENT_BRANCH}
 ENV HB_CLIENT_COMMIT_SHA=${HB_CLIENT_COMMIT}
 ENV HB_CLIENT_BUILD_DATE=${HB_CLIENT_BUILD_DATE}
-ENV HB_CLIENT_COMMAND=${HB_CLIENT_COMMAND}
+ENV HB_CLIENT_COMMAND=${HB_CLIENT_COMMAND:-echo}
+
+#ENV CONCATENATED_COMMAND="$FUN_HB_CLIENT_COMMAND; $GATEWAY_COMMAND; $HB_CLIENT_COMMAND"
 
 LABEL hb_client_branch=${HB_CLIENT_BRANCH}
 LABEL hb_client_commit=${HB_CLIENT_COMMIT}
@@ -62,8 +65,8 @@ RUN <<-EOF
     gcc \
     vim \
     tree \
-    psmisc \
     curl \
+    psmisc \
     python3 \
     python3-pip \
     python3-dev \
@@ -231,9 +234,18 @@ RUN echo "Starting Hummingbot Client build process"
 RUN <<-EOF
 	set -ex
 
-	git clone -b $HB_CLIENT_REPOSITORY_BRANCH $HB_CLIENT_REPOSITORY_URL /tmp/hummingbot/client
 	mkdir -p hummingbot/client
-	cp -a /tmp/hummingbot/client/. hummingbot/client
+
+  set +ex
+EOF
+
+WORKDIR /root/hummingbot/client
+
+RUN <<-EOF
+	set -ex
+
+	git clone -b $HB_CLIENT_REPOSITORY_BRANCH $HB_CLIENT_REPOSITORY_URL /tmp/hummingbot/client
+	cp -a /tmp/hummingbot/client/. .
 
   rm -rf /tmp/hummingbot
 
@@ -304,7 +316,7 @@ EOF
 RUN <<-EOF
 	set -ex
 
-	MINICONDA_ENVIRONMENT=$(head -1 hummingbot/client/setup/environment.yml | cut -d' ' -f2)
+	MINICONDA_ENVIRONMENT=$(head -1 setup/environment.yml | cut -d' ' -f2)
 	if [ -z "$MINICONDA_ENVIRONMENT" ]
 	then
 		echo "The MINICONDA_ENVIRONMENT environment variable could not be defined."
@@ -312,7 +324,7 @@ RUN <<-EOF
 	fi
 	echo "export MINICONDA_ENVIRONMENT=$MINICONDA_ENVIRONMENT" >> /root/.bashrc
 
-	/root/miniconda3/bin/conda env create -f hummingbot/client/setup/environment.yml
+	/root/miniconda3/bin/conda env create -f setup/environment.yml
 	/root/miniconda3/bin/conda clean -tipy
 	rm -rf /root/.cache
 
@@ -323,8 +335,8 @@ RUN <<-EOF
 	set -ex
 
 	echo "source /root/miniconda3/etc/profile.d/conda.sh && conda activate $MINICONDA_ENVIRONMENT" >> /root/.bashrc
-	/root/miniconda3/envs/$MINICONDA_ENVIRONMENT/bin/python3 hummingbot/client/setup.py build_ext --inplace -j 8
-	rm -rf hummingbot/client/build/
+	/root/miniconda3/envs/$MINICONDA_ENVIRONMENT/bin/python3 setup.py build_ext --inplace -j 8
+	rm -rf build/
 	find . -type f -name "*.cpp" -delete
 
 	set +ex
@@ -334,20 +346,20 @@ RUN <<-EOF
 	set -ex
 
 	mkdir -p \
-  	hummingbot/client/certs \
-  	hummingbot/client/conf/connectors \
-  	hummingbot/client/conf/strategies \
-  	hummingbot/client/conf/scripts \
-  	hummingbot/client/logs \
-  	hummingbot/client/data \
-  	hummingbot/client/scripts \
-  	hummingbot/client/pmm_scripts
+  	certs \
+  	conf/connectors \
+  	conf/strategies \
+  	conf/scripts \
+  	logs \
+  	data \
+  	scripts \
+  	pmm_scripts
 
 	set +ex
 EOF
 
-RUN echo "Ending Hummingbot Gateway build process"
+WORKDIR /root
 
-LABEL CONCATENATED_COMMAND="$FUN_HB_CLIENT_COMMAND; $GATEWAY_COMMAND; $HB_CLIENT_COMMAND"
+RUN echo "Ending Hummingbot Client build process"
 
-CMD $CONCATENATED_COMMAND
+CMD ["sh", "-c", "$FUN_HB_CLIENT_COMMAND; $GATEWAY_COMMAND; $HB_CLIENT_COMMAND"]

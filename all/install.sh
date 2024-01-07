@@ -53,18 +53,46 @@ pre_installation_fun_hb_client () {
 
   default_values_info
 
-  # Customize the Client image to be used?
-  RESPONSE="$FUN_HB_CLIENT_IMAGE_NAME"
-  if [ "$RESPONSE" == "" ]
-  then
-    echo
-    read -rp "   Enter a Funttastic Hummingbot Client image name you want to use (default = \"fun-hb-client\") >>> " RESPONSE
-  fi
-  if [ "$RESPONSE" == "" ]
-  then
-    FUN_HB_CLIENT_IMAGE_NAME="fun-hb-client"
+  if [[ ! "$CHOICE" == "U1" && ! "$CHOICE" == "U3" ]]; then
+    # Customize the Client image to be used?
+    RESPONSE="$FUN_HB_CLIENT_IMAGE_NAME"
+    if [ "$RESPONSE" == "" ]
+    then
+      echo
+      read -rp "   Enter a Funttastic Hummingbot Client image name you want to use (default = \"fun-hb-client\") >>> " RESPONSE
+    fi
+    if [ "$RESPONSE" == "" ]
+    then
+      FUN_HB_CLIENT_IMAGE_NAME="fun-hb-client"
+    else
+      FUN_HB_CLIENT_IMAGE_NAME="$RESPONSE"
+    fi
   else
-    FUN_HB_CLIENT_IMAGE_NAME="$RESPONSE"
+    # Customize the unified choice 1 and 3 image name to be used?
+    if [ "$CHOICE" == "U1" ]; then
+      DEFAULT_NAME="fun-hb-client-and-hb-gateway"
+    else
+      DEFAULT_NAME="all-apps"
+    fi
+
+    echo
+    read -rp "   Enter a name for your new unified image fot Funttastic Hummingbot Client and Hummingbot Gateway
+   (default = \"$DEFAULT_NAME\") >>> " RESPONSE
+
+    if [ "$RESPONSE" == "" ]
+    then
+      if [ "$CHOICE" == "U1" ]; then
+        UNIFIED_IMAGE_NAME_CHOICE_1="$DEFAULT_NAME"
+      else
+        UNIFIED_IMAGE_NAME_CHOICE_3="$DEFAULT_NAME"
+      fi
+    else
+      if [ "$CHOICE" == "U1" ]; then
+        UNIFIED_IMAGE_NAME_CHOICE_1="$RESPONSE"
+      else
+        UNIFIED_IMAGE_NAME_CHOICE_3="$RESPONSE"
+      fi
+    fi
   fi
 
   # Create a new image?
@@ -83,18 +111,46 @@ pre_installation_fun_hb_client () {
     FUN_HB_CLIENT_BUILD_CACHE=""
   fi
 
-  # Create a new container?
-  RESPONSE="$FUN_HB_CLIENT_CONTAINER_NAME"
-  if [ "$RESPONSE" == "" ]
-  then
-    echo
-    read -rp "   Enter a name for your new Funttastic Hummingbot Client instance (default = \"fun-hb-client\") >>> " RESPONSE
-  fi
-  if [ "$RESPONSE" == "" ]
-  then
-    FUN_HB_CLIENT_CONTAINER_NAME="fun-hb-client"
+  if [[ ! "$CHOICE" == "U1" && ! "$CHOICE" == "U3" ]]; then
+    # Create a new container?
+    RESPONSE="$FUN_HB_CLIENT_CONTAINER_NAME"
+    if [ "$RESPONSE" == "" ]
+    then
+      echo
+      read -rp "   Enter a name for your new Funttastic Hummingbot Client instance (default = \"fun-hb-client\") >>> " RESPONSE
+    fi
+    if [ "$RESPONSE" == "" ]
+    then
+      FUN_HB_CLIENT_CONTAINER_NAME="fun-hb-client"
+    else
+      FUN_HB_CLIENT_CONTAINER_NAME=$RESPONSE
+    fi
   else
-    FUN_HB_CLIENT_CONTAINER_NAME=$RESPONSE
+    # Customize the unified choice 1 and 3 container name to be used?
+    if [ "$CHOICE" == "U1" ]; then
+      DEFAULT_NAME="fun-hb-client-and-hb-gateway"
+    else
+      DEFAULT_NAME="all-apps"
+    fi
+
+    echo
+    read -rp "   Enter a name for your new unified instance of Funttastic Hummingbot Client and Hummingbot Gateway
+   (default = \"$DEFAULT_NAME\") >>> " RESPONSE
+
+    if [ "$RESPONSE" == "" ]
+    then
+      if [ "$CHOICE" == "U1" ]; then
+        UNIFIED_CONTAINER_NAME_CHOICE_1="$DEFAULT_NAME"
+      else
+        UNIFIED_CONTAINER_NAME_CHOICE_3="$DEFAULT_NAME"
+      fi
+    else
+      if [ "$CHOICE" == "U1" ]; then
+        UNIFIED_CONTAINER_NAME_CHOICE_1="$RESPONSE"
+      else
+        UNIFIED_CONTAINER_NAME_CHOICE_3="$RESPONSE"
+      fi
+    fi
   fi
 
   # Prompt the user for the passphrase to encrypt the certificates
@@ -195,17 +251,37 @@ pre_installation_hb_client () {
 
   default_values_info
 
-  RESPONSE="$HB_CLIENT_IMAGE_NAME"
-  if [ "$RESPONSE" == "" ]
-  then
-    echo
-    read -rp "   Enter a Hummingbot Client image name you want to use (default = \"hb-client\") >>> " RESPONSE
-  fi
-  if [ "$RESPONSE" == "" ]
-  then
-    HB_CLIENT_IMAGE_NAME="hb-client"
+  if [[ ! "$CHOICE" == "U1" && ! "$CHOICE" == "U2" && ! "$CHOICE" == "U3" ]]; then
+    RESPONSE="$HB_CLIENT_IMAGE_NAME"
+    if [ "$RESPONSE" == "" ]
+    then
+      echo
+      read -rp "   Enter a Hummingbot Client image name you want to use (default = \"hb-client\") >>> " RESPONSE
+    fi
+    if [ "$RESPONSE" == "" ]
+    then
+      HB_CLIENT_IMAGE_NAME="hb-client"
+    else
+      HB_CLIENT_IMAGE_NAME="$RESPONSE"
+    fi
   else
-    HB_CLIENT_IMAGE_NAME="$RESPONSE"
+    # Customize the unified choice 2 image name to be used?
+    # For choice 3 it is already being defined from the pre-installation of "Funttastic Hummingbot Client"
+
+    DEFAULT_NAME="hb-client-and-hb-gateway"
+
+    if [ "$CHOICE" == "U2" ]; then
+      echo
+      read -rp "   Enter a name for your new unified image for Hummingbot Client and Hummingbot Gateway
+   (default = \"$DEFAULT_NAME\") >>> " RESPONSE
+
+      if [ "$RESPONSE" == "" ]
+      then
+        UNIFIED_IMAGE_NAME_CHOICE_2="$DEFAULT_NAME"
+      else
+        UNIFIED_IMAGE_NAME_CHOICE_2="$RESPONSE"
+      fi
+    fi
   fi
 
   # Create a new image?
@@ -224,18 +300,46 @@ pre_installation_hb_client () {
     HB_CLIENT_BUILD_CACHE=""
   fi
 
-  # Create a new instance?
-  RESPONSE="$HB_CLIENT_CONTAINER_NAME"
-  if [ "$RESPONSE" == "" ]
-  then
-    echo
-    read -rp "   Enter a name for your new Hummingbot Client instance (default = \"hb-client\") >>> " RESPONSE
-  fi
-  if [ "$RESPONSE" == "" ]
-  then
-    HB_CLIENT_CONTAINER_NAME="hb-client"
+  if [[ ! "$CHOICE" == "U1" && ! "$CHOICE" == "U2" && ! "$CHOICE" == "U3" ]]; then
+    # Create a new instance?
+    RESPONSE="$HB_CLIENT_CONTAINER_NAME"
+    if [ "$RESPONSE" == "" ]
+    then
+      echo
+      read -rp "   Enter a name for your new Hummingbot Client instance (default = \"hb-client\") >>> " RESPONSE
+    fi
+    if [ "$RESPONSE" == "" ]
+    then
+      HB_CLIENT_CONTAINER_NAME="hb-client"
+    else
+      HB_CLIENT_CONTAINER_NAME=$RESPONSE
+    fi
   else
-    HB_CLIENT_CONTAINER_NAME=$RESPONSE
+    # Customize the unified choice 2 and 3 container name to be used?
+    if [ "$CHOICE" == "U2" ]; then
+      DEFAULT_NAME="hb-client-and-hb-gateway"
+    else
+      DEFAULT_NAME="all-apps"
+    fi
+
+    echo
+    read -rp "   Enter a name for your new unified instance for Hummingbot Client and Hummingbot Gateway
+   (default = \"$DEFAULT_NAME\") >>> " RESPONSE
+
+    if [ "$RESPONSE" == "" ]
+    then
+      if [ "$CHOICE" == "U2" ]; then
+        UNIFIED_CONTAINER_NAME_CHOICE_2="$DEFAULT_NAME"
+      else
+        UNIFIED_CONTAINER_NAME_CHOICE_3="$DEFAULT_NAME"
+      fi
+    else
+      if [ "$CHOICE" == "U2" ]; then
+        UNIFIED_CONTAINER_NAME_CHOICE_2="$RESPONSE"
+      else
+        UNIFIED_CONTAINER_NAME_CHOICE_3="$RESPONSE"
+      fi
+    fi
   fi
 
   # Location to save files?
@@ -314,17 +418,19 @@ pre_installation_hb_gateway () {
 
   default_values_info
 
-  RESPONSE="$GATEWAY_IMAGE_NAME"
-  if [ "$RESPONSE" == "" ]
-  then
-    echo
-    read -rp "   Enter a Hummingbot Gateway image name you want to use (default = \"hb-gateway\") >>> " RESPONSE
-  fi
-  if [ "$RESPONSE" == "" ]
-  then
-    GATEWAY_IMAGE_NAME="hb-gateway"
-  else
-    GATEWAY_IMAGE_NAME="$RESPONSE"
+  if [[ ! "$CHOICE" == "U1" && ! "$CHOICE" == "U2" && ! "$CHOICE" == "U3" ]]; then
+    RESPONSE="$GATEWAY_IMAGE_NAME"
+    if [ "$RESPONSE" == "" ]
+    then
+      echo
+      read -rp "   Enter a Hummingbot Gateway image name you want to use (default = \"hb-gateway\") >>> " RESPONSE
+    fi
+    if [ "$RESPONSE" == "" ]
+    then
+      GATEWAY_IMAGE_NAME="hb-gateway"
+    else
+      GATEWAY_IMAGE_NAME="$RESPONSE"
+    fi
   fi
 
   # Create a new image?
@@ -343,18 +449,20 @@ pre_installation_hb_gateway () {
     GATEWAY_BUILD_CACHE=""
   fi
 
-  # Create a new instance?
-  RESPONSE="$GATEWAY_CONTAINER_NAME"
-  if [ "$RESPONSE" == "" ]
-  then
-    echo
-    read -rp "   Enter a name for your new Hummingbot Gateway instance (default = \"hb-gateway\") >>> " RESPONSE
-  fi
-  if [ "$RESPONSE" == "" ]
-  then
-    GATEWAY_CONTAINER_NAME="hb-gateway"
-  else
-    GATEWAY_CONTAINER_NAME=$RESPONSE
+  if [[ ! "$CHOICE" == "U1" && ! "$CHOICE" == "U2" && ! "$CHOICE" == "U3" ]]; then
+    # Create a new instance?
+    RESPONSE="$GATEWAY_CONTAINER_NAME"
+    if [ "$RESPONSE" == "" ]
+    then
+      echo
+      read -rp "   Enter a name for your new Hummingbot Gateway instance (default = \"hb-gateway\") >>> " RESPONSE
+    fi
+    if [ "$RESPONSE" == "" ]
+    then
+      GATEWAY_CONTAINER_NAME="hb-gateway"
+    else
+      GATEWAY_CONTAINER_NAME=$RESPONSE
+    fi
   fi
 
   # Exposed port?
@@ -669,6 +777,13 @@ else
   GATEWAY_LOGS_FOLDER="$GATEWAY_FOLDER/logs"
   GATEWAY_AUTO_START=${GATEWAY_AUTO_START:-1}
 
+  UNIFIED_IMAGE_NAME_CHOICE_1="fun-hb-client-and-hb-gateway"
+  UNIFIED_IMAGE_NAME_CHOICE_2="hb-client-and-hb-gateway"
+  UNIFIED_IMAGE_NAME_CHOICE_3="all-apps"
+  UNIFIED_CONTAINER_NAME_CHOICE_1="$UNIFIED_IMAGE_NAME_CHOICE_1"
+  UNIFIED_CONTAINER_NAME_CHOICE_2="$UNIFIED_IMAGE_NAME_CHOICE_2"
+  UNIFIED_CONTAINER_NAME_CHOICE_3="$UNIFIED_IMAGE_NAME_CHOICE_3"
+
   # Settings for both
   TAG=${TAG:-"latest"}
   ENTRYPOINT=${ENTRYPOINT:-"/bin/bash"}
@@ -797,23 +912,32 @@ unified_docker_create_image_choice_one () {
   if [[ ! "$FUN_HB_CLIENT_BUILD_CACHE" == "" || ! "$GATEWAY_BUILD_CACHE" == ""  ]]
   then
     BUILT=$(DOCKER_BUILDKIT=1 docker build \
+    --build-arg CHOICE="$CHOICE" \
     --build-arg SSH_PUBLIC_KEY="$SSH_PUBLIC_KEY" \
     --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" \
     --build-arg FUN_HB_CLIENT_REPOSITORY_URL="$FUN_HB_CLIENT_REPOSITORY_URL" \
     --build-arg FUN_HB_CLIENT_REPOSITORY_BRANCH="$FUN_HB_CLIENT_REPOSITORY_BRANCH" \
     --build-arg GATEWAY_REPOSITORY_URL="$GATEWAY_REPOSITORY_URL" \
     --build-arg GATEWAY_REPOSITORY_BRANCH="$GATEWAY_REPOSITORY_BRANCH" \
-    -t "fun-hb-client-and-hb-gateway" -f ./all/Dockerfile/unified/Dockerfile .)
+    -t "$UNIFIED_IMAGE_NAME_CHOICE_1" -f ./all/Dockerfile/unified/Dockerfile .)
   fi
 }
 
 unified_docker_create_container_choice_one () {
+#  if [[ "$FUN_HB_CLIENT_AUTO_START" == 1 ]]; then
+#      FUN_HB_CLIENT_COMMAND="python /root/funttastic/client/app.py > /dev/null 2>&1 &"
+#  fi
+#
+#  if [[ "$GATEWAY_AUTO_START" == 1 ]]; then
+#      GATEWAY_COMMAND="cd /root/hummingbot/gateway && yarn start --passphrase=$SELECTED_PASSPHRASE > /dev/null 2>&1 &"
+#  fi
+
   $BUILT \
   && docker run \
     -dit \
     --log-opt max-size=10m \
     --log-opt max-file=5 \
-    --name "fun-hb-client-and-hb-gateway" \
+    --name "$UNIFIED_CONTAINER_NAME_CHOICE_1" \
     --network "$NETWORK" \
     --mount type=bind,source="$RESOURCES_FOLDER",target=/root/funttastic/client/resources \
     --mount type=bind,source="$CERTS_FOLDER",target=/root/hummingbot/gateway/certs \
@@ -826,8 +950,10 @@ unified_docker_create_container_choice_one () {
     -e LOGS_FOLDER="/root/hummingbot/gateway/logs" \
     -e FUN_HB_CLIENT_PORT="$FUN_HB_CLIENT_PORT" \
     -e GATEWAY_PORT="$GATEWAY_PORT" \
+    -e FUN_HB_CLIENT_COMMAND="$FUN_HB_CLIENT_COMMAND" \
+    -e GATEWAY_COMMAND="$GATEWAY_COMMAND" \
     --entrypoint="$ENTRYPOINT" \
-    "fun-hb-client-and-hb-gateway":$TAG
+    "$UNIFIED_IMAGE_NAME_CHOICE_1":$TAG
 
 #    --mount type=bind,source="$CERTS_FOLDER",target=/root/funttastic/client/resources/certificates \
 #    -e CERTS_FOLDER="/root/funttastic/client/resources/certificates" \
@@ -837,23 +963,32 @@ unified_docker_create_image_choice_two () {
   if [[ ! "$HB_CLIENT_BUILD_CACHE" == "" || ! "$GATEWAY_BUILD_CACHE" == ""  ]]
   then
     BUILT=$(DOCKER_BUILDKIT=1 docker build \
+    --build-arg CHOICE="$CHOICE" \
     --build-arg SSH_PUBLIC_KEY="$SSH_PUBLIC_KEY" \
     --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" \
     --build-arg HB_CLIENT_REPOSITORY_URL="$HB_CLIENT_REPOSITORY_URL" \
     --build-arg HB_CLIENT_REPOSITORY_BRANCH="$HB_CLIENT_REPOSITORY_BRANCH" \
     --build-arg GATEWAY_REPOSITORY_URL="$GATEWAY_REPOSITORY_URL" \
     --build-arg GATEWAY_REPOSITORY_BRANCH="$GATEWAY_REPOSITORY_BRANCH" \
-    -t "hb-client-and-hb-gateway" -f ./all/Dockerfile/unified/Dockerfile .)
+    -t "$UNIFIED_IMAGE_NAME_CHOICE_2" -f ./all/Dockerfile/unified/Dockerfile .)
   fi
 }
 
 unified_docker_create_container_choice_two () {
+#  if [[ "$GATEWAY_AUTO_START" == 1 ]]; then
+#      GATEWAY_COMMAND="cd /root/hummingbot/gateway && yarn start --passphrase=$SELECTED_PASSPHRASE > /dev/null 2>&1 &"
+#  fi
+#
+#  if [[ "$HB_CLIENT_AUTO_START" == 1 ]]; then
+#      HB_CLIENT_COMMAND="/root/miniconda3/envs/hummingbot/bin/python3 /root/hummingbot/client/bin/hummingbot_quickstart.py"
+#  fi
+
   $BUILT \
   && docker run \
     -dit \
     --log-opt max-size=10m \
     --log-opt max-file=5 \
-    --name "hb-client-and-hb-gateway" \
+    --name "$UNIFIED_CONTAINER_NAME_CHOICE_2" \
     --network "$NETWORK" \
     --mount type=bind,source="$HB_CLIENT_CONF_FOLDER",target=/root/hummingbot/client/conf/connectors \
     --mount type=bind,source="$HB_CLIENT_LOGS_FOLDER",target=/root/hummingbot/client/logs \
@@ -877,7 +1012,7 @@ unified_docker_create_container_choice_two () {
     -e GATEWAY_COMMAND="$GATEWAY_COMMAND" \
     -e HB_CLIENT_COMMAND="$HB_CLIENT_COMMAND" \
     --entrypoint="$ENTRYPOINT" \
-    "hb-client-and-hb-gateway":$TAG
+    "$UNIFIED_IMAGE_NAME_CHOICE_2":$TAG
 
 #    --mount type=bind,source="$CERTS_FOLDER",target=/root/hummingbot/client/certs \
 #    -e CERTS_FOLDER="/root/hummingbot/client/certs" \
@@ -887,6 +1022,7 @@ unified_docker_create_image_choice_three () {
   if [[ ! "$FUN_HB_CLIENT_BUILD_CACHE" == "" || ! "$HB_CLIENT_BUILD_CACHE" == "" || ! "$GATEWAY_BUILD_CACHE" == ""  ]]
   then
     BUILT=$(DOCKER_BUILDKIT=1 docker build \
+    --build-arg CHOICE="$CHOICE" \
     --build-arg SSH_PUBLIC_KEY="$SSH_PUBLIC_KEY" \
     --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" \
     --build-arg FUN_HB_CLIENT_REPOSITORY_URL="$FUN_HB_CLIENT_REPOSITORY_URL" \
@@ -895,17 +1031,30 @@ unified_docker_create_image_choice_three () {
     --build-arg HB_CLIENT_REPOSITORY_BRANCH="$HB_CLIENT_REPOSITORY_BRANCH" \
     --build-arg GATEWAY_REPOSITORY_URL="$GATEWAY_REPOSITORY_URL" \
     --build-arg GATEWAY_REPOSITORY_BRANCH="$GATEWAY_REPOSITORY_BRANCH" \
-    -t "all-apps" -f ./all/Dockerfile/unified/Dockerfile .)
+    -t "$UNIFIED_IMAGE_NAME_CHOICE_3" -f ./all/Dockerfile/unified/Dockerfile .)
   fi
 }
 
 unified_docker_create_container_choice_three () {
+
+#  if [[ "$FUN_HB_CLIENT_AUTO_START" == 1 ]]; then
+#      FUN_HB_CLIENT_COMMAND="python /root/funttastic/client/app.py > /dev/null 2>&1 &"
+#  fi
+#
+#  if [[ "$GATEWAY_AUTO_START" == 1 ]]; then
+#      GATEWAY_COMMAND="cd /root/hummingbot/gateway && yarn start --passphrase=$SELECTED_PASSPHRASE > /dev/null 2>&1 &"
+#  fi
+#
+#  if [[ "$HB_CLIENT_AUTO_START" == 1 ]]; then
+#      HB_CLIENT_COMMAND="/root/miniconda3/envs/hummingbot/bin/python3 /root/hummingbot/client/bin/hummingbot_quickstart.py"
+#  fi
+
   $BUILT \
   && docker run \
     -dit \
     --log-opt max-size=10m \
     --log-opt max-file=5 \
-    --name "all-apps" \
+    --name "$UNIFIED_CONTAINER_NAME_CHOICE_3" \
     --network "$NETWORK" \
     --mount type=bind,source="$RESOURCES_FOLDER",target=/root/funttastic/client/resources \
     --mount type=bind,source="$HB_CLIENT_CONF_FOLDER",target=/root/hummingbot/client/conf/connectors \
@@ -928,10 +1077,11 @@ unified_docker_create_container_choice_three () {
     -e LOGS_FOLDER="/root/hummingbot/gateway/logs" \
     -e FUN_HB_CLIENT_PORT="$FUN_HB_CLIENT_PORT" \
     -e GATEWAY_PORT="$GATEWAY_PORT" \
+    -e FUN_HB_CLIENT_COMMAND="$FUN_HB_CLIENT_COMMAND" \
     -e GATEWAY_COMMAND="$GATEWAY_COMMAND" \
     -e HB_CLIENT_COMMAND="$HB_CLIENT_COMMAND" \
     --entrypoint="$ENTRYPOINT" \
-    "all-apps":$TAG
+    "$UNIFIED_IMAGE_NAME_CHOICE_3":$TAG
 
 #    --mount type=bind,source="$CERTS_FOLDER",target=/root/funttastic/client/resources/certificates \
 #    -e CERTS_FOLDER="/root/funttastic/client/resources/certificates" \
@@ -940,18 +1090,23 @@ unified_docker_create_container_choice_three () {
 }
 
 post_installation_fun_hb_client () {
+  APP_PATH_PREFIX="/root"
 
-  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "echo '$SELECTED_PASSPHRASE' > selected_passphrase.txt"
+  if [[ "$CHOICE" == "U1" || "$CHOICE" == "U2" || "$CHOICE" == "U3" ]]; then
+    APP_PATH_PREFIX="/root/funttastic/client"
+  fi
 
-  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cp -r /root/resources_temp/* /root/resources"
-  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "rm -rf /root/resources_temp"
-  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'python /root/resources/scripts/generate_ssl_certificates.py --passphrase "$(cat selected_passphrase.txt)" --cert-path /root/resources/certificates'
-  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'sed -i "s/<password>/"$(cat selected_passphrase.txt)"/g" /root/resources/configuration/production.yml'
-  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' resources/configuration/common.yml"
-  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i -e '/logging:/,/use_telegram: true/ s/use_telegram: true/use_telegram: false/' -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' resources/configuration/production.yml"
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "echo '$SELECTED_PASSPHRASE' > $APP_PATH_PREFIX/selected_passphrase.txt"
+
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cp -r $APP_PATH_PREFIX/resources_temp/* $APP_PATH_PREFIX/resources"
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "rm -rf $APP_PATH_PREFIX/resources_temp"
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'python '$APP_PATH_PREFIX'/resources/scripts/generate_ssl_certificates.py --passphrase "$(cat '$APP_PATH_PREFIX'/selected_passphrase.txt)" --cert-path '$APP_PATH_PREFIX'/resources/certificates'
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'sed -i "s/<password>/"$(cat '$APP_PATH_PREFIX'/selected_passphrase.txt)"/g" '$APP_PATH_PREFIX'/resources/configuration/production.yml'
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' $APP_PATH_PREFIX/resources/configuration/common.yml"
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i -e '/logging:/,/use_telegram: true/ s/use_telegram: true/use_telegram: false/' -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' $APP_PATH_PREFIX/resources/configuration/production.yml"
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "groupadd -f $GROUP"
-  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd resources && chown -RH :$GROUP ."
-  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd resources && chmod -R a+rwX ."
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX/resources && chown -RH :$GROUP ."
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX/resources && chmod -R a+rwX ."
 
   if [ "$FUN_HB_CLIENT_AUTO_START" == 1 ]; then
     docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "python app.py" > /dev/null 2>&1 &
@@ -965,20 +1120,39 @@ post_installation_fun_hb_client () {
 }
 
 post_installation_hb_client () {
+  PY_PATH_PREFIX="/root"
+
+  if [[ "$CHOICE" == "U1" || "$CHOICE" == "U2" || "$CHOICE" == "U3" ]]; then
+    if [ -n "$UNIFIED_IMAGE_NAME_CHOICE_1" ]; then
+      HB_CLIENT_CONTAINER_NAME="$UNIFIED_CONTAINER_NAME_CHOICE_1"
+    elif [ -n "$UNIFIED_IMAGE_NAME_CHOICE_2" ]; then
+      HB_CLIENT_CONTAINER_NAME="$UNIFIED_CONTAINER_NAME_CHOICE_2"
+    else
+      HB_CLIENT_CONTAINER_NAME="$UNIFIED_CONTAINER_NAME_CHOICE_3"
+    fi
+    PY_PATH_PREFIX="/root/hummingbot/client"
+  fi
+
   if [ "$HB_CLIENT_AUTO_START" == 1 ]; then
-    docker exec -it "$HB_CLIENT_CONTAINER_NAME" /bin/bash -c "/root/miniconda3/envs/hummingbot/bin/python3 /root/bin/hummingbot_quickstart.py"
+    docker exec -it "$HB_CLIENT_CONTAINER_NAME" /bin/bash -c "/root/miniconda3/envs/hummingbot/bin/python3 $PY_PATH_PREFIX/bin/hummingbot_quickstart.py"
   fi
 }
 
 post_installation_hb_gateway () {
+  APP_PATH_PREFIX="/root"
+
+  if [[ "$CHOICE" == "U1" || "$CHOICE" == "U2" || "$CHOICE" == "U3" ]]; then
+    APP_PATH_PREFIX="/root/hummingbot/gateway"
+  fi
+
   docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "groupadd -f $GROUP"
-  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/conf && chown -RH :$GROUP ."
-  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/conf && chmod -R a+rw ."
-  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/logs && chown -RH :$GROUP ."
-  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/logs && chmod -R a+rw ."
+  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX/conf && chown -RH :$GROUP ."
+  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX/conf && chmod -R a+rw ."
+  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX/logs && chown -RH :$GROUP ."
+  docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX/logs && chmod -R a+rw ."
 
   if [ "$GATEWAY_AUTO_START" == 1 ]; then
-    docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "yarn start --passphrase=$SELECTED_PASSPHRASE" > /dev/null 2>&1 &
+    docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX && yarn start --passphrase=$SELECTED_PASSPHRASE" > /dev/null 2>&1 &
   fi
 }
 
@@ -1071,6 +1245,14 @@ unified_default_installation () {
 
   unified_docker_create_image_choice_one
   unified_docker_create_container_choice_one
+
+  if [ "$FUN_HB_CLIENT_AUTO_START" == 1 ]; then
+    post_installation_fun_hb_client
+  fi
+
+  if [ "$GATEWAY_AUTO_START" == 1 ]; then
+    post_installation_hb_gateway
+  fi
 }
 
 unified_choice_two_installation () {
@@ -1096,6 +1278,14 @@ unified_choice_two_installation () {
 
   unified_docker_create_image_choice_two
   unified_docker_create_container_choice_two
+
+  if [ "$GATEWAY_AUTO_START" == 1 ]; then
+    post_installation_hb_gateway
+  fi
+
+  if [ "$HB_CLIENT_AUTO_START" == 1 ]; then
+    post_installation_hb_client
+  fi
 }
 
 unified_choice_three_installation () {
@@ -1123,6 +1313,18 @@ unified_choice_three_installation () {
 
   unified_docker_create_image_choice_three
   unified_docker_create_container_choice_three
+
+  if [ "$FUN_HB_CLIENT_AUTO_START" == 1 ]; then
+    post_installation_fun_hb_client
+  fi
+
+  if [ "$GATEWAY_AUTO_START" == 1 ]; then
+    post_installation_hb_gateway
+  fi
+
+  if [ "$HB_CLIENT_AUTO_START" == 1 ]; then
+    post_installation_hb_client
+  fi
 }
 
 execute_installation () {
@@ -1335,6 +1537,12 @@ then
   echo
 
   if [[ "$CHOICE" == 1 || "$CHOICE" == 4 || "$CHOICE" == 5 || "$CHOICE" == "U1" || "$CHOICE" == "U3" ]]; then
+
+    if [[ "$CHOICE" == "U1" || "$CHOICE" == "U2" || "$CHOICE" == "U3" ]]; then
+      FUN_HB_CLIENT_IMAGE_NAME="$UNIFIED_IMAGE_NAME_CHOICE_1"
+      FUN_HB_CLIENT_CONTAINER_NAME="$UNIFIED_CONTAINER_NAME_CHOICE_1"
+    fi
+
     echo
     echo "ℹ️  Confirm below if the Funttastic Hummingbot Client instance and its folders are correct:"
     echo
@@ -1352,6 +1560,12 @@ then
   fi
 
   if [[ "$CHOICE" == 2 || "$CHOICE" == 5 || "$CHOICE" == "U2" || "$CHOICE" == "U3" ]]; then
+
+    if [[ "$CHOICE" == "U1" || "$CHOICE" == "U2" || "$CHOICE" == "U3" ]]; then
+      HB_CLIENT_IMAGE_NAME="$UNIFIED_IMAGE_NAME_CHOICE_2"
+      HB_CLIENT_CONTAINER_NAME="$UNIFIED_CONTAINER_NAME_CHOICE_2"
+    fi
+
     echo
     echo "ℹ️  Confirm below if the Hummingbot Client instance and its folders are correct:"
     echo
@@ -1372,6 +1586,20 @@ then
   fi
 
   if [[ ! "$CHOICE" == 1 && ! "$CHOICE" == 2 ]]; then
+    if [[ "$CHOICE" == "U1" || "$CHOICE" == "U2" || "$CHOICE" == "U3" ]]; then
+      if [ -n "$UNIFIED_IMAGE_NAME_CHOICE_1" ]
+      then
+        GATEWAY_IMAGE_NAME="$UNIFIED_IMAGE_NAME_CHOICE_1"
+        GATEWAY_CONTAINER_NAME="$UNIFIED_CONTAINER_NAME_CHOICE_1"
+      elif [  -n "$UNIFIED_IMAGE_NAME_CHOICE_2"  ]; then
+        GATEWAY_IMAGE_NAME="$UNIFIED_IMAGE_NAME_CHOICE_2"
+        GATEWAY_CONTAINER_NAME="$UNIFIED_CONTAINER_NAME_CHOICE_2"
+      else
+        GATEWAY_IMAGE_NAME="$UNIFIED_IMAGE_NAME_CHOICE_3"
+        GATEWAY_CONTAINER_NAME="$UNIFIED_CONTAINER_NAME_CHOICE_3"
+      fi
+    fi
+
     echo
     echo "ℹ️  Confirm below if the Hummingbot Gateway instance and its folders are correct:"
     echo
