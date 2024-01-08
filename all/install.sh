@@ -431,6 +431,17 @@ pre_installation_hb_gateway () {
     else
       GATEWAY_IMAGE_NAME="$RESPONSE"
     fi
+  else
+    if [ "$CHOICE" == "U1" ]; then
+        GATEWAY_IMAGE_NAME="fun-hb-client-and-hb-gateway"
+    elif [ "$CHOICE" == "U2" ]; then
+        GATEWAY_IMAGE_NAME="hb-client-and-hb-gateway"
+    elif [ "$CHOICE" == "U3"  ]; then
+        GATEWAY_IMAGE_NAME="all-apps"
+    else
+      echo
+      echo "      ERROR: Unable to set Gateway image name correctly."
+    fi
   fi
 
   # Create a new image?
@@ -462,6 +473,17 @@ pre_installation_hb_gateway () {
       GATEWAY_CONTAINER_NAME="hb-gateway"
     else
       GATEWAY_CONTAINER_NAME=$RESPONSE
+    fi
+  else
+    if [ "$CHOICE" == "U1" ]; then
+        GATEWAY_CONTAINER_NAME="fun-hb-client-and-hb-gateway"
+    elif [ "$CHOICE" == "U2" ]; then
+        GATEWAY_CONTAINER_NAME="hb-client-and-hb-gateway"
+    elif [ "$CHOICE" == "U3"  ]; then
+        GATEWAY_CONTAINER_NAME="all-apps"
+    else
+      echo
+      echo "      ERROR: Unable to set Gateway container name correctly."
     fi
   fi
 
@@ -924,14 +946,6 @@ unified_docker_create_image_choice_one () {
 }
 
 unified_docker_create_container_choice_one () {
-#  if [[ "$FUN_HB_CLIENT_AUTO_START" == 1 ]]; then
-#      FUN_HB_CLIENT_COMMAND="python /root/funttastic/client/app.py > /dev/null 2>&1 &"
-#  fi
-#
-#  if [[ "$GATEWAY_AUTO_START" == 1 ]]; then
-#      GATEWAY_COMMAND="cd /root/hummingbot/gateway && yarn start --passphrase=$SELECTED_PASSPHRASE > /dev/null 2>&1 &"
-#  fi
-
   $BUILT \
   && docker run \
     -dit \
@@ -940,12 +954,12 @@ unified_docker_create_container_choice_one () {
     --name "$UNIFIED_CONTAINER_NAME_CHOICE_1" \
     --network "$NETWORK" \
     --mount type=bind,source="$RESOURCES_FOLDER",target=/root/funttastic/client/resources \
-    --mount type=bind,source="$CERTS_FOLDER",target=/root/hummingbot/gateway/certs \
+    --mount type=bind,source="$CERTS_FOLDER",target=/root/funttastic/client/resources/certificates \
     --mount type=bind,source="$GATEWAY_CONF_FOLDER",target=/root/hummingbot/gateway/conf \
     --mount type=bind,source="$GATEWAY_LOGS_FOLDER",target=/root/hummingbot/gateway/logs \
     --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
     -e RESOURCES_FOLDER="/root/funttastic/client/resources" \
-    -e CERTS_FOLDER="/root/hummingbot/gateway/certs" \
+    -e CERTS_FOLDER="/root/funttastic/client/resources/certificates" \
     -e CONF_FOLDER="/root/hummingbot/gateway/conf" \
     -e LOGS_FOLDER="/root/hummingbot/gateway/logs" \
     -e FUN_HB_CLIENT_PORT="$FUN_HB_CLIENT_PORT" \
@@ -955,6 +969,8 @@ unified_docker_create_container_choice_one () {
     --entrypoint="$ENTRYPOINT" \
     "$UNIFIED_IMAGE_NAME_CHOICE_1":$TAG
 
+#    --mount type=bind,source="$CERTS_FOLDER",target=/root/hummingbot/gateway/certs \
+#    -e CERTS_FOLDER="/root/funttastic/client/resources/certificates" \
 #    --mount type=bind,source="$CERTS_FOLDER",target=/root/funttastic/client/resources/certificates \
 #    -e CERTS_FOLDER="/root/funttastic/client/resources/certificates" \
 }
@@ -975,14 +991,6 @@ unified_docker_create_image_choice_two () {
 }
 
 unified_docker_create_container_choice_two () {
-#  if [[ "$GATEWAY_AUTO_START" == 1 ]]; then
-#      GATEWAY_COMMAND="cd /root/hummingbot/gateway && yarn start --passphrase=$SELECTED_PASSPHRASE > /dev/null 2>&1 &"
-#  fi
-#
-#  if [[ "$HB_CLIENT_AUTO_START" == 1 ]]; then
-#      HB_CLIENT_COMMAND="/root/miniconda3/envs/hummingbot/bin/python3 /root/hummingbot/client/bin/hummingbot_quickstart.py"
-#  fi
-
   $BUILT \
   && docker run \
     -dit \
@@ -1036,19 +1044,6 @@ unified_docker_create_image_choice_three () {
 }
 
 unified_docker_create_container_choice_three () {
-
-#  if [[ "$FUN_HB_CLIENT_AUTO_START" == 1 ]]; then
-#      FUN_HB_CLIENT_COMMAND="python /root/funttastic/client/app.py > /dev/null 2>&1 &"
-#  fi
-#
-#  if [[ "$GATEWAY_AUTO_START" == 1 ]]; then
-#      GATEWAY_COMMAND="cd /root/hummingbot/gateway && yarn start --passphrase=$SELECTED_PASSPHRASE > /dev/null 2>&1 &"
-#  fi
-#
-#  if [[ "$HB_CLIENT_AUTO_START" == 1 ]]; then
-#      HB_CLIENT_COMMAND="/root/miniconda3/envs/hummingbot/bin/python3 /root/hummingbot/client/bin/hummingbot_quickstart.py"
-#  fi
-
   $BUILT \
   && docker run \
     -dit \
@@ -1100,23 +1095,24 @@ post_installation_fun_hb_client () {
 
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cp -r $APP_PATH_PREFIX/resources_temp/* $APP_PATH_PREFIX/resources"
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "rm -rf $APP_PATH_PREFIX/resources_temp"
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "source /root/.bashrc > /dev/null 2>&1 && conda install click > /dev/null 2>&1" &
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'python '$APP_PATH_PREFIX'/resources/scripts/generate_ssl_certificates.py --passphrase "$(cat '$APP_PATH_PREFIX'/selected_passphrase.txt)" --cert-path '$APP_PATH_PREFIX'/resources/certificates'
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'sed -i "s/<password>/"$(cat '$APP_PATH_PREFIX'/selected_passphrase.txt)"/g" '$APP_PATH_PREFIX'/resources/configuration/production.yml'
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' $APP_PATH_PREFIX/resources/configuration/common.yml"
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i -e '/logging:/,/use_telegram: true/ s/use_telegram: true/use_telegram: false/' -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' $APP_PATH_PREFIX/resources/configuration/production.yml"
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "groupadd -f $GROUP"
-  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX/resources && chown -RH :$GROUP ."
-  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX/resources && chmod -R a+rwX ."
+#  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX/resources && chown -RH :$GROUP ."
+#  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX/resources && chmod -R a+rwX ."
 
   if [ "$FUN_HB_CLIENT_AUTO_START" == 1 ]; then
     docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "python app.py" > /dev/null 2>&1 &
   fi
 
   if [ -n "$RANDOM_PASSPHRASE" ]; then
-    docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'echo "$(cat selected_passphrase.txt)" > resources/random_passphrase.txt' &> /dev/null
+    docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'echo "$(cat '$APP_PATH_PREFIX'/selected_passphrase.txt)" > '$APP_PATH_PREFIX'/resources/random_passphrase.txt' &> /dev/null
   fi
 
-  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "rm -f selected_passphrase.txt"
+#  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "rm -f selected_passphrase.txt"
 }
 
 post_installation_hb_client () {
@@ -1150,6 +1146,10 @@ post_installation_hb_gateway () {
   docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX/conf && chmod -R a+rw ."
   docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX/logs && chown -RH :$GROUP ."
   docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX/logs && chmod -R a+rw ."
+
+  if [[ "$CHOICE" == "U1" || "$CHOICE" == "U2" || "$CHOICE" == "U3" ]]; then
+      docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "ln -fs /root/funttastic/client/resources/certificates/* $APP_PATH_PREFIX/certs"
+  fi
 
   if [ "$GATEWAY_AUTO_START" == 1 ]; then
     docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX && yarn start --passphrase=$SELECTED_PASSPHRASE" > /dev/null 2>&1 &
