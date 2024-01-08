@@ -140,7 +140,7 @@ EOF
 RUN <<-EOF
   set -ex
 
-  mkdir -p funttastic/client/certificates
+  mkdir -p funttastic/client/resources/certificates
   cp funttastic/client/resources/configuration/production.example.yml funttastic/client/resources/configuration/production.yml
   cp -R funttastic/client/resources/strategies/templates/* funttastic/client/resources/strategies
 
