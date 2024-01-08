@@ -1105,7 +1105,7 @@ post_installation_fun_hb_client () {
 #  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX/resources && chmod -R a+rwX ."
 
   if [ "$FUN_HB_CLIENT_AUTO_START" == 1 ]; then
-    docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "python app.py" > /dev/null 2>&1 &
+    docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "python '$APP_PATH_PREFIX'/app.py" > /dev/null 2>&1 &
   fi
 
   if [ -n "$RANDOM_PASSPHRASE" ]; then
