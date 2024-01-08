@@ -132,7 +132,6 @@ RUN <<-EOF
   mkdir -p funttastic/client
   cp -a /tmp/funttastic/. funttastic/client
   rm -rf /tmp/funttastic
-  pip install -r funttastic/client/requirements.txt
 
   set +ex
 EOF
