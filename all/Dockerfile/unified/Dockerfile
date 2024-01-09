@@ -55,6 +55,8 @@ RUN :> /root/.bashrc
 
 SHELL [ "/bin/bash", "-lc" ]
 
+RUN echo "Starting the package installation on the Ubuntu system."
+
 RUN <<-EOF
   set -ex
 
@@ -82,17 +84,9 @@ RUN <<-EOF
   set +ex
 EOF
 
-RUN echo "Starting Funttastic Hummingbot Client build process"
+RUN echo "Ending the package installation on the Ubuntu system."
 
-RUN <<-EOF
-  set -ex
-
-  unlink /usr/bin/pip
-  ln -s /usr/bin/python3 /usr/bin/python
-  ln -s /usr/bin/pip3 /usr/bin/pip
-
-  set +ex
-EOF
+RUN echo "Starting the SSH key loading process."
 
 # Authorizing the ssh host
 RUN <<-EOF
@@ -125,33 +119,56 @@ RUN <<-EOF
   fi
 EOF
 
+RUN echo "Finishing the SSH key loading process."
+
+RUN echo "Starting Funttastic Hummingbot Client build process"
+
 RUN <<-EOF
-  set -ex
+  if [[ "$CHOICE" == "U1" || "$CHOICE" == "U3" ]]; then \
+    set -ex
 
-  git clone -b $FUN_HB_CLIENT_REPOSITORY_BRANCH $FUN_HB_CLIENT_REPOSITORY_URL /tmp/funttastic
-  mkdir -p funttastic/client
-  cp -a /tmp/funttastic/. funttastic/client
-  rm -rf /tmp/funttastic
+    unlink /usr/bin/pip
+    ln -s /usr/bin/python3 /usr/bin/python
+    ln -s /usr/bin/pip3 /usr/bin/pip
 
-  set +ex
+    set +ex
+  fi
 EOF
 
 RUN <<-EOF
-  set -ex
+  if [[ "$CHOICE" == "U1" || "$CHOICE" == "U3" ]]; then \
+    set -ex
 
-  mkdir -p funttastic/client/resources/certificates
-  cp funttastic/client/resources/configuration/production.example.yml funttastic/client/resources/configuration/production.yml
-  cp -R funttastic/client/resources/strategies/templates/* funttastic/client/resources/strategies
+    git clone -b $FUN_HB_CLIENT_REPOSITORY_BRANCH $FUN_HB_CLIENT_REPOSITORY_URL /tmp/funttastic
+    mkdir -p funttastic/client
+    cp -a /tmp/funttastic/. funttastic/client
+    rm -rf /tmp/funttastic
+    pip install -r funttastic/client/requirements.txt
 
-  set +ex
+    set +ex
+  fi
 EOF
 
 RUN <<-EOF
-  set -ex
+  if [[ "$CHOICE" == "U1" || "$CHOICE" == "U3" ]]; then \
+    set -ex
 
-  mv funttastic/client/resources funttastic/client/resources_temp
+    mkdir -p funttastic/client/resources/certificates
+    cp funttastic/client/resources/configuration/production.example.yml funttastic/client/resources/configuration/production.yml
+    cp -R funttastic/client/resources/strategies/templates/* funttastic/client/resources/strategies
 
-  set +ex
+    set +ex
+  fi
+EOF
+
+RUN <<-EOF
+  if [[ "$CHOICE" == "U1" || "$CHOICE" == "U3" ]]; then \
+    set -ex
+
+    mv funttastic/client/resources funttastic/client/resources_temp
+
+    set +ex
+  fi
 EOF
 
 RUN echo "Ending Funttastic Hummingbot Client build process"
@@ -230,131 +247,135 @@ RUN echo "Ending Hummingbot Gateway build process"
 
 RUN echo "Starting Hummingbot Client build process"
 
-RUN <<-EOF
-	set -ex
-
-	mkdir -p hummingbot/client
-
-  set +ex
-EOF
-
+# This will create the directory automatically
 WORKDIR /root/hummingbot/client
 
+
 RUN <<-EOF
-	set -ex
+  if [[ "$CHOICE" == "U2" || "$CHOICE" == "U3" ]]; then \
+    set -ex
 
-	git clone -b $HB_CLIENT_REPOSITORY_BRANCH $HB_CLIENT_REPOSITORY_URL /tmp/hummingbot/client
-	cp -a /tmp/hummingbot/client/. .
+    git clone -b $HB_CLIENT_REPOSITORY_BRANCH $HB_CLIENT_REPOSITORY_URL /tmp/hummingbot/client
+    cp -a /tmp/hummingbot/client/. .
 
-  rm -rf /tmp/hummingbot
+    rm -rf /tmp/hummingbot
 
-  set +ex
+    set +ex
+  fi
 EOF
 
 # Install miniconda
 RUN <<-EOF
-	set -ex
+  if [[ "$CHOICE" == "U2" || "$CHOICE" == "U3" ]]; then \
+    set -ex
 
-	ARCHITECTURE="$(uname -m)"
+    ARCHITECTURE="$(uname -m)"
 
-	case $(uname | tr '[:upper:]' '[:lower:]') in
-		linux*)
-			OS="Linux"
-			FILE_EXTENSION="sh"
-			case $(uname -r	| tr '[:upper:]' '[:lower:]') in
-			*raspi*)
-				IS_RASPBERRY="TRUE"
-				;;
-			*)
-				IS_RASPBERRY="FALSE"
-				;;
-			esac
-			;;
-		darwin*)
-			OS="MacOSX"
-			FILE_EXTENSION="sh"
-			;;
-		msys*)
-			OS="Windows"
-			FILE_EXTENSION="exe"
-			;;
-		*)
-			echo "Unrecognized OS"
-			exit 1
-			;;
-	esac
+    case $(uname | tr '[:upper:]' '[:lower:]') in
+      linux*)
+        OS="Linux"
+        FILE_EXTENSION="sh"
+        case $(uname -r	| tr '[:upper:]' '[:lower:]') in
+        *raspi*)
+          IS_RASPBERRY="TRUE"
+          ;;
+        *)
+          IS_RASPBERRY="FALSE"
+          ;;
+        esac
+        ;;
+      darwin*)
+        OS="MacOSX"
+        FILE_EXTENSION="sh"
+        ;;
+      msys*)
+        OS="Windows"
+        FILE_EXTENSION="exe"
+        ;;
+      *)
+        echo "Unrecognized OS"
+        exit 1
+        ;;
+    esac
 
-	echo "export ARCHITECTURE=$ARCHITECTURE" >> /root/.bashrc
-	echo "export OS=$OS" >> /root/.bashrc
-	echo "export FILE_EXTENSION=$FILE_EXTENSION" >> /root/.bashrc
-	echo "export IS_RASPBERRY=$IS_RASPBERRY" >> /root/.bashrc
+    echo "export ARCHITECTURE=$ARCHITECTURE" >> /root/.bashrc
+    echo "export OS=$OS" >> /root/.bashrc
+    echo "export FILE_EXTENSION=$FILE_EXTENSION" >> /root/.bashrc
+    echo "export IS_RASPBERRY=$IS_RASPBERRY" >> /root/.bashrc
 
-	if [ "$ARCHITECTURE" == "aarch64" ]
-	then
-		echo "export ARCHITECTURE_SUFFIX=\"-$ARCHITECTURE\"" >> /root/.bashrc
-		MINICONDA_VERSION="Mambaforge-$(uname)-$(uname -m).sh"
-		MINICONDA_URL="https://github.com/conda-forge/miniforge/releases/latest/download/$MINICONDA_VERSION"
-		ln -s /root/mambaforge /root/miniconda3
-	else
-		MINICONDA_VERSION="Miniconda3-py38_4.10.3-$OS-$ARCHITECTURE.$FILE_EXTENSION"
-		MINICONDA_URL="https://repo.anaconda.com/miniconda/$MINICONDA_VERSION"
-	fi
+    if [ "$ARCHITECTURE" == "aarch64" ]
+    then
+      echo "export ARCHITECTURE_SUFFIX=\"-$ARCHITECTURE\"" >> /root/.bashrc
+      MINICONDA_VERSION="Mambaforge-$(uname)-$(uname -m).sh"
+      MINICONDA_URL="https://github.com/conda-forge/miniforge/releases/latest/download/$MINICONDA_VERSION"
+      ln -s /root/mambaforge /root/miniconda3
+    else
+      MINICONDA_VERSION="Miniconda3-py38_4.10.3-$OS-$ARCHITECTURE.$FILE_EXTENSION"
+      MINICONDA_URL="https://repo.anaconda.com/miniconda/$MINICONDA_VERSION"
+    fi
 
-	curl -L "$MINICONDA_URL" -o "/root/miniconda.$MINICONDA_EXTENSION"
-	/bin/bash "/root/miniconda.$MINICONDA_EXTENSION" -b
-	rm "/root/miniconda.$MINICONDA_EXTENSION"
-	/root/miniconda3/bin/conda update -n base conda -y
-	/root/miniconda3/bin/conda clean -tipy
+    curl -L "$MINICONDA_URL" -o "/root/miniconda.$MINICONDA_EXTENSION"
+    /bin/bash "/root/miniconda.$MINICONDA_EXTENSION" -b
+    rm "/root/miniconda.$MINICONDA_EXTENSION"
+    /root/miniconda3/bin/conda update -n base conda -y
+    /root/miniconda3/bin/conda clean -tipy
 
-	echo "export MINICONDA_VERSION=$MINICONDA_VERSION" >> /root/.bashrc
-	echo "export MINICONDA_URL=$MINICONDA_URL" >> /root/.bashrc
+    echo "export MINICONDA_VERSION=$MINICONDA_VERSION" >> /root/.bashrc
+    echo "export MINICONDA_URL=$MINICONDA_URL" >> /root/.bashrc
 
-	set +ex
+    set +ex
+  fi
 EOF
 
 RUN <<-EOF
-	set -ex
+  if [[ "$CHOICE" == "U2" || "$CHOICE" == "U3" ]]; then \
+    set -ex
 
-	MINICONDA_ENVIRONMENT=$(head -1 setup/environment.yml | cut -d' ' -f2)
-	if [ -z "$MINICONDA_ENVIRONMENT" ]
-	then
-		echo "The MINICONDA_ENVIRONMENT environment variable could not be defined."
-		exit 1
-	fi
-	echo "export MINICONDA_ENVIRONMENT=$MINICONDA_ENVIRONMENT" >> /root/.bashrc
+    MINICONDA_ENVIRONMENT=$(head -1 setup/environment.yml | cut -d' ' -f2)
+    if [ -z "$MINICONDA_ENVIRONMENT" ]
+    then
+      echo "The MINICONDA_ENVIRONMENT environment variable could not be defined."
+      exit 1
+    fi
+    echo "export MINICONDA_ENVIRONMENT=$MINICONDA_ENVIRONMENT" >> /root/.bashrc
 
-	/root/miniconda3/bin/conda env create -f setup/environment.yml
-	/root/miniconda3/bin/conda clean -tipy
-	rm -rf /root/.cache
+    /root/miniconda3/bin/conda env create -f setup/environment.yml
+    /root/miniconda3/bin/conda clean -tipy
+    rm -rf /root/.cache
 
-	set +ex
+    set +ex
+  fi
 EOF
 
 RUN <<-EOF
-	set -ex
+  if [[ "$CHOICE" == "U2" || "$CHOICE" == "U3" ]]; then \
+    set -ex
 
-	echo "source /root/miniconda3/etc/profile.d/conda.sh && conda activate $MINICONDA_ENVIRONMENT" >> /root/.bashrc
-	/root/miniconda3/envs/$MINICONDA_ENVIRONMENT/bin/python3 setup.py build_ext --inplace -j 8
-	rm -rf build/
-	find . -type f -name "*.cpp" -delete
+    echo "source /root/miniconda3/etc/profile.d/conda.sh && conda activate $MINICONDA_ENVIRONMENT" >> /root/.bashrc
+    /root/miniconda3/envs/$MINICONDA_ENVIRONMENT/bin/python3 setup.py build_ext --inplace -j 8
+    rm -rf build/
+    find . -type f -name "*.cpp" -delete
 
-	set +ex
+    set +ex
+  fi
 EOF
 
 RUN <<-EOF
-	set -ex
+  if [[ "$CHOICE" == "U2" || "$CHOICE" == "U3" ]]; then \
+    set -ex
 
-	mkdir -p \
-  	certs \
-  	conf/connectors \
-  	conf/strategies \
-  	conf/scripts \
-  	logs \
-  	data \
-  	scripts \
-  	pmm_scripts
+    mkdir -p \
+      certs \
+      conf/connectors \
+      conf/strategies \
+      conf/scripts \
+      logs \
+      data \
+      scripts \
+      pmm_scripts
 
-	set +ex
+    set +ex
+  fi
 EOF
 
 WORKDIR /root

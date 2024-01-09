@@ -954,14 +954,16 @@ unified_docker_create_container_choice_one () {
     --name "$UNIFIED_CONTAINER_NAME_CHOICE_1" \
     --network "$NETWORK" \
     --mount type=bind,source="$RESOURCES_FOLDER",target=/root/funttastic/client/resources \
+    --mount type=bind,source="$FUN_HB_CLIENT_LOGS_FOLDER",target=/root/funttastic/client/resources/logs \
     --mount type=bind,source="$CERTS_FOLDER",target=/root/funttastic/client/resources/certificates \
     --mount type=bind,source="$GATEWAY_CONF_FOLDER",target=/root/hummingbot/gateway/conf \
     --mount type=bind,source="$GATEWAY_LOGS_FOLDER",target=/root/hummingbot/gateway/logs \
     --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
     -e RESOURCES_FOLDER="/root/funttastic/client/resources" \
+    -e FUN_HB_CLIENT_LOGS_FOLDER="/root/funttastic/client/resources/logs" \
     -e CERTS_FOLDER="/root/funttastic/client/resources/certificates" \
-    -e CONF_FOLDER="/root/hummingbot/gateway/conf" \
-    -e LOGS_FOLDER="/root/hummingbot/gateway/logs" \
+    -e GATEWAY_CONF_FOLDER="/root/hummingbot/gateway/conf" \
+    -e GATEWAY_LOGS_FOLDER="/root/hummingbot/gateway/logs" \
     -e FUN_HB_CLIENT_PORT="$FUN_HB_CLIENT_PORT" \
     -e GATEWAY_PORT="$GATEWAY_PORT" \
     -e FUN_HB_CLIENT_COMMAND="$FUN_HB_CLIENT_COMMAND" \
@@ -1095,15 +1097,13 @@ post_installation_fun_hb_client () {
 
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cp -r $APP_PATH_PREFIX/resources_temp/* $APP_PATH_PREFIX/resources"
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "rm -rf $APP_PATH_PREFIX/resources_temp"
-  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "source /root/.bashrc > /dev/null 2>&1 && conda install click > /dev/null 2>&1" &
-  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "pip install -r /root/funttastic/client/requirements.txt"
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'python '$APP_PATH_PREFIX'/resources/scripts/generate_ssl_certificates.py --passphrase "$(cat '$APP_PATH_PREFIX'/selected_passphrase.txt)" --cert-path '$APP_PATH_PREFIX'/resources/certificates'
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'sed -i "s/<password>/"$(cat '$APP_PATH_PREFIX'/selected_passphrase.txt)"/g" '$APP_PATH_PREFIX'/resources/configuration/production.yml'
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' $APP_PATH_PREFIX/resources/configuration/common.yml"
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i -e '/logging:/,/use_telegram: true/ s/use_telegram: true/use_telegram: false/' -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' $APP_PATH_PREFIX/resources/configuration/production.yml"
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "groupadd -f $GROUP"
-#  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX/resources && chown -RH :$GROUP ."
-#  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX/resources && chmod -R a+rwX ."
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX/resources && chown -RH :$GROUP ."
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX/resources && chmod -R a+rwX ."
 
   if [ "$FUN_HB_CLIENT_AUTO_START" == 1 ]; then
     docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "python '$APP_PATH_PREFIX'/app.py" > /dev/null 2>&1 &
@@ -1113,7 +1113,7 @@ post_installation_fun_hb_client () {
     docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'echo "$(cat '$APP_PATH_PREFIX'/selected_passphrase.txt)" > '$APP_PATH_PREFIX'/resources/random_passphrase.txt' &> /dev/null
   fi
 
-#  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "rm -f selected_passphrase.txt"
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "rm -f selected_passphrase.txt"
 }
 
 post_installation_hb_client () {
