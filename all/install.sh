@@ -954,13 +954,11 @@ unified_docker_create_container_choice_one () {
     --name "$UNIFIED_CONTAINER_NAME_CHOICE_1" \
     --network "$NETWORK" \
     --mount type=bind,source="$RESOURCES_FOLDER",target=/root/funttastic/client/resources \
-    --mount type=bind,source="$FUN_HB_CLIENT_LOGS_FOLDER",target=/root/funttastic/client/resources/logs \
     --mount type=bind,source="$CERTS_FOLDER",target=/root/funttastic/client/resources/certificates \
     --mount type=bind,source="$GATEWAY_CONF_FOLDER",target=/root/hummingbot/gateway/conf \
     --mount type=bind,source="$GATEWAY_LOGS_FOLDER",target=/root/hummingbot/gateway/logs \
     --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
     -e RESOURCES_FOLDER="/root/funttastic/client/resources" \
-    -e FUN_HB_CLIENT_LOGS_FOLDER="/root/funttastic/client/resources/logs" \
     -e CERTS_FOLDER="/root/funttastic/client/resources/certificates" \
     -e GATEWAY_CONF_FOLDER="/root/hummingbot/gateway/conf" \
     -e GATEWAY_LOGS_FOLDER="/root/hummingbot/gateway/logs" \
@@ -1106,7 +1104,7 @@ post_installation_fun_hb_client () {
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX/resources && chmod -R a+rwX ."
 
   if [ "$FUN_HB_CLIENT_AUTO_START" == 1 ]; then
-    docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "python '$APP_PATH_PREFIX'/app.py" > /dev/null 2>&1 &
+    docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX && python '$APP_PATH_PREFIX'/app.py" > /dev/null 2>&1 &
   fi
 
   if [ -n "$RANDOM_PASSPHRASE" ]; then
@@ -1153,7 +1151,7 @@ post_installation_hb_gateway () {
   fi
 
   if [ "$GATEWAY_AUTO_START" == 1 ]; then
-    docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX && yarn start --passphrase=$SELECTED_PASSPHRASE" > /dev/null 2>&1 &
+    docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "source /root/.bashrc && cd $APP_PATH_PREFIX && yarn start --passphrase=$SELECTED_PASSPHRASE" > /dev/null 2>&1 &
   fi
 }
 
@@ -1247,13 +1245,8 @@ unified_default_installation () {
   unified_docker_create_image_choice_one
   unified_docker_create_container_choice_one
 
-  if [ "$FUN_HB_CLIENT_AUTO_START" == 1 ]; then
-    post_installation_fun_hb_client
-  fi
-
-  if [ "$GATEWAY_AUTO_START" == 1 ]; then
-    post_installation_hb_gateway
-  fi
+  post_installation_fun_hb_client
+  post_installation_hb_gateway
 }
 
 unified_choice_two_installation () {
@@ -1280,13 +1273,8 @@ unified_choice_two_installation () {
   unified_docker_create_image_choice_two
   unified_docker_create_container_choice_two
 
-  if [ "$GATEWAY_AUTO_START" == 1 ]; then
-    post_installation_hb_gateway
-  fi
-
-  if [ "$HB_CLIENT_AUTO_START" == 1 ]; then
-    post_installation_hb_client
-  fi
+  post_installation_hb_gateway
+  post_installation_hb_client
 }
 
 unified_choice_three_installation () {
@@ -1315,17 +1303,9 @@ unified_choice_three_installation () {
   unified_docker_create_image_choice_three
   unified_docker_create_container_choice_three
 
-  if [ "$FUN_HB_CLIENT_AUTO_START" == 1 ]; then
-    post_installation_fun_hb_client
-  fi
-
-  if [ "$GATEWAY_AUTO_START" == 1 ]; then
-    post_installation_hb_gateway
-  fi
-
-  if [ "$HB_CLIENT_AUTO_START" == 1 ]; then
-    post_installation_hb_client
-  fi
+  post_installation_fun_hb_client
+  post_installation_hb_gateway
+  post_installation_hb_client
 }
 
 execute_installation () {
