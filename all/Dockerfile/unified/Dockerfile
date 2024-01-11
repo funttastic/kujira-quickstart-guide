@@ -2,13 +2,15 @@ FROM ubuntu:latest
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ="Etc/GMT"
-ARG CHOICE
 ARG SSH_PUBLIC_KEY
 ARG SSH_PRIVATE_KEY
 ENV BUILD_DATE=${DATE}
 ENV INSTALLATION_TYPE=docker
 ENV WALLET=${WALLET}
 ENV CONFIG_PASSWORD=${CONFIG_PASSWORD}
+
+ARG CHOICE
+ENV CHOICE=${CHOICE}
 
 ARG FUN_HB_CLIENT_REPOSITORY_URL="${FUN_HB_CLIENT_REPOSITORY_URL:-https://github.com/funttastic/fun-hb-client.git}"
 ARG FUN_HB_CLIENT_REPOSITORY_BRANCH="${FUN_HB_CLIENT_REPOSITORY_BRANCH:-community}"
@@ -379,6 +381,18 @@ RUN <<-EOF
 EOF
 
 WORKDIR /root
+
+RUN <<-EOF
+  set -ex
+
+  mkdir -p utils
+  cd utils
+  curl -O https://raw.githubusercontent.com/funttastic/fun-hb-client/community/resources/scripts/generate_ssl_certificates.py
+  curl -O https://raw.githubusercontent.com/funttastic/fun-hb-client/community/requirements.txt
+  source /root/.bashrc && pip install -r requirements.txt
+
+  set +ex
+EOF
 
 RUN echo "Ending Hummingbot Client build process"
 

@@ -12,6 +12,18 @@ COMMON_FOLDER="$SHARED_FOLDER/common"
 ENTRYPOINT="/bin/bash"
 NETWORK="host"
 CERTS_FOLDER="$COMMON_FOLDER/certificates"
+OUTPUT_SUPPRESSION_MODE="stdout+stderr"
+
+if [ "$OUTPUT_SUPPRESSION_MODE" == "stdout+stderr" ]; then
+#  OUTPUT_SUPPRESSION="&> /dev/null"
+  OUTPUT_SUPPRESSION="> /dev/null 2>&1"
+elif [ "$OUTPUT_SUPPRESSION_MODE" == "stdout" ]; then
+  OUTPUT_SUPPRESSION="> /dev/null"
+elif [ "$OUTPUT_SUPPRESSION_MODE" == "stderr" ]; then
+  OUTPUT_SUPPRESSION="2> /dev/null"
+else
+  OUTPUT_SUPPRESSION=""
+fi
 
 generate_passphrase() {
     local length=$1
@@ -998,24 +1010,21 @@ unified_docker_create_container_choice_two () {
     --log-opt max-file=5 \
     --name "$UNIFIED_CONTAINER_NAME_CHOICE_2" \
     --network "$NETWORK" \
-    --mount type=bind,source="$HB_CLIENT_CONF_FOLDER",target=/root/hummingbot/client/conf/connectors \
+    --mount type=bind,source="$HB_CLIENT_CONF_FOLDER",target=/root/hummingbot/client/conf \
     --mount type=bind,source="$HB_CLIENT_LOGS_FOLDER",target=/root/hummingbot/client/logs \
     --mount type=bind,source="$HB_CLIENT_DATA_FOLDER",target=/root/hummingbot/client/data \
     --mount type=bind,source="$HB_CLIENT_SCRIPTS_FOLDER",target=/root/hummingbot/client/scripts \
     --mount type=bind,source="$HB_CLIENT_PMM_SCRIPTS_FOLDER",target=/root/hummingbot/client/pmm_scripts \
-    --mount type=bind,source="$CERTS_FOLDER",target=/root/hummingbot/gateway/certs \
     --mount type=bind,source="$GATEWAY_CONF_FOLDER",target=/root/hummingbot/gateway/conf \
     --mount type=bind,source="$GATEWAY_LOGS_FOLDER",target=/root/hummingbot/gateway/logs \
     --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
+    -e HB_CLIENT_CONF_FOLDER="/root/hummingbot/client/conf" \
     -e HB_CLIENT_LOGS_FOLDER="/root/hummingbot/client/logs" \
     -e HB_CLIENT_DATA_FOLDER="/root/hummingbot/client/data" \
     -e HB_CLIENT_SCRIPTS_FOLDER="/root/hummingbot/client/scripts" \
     -e HB_CLIENT_PMM_SCRIPTS_FOLDER="/root/hummingbot/client/pmm_scripts" \
-    -e RESOURCES_FOLDER="/root/funttastic/client/resources" \
-    -e CERTS_FOLDER="/root/hummingbot/gateway/certs" \
-    -e CONF_FOLDER="/root/hummingbot/gateway/conf" \
-    -e LOGS_FOLDER="/root/hummingbot/gateway/logs" \
-    -e FUN_HB_CLIENT_PORT="$FUN_HB_CLIENT_PORT" \
+    -e GATEWAY_CONF_FOLDER="/root/hummingbot/gateway/conf" \
+    -e GATEWAY_LOGS_FOLDER="/root/hummingbot/gateway/logs" \
     -e GATEWAY_PORT="$GATEWAY_PORT" \
     -e GATEWAY_COMMAND="$GATEWAY_COMMAND" \
     -e HB_CLIENT_COMMAND="$HB_CLIENT_COMMAND" \
@@ -1051,25 +1060,27 @@ unified_docker_create_container_choice_three () {
     --log-opt max-file=5 \
     --name "$UNIFIED_CONTAINER_NAME_CHOICE_3" \
     --network "$NETWORK" \
-    --mount type=bind,source="$RESOURCES_FOLDER",target=/root/funttastic/client/resources \
-    --mount type=bind,source="$HB_CLIENT_CONF_FOLDER",target=/root/hummingbot/client/conf/connectors \
+    --mount type=bind,source="$FUN_HB_CLIENT_RESOURCES_FOLDER",target=/root/funttastic/client/resources \
+    --mount type=bind,source="$FUN_HB_CLIENT_CERTS_FOLDER",target=/root/funttastic/client/resources/certificates \
+    --mount type=bind,source="$HB_CLIENT_CONF_FOLDER",target=/root/hummingbot/client/conf \
     --mount type=bind,source="$HB_CLIENT_LOGS_FOLDER",target=/root/hummingbot/client/logs \
     --mount type=bind,source="$HB_CLIENT_DATA_FOLDER",target=/root/hummingbot/client/data \
     --mount type=bind,source="$HB_CLIENT_SCRIPTS_FOLDER",target=/root/hummingbot/client/scripts \
     --mount type=bind,source="$HB_CLIENT_PMM_SCRIPTS_FOLDER",target=/root/hummingbot/client/pmm_scripts \
-    --mount type=bind,source="$CERTS_FOLDER",target=/root/hummingbot/gateway/certs \
+    --mount type=bind,source="$GATEWAY_CERTS_FOLDER",target=/root/hummingbot/gateway/certs \
     --mount type=bind,source="$GATEWAY_CONF_FOLDER",target=/root/hummingbot/gateway/conf \
     --mount type=bind,source="$GATEWAY_LOGS_FOLDER",target=/root/hummingbot/gateway/logs \
     --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
-    -e RESOURCES_FOLDER="/root/funttastic/client/resources" \
+    -e FUN_HB_CLIENT_RESOURCES_FOLDER="/root/funttastic/client/resources" \
+    -e FUN_HB_CLIENT_CERTS_FOLDER="/root/funttastic/client/resources/certificates" \
+    -e HB_CLIENT_CONF_FOLDER="/root/hummingbot/client/conf" \
     -e HB_CLIENT_LOGS_FOLDER="/root/hummingbot/client/logs" \
     -e HB_CLIENT_DATA_FOLDER="/root/hummingbot/client/data" \
     -e HB_CLIENT_SCRIPTS_FOLDER="/root/hummingbot/client/scripts" \
     -e HB_CLIENT_PMM_SCRIPTS_FOLDER="/root/hummingbot/client/pmm_scripts" \
-    -e RESOURCES_FOLDER="/root/funttastic/client/resources" \
-    -e CERTS_FOLDER="/root/hummingbot/gateway/certs" \
-    -e CONF_FOLDER="/root/hummingbot/gateway/conf" \
-    -e LOGS_FOLDER="/root/hummingbot/gateway/logs" \
+    -e GATEWAY_CERTS_FOLDER="/root/hummingbot/gateway/certs" \
+    -e GATEWAY_CONF_FOLDER="/root/hummingbot/gateway/conf" \
+    -e GATEWAY_LOGS_FOLDER="/root/hummingbot/gateway/logs" \
     -e FUN_HB_CLIENT_PORT="$FUN_HB_CLIENT_PORT" \
     -e GATEWAY_PORT="$GATEWAY_PORT" \
     -e FUN_HB_CLIENT_COMMAND="$FUN_HB_CLIENT_COMMAND" \
@@ -1129,7 +1140,7 @@ post_installation_hb_client () {
   fi
 
   if [ "$HB_CLIENT_AUTO_START" == 1 ]; then
-    docker exec -it "$HB_CLIENT_CONTAINER_NAME" /bin/bash -c "/root/miniconda3/envs/hummingbot/bin/python3 $PY_PATH_PREFIX/bin/hummingbot_quickstart.py"
+    docker exec -it "$HB_CLIENT_CONTAINER_NAME" /bin/bash -c "source /root/.bashrc && /root/miniconda3/envs/hummingbot/bin/python3 $PY_PATH_PREFIX/bin/hummingbot_quickstart.py"
   fi
 }
 
@@ -1148,6 +1159,11 @@ post_installation_hb_gateway () {
 
   if [[ "$CHOICE" == "U1" || "$CHOICE" == "U2" || "$CHOICE" == "U3" ]]; then
       docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "ln -fs /root/funttastic/client/resources/certificates/* $APP_PATH_PREFIX/certs"
+  fi
+
+  if [ "$CHOICE" == "U2" ]; then
+    docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "mkdir -p ~/temp && echo '$SELECTED_PASSPHRASE' > ~/temp/selected_passphrase.txt" > /dev/null 2>&1 &
+    docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c 'source /root/.bashrc && python ~/utils/generate_ssl_certificates.py --passphrase "$(cat ~/temp/selected_passphrase.txt)" --cert-path '$APP_PATH_PREFIX'/certs' > /dev/null 2>&1 &
   fi
 
   if [ "$GATEWAY_AUTO_START" == 1 ]; then
@@ -1195,7 +1211,7 @@ choice_two_installation () {
   docker_create_container_hb_client
 
   # Makes some configurations within the container after its creation
-#  post_installation_hb_client
+  post_installation_hb_client
 }
 
 choice_three_installation () {
