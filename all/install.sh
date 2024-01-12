@@ -825,7 +825,7 @@ else
 	RANDOM_PASSPHRASE=$(generate_passphrase 32)
 fi
 
-RESOURCES_FOLDER="$FUN_HB_CLIENT_FOLDER/client/resources"
+FUN_HB_CLIENT_RESOURCES_FOLDER="$FUN_HB_CLIENT_FOLDER/client/resources"
 SELECTED_PASSPHRASE=${RANDOM_PASSPHRASE:-$DEFINED_PASSPHRASE}
 if [[ "$SSH_PUBLIC_KEY" && "$SSH_PRIVATE_KEY" ]]; then
     FUN_HB_CLIENT_REPOSITORY_URL="git@github.com:funttastic/fun-hb-client.git"
@@ -865,10 +865,10 @@ docker_create_container_fun_hb_client () {
     --log-opt max-file=5 \
     --name "$FUN_HB_CLIENT_CONTAINER_NAME" \
     --network "$NETWORK" \
-    --mount type=bind,source="$RESOURCES_FOLDER",target=/root/resources \
+    --mount type=bind,source="$FUN_HB_CLIENT_RESOURCES_FOLDER",target=/root/resources \
     --mount type=bind,source="$CERTS_FOLDER",target=/root/resources/certificates \
     --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
-    -e RESOURCES_FOLDER="/root/resources" \
+    -e FUN_HB_CLIENT_RESOURCES_FOLDER="/root/resources" \
     -e CERTS_FOLDER="/root/resources/certificates" \
     -e PORT="$FUN_HB_CLIENT_PORT" \
     --entrypoint="$ENTRYPOINT" \
@@ -965,12 +965,12 @@ unified_docker_create_container_choice_one () {
     --log-opt max-file=5 \
     --name "$UNIFIED_CONTAINER_NAME_CHOICE_1" \
     --network "$NETWORK" \
-    --mount type=bind,source="$RESOURCES_FOLDER",target=/root/funttastic/client/resources \
+    --mount type=bind,source="$FUN_HB_CLIENT_RESOURCES_FOLDER",target=/root/funttastic/client/resources \
     --mount type=bind,source="$CERTS_FOLDER",target=/root/funttastic/client/resources/certificates \
     --mount type=bind,source="$GATEWAY_CONF_FOLDER",target=/root/hummingbot/gateway/conf \
     --mount type=bind,source="$GATEWAY_LOGS_FOLDER",target=/root/hummingbot/gateway/logs \
     --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
-    -e RESOURCES_FOLDER="/root/funttastic/client/resources" \
+    -e FUN_HB_CLIENT_RESOURCES_FOLDER="/root/funttastic/client/resources" \
     -e CERTS_FOLDER="/root/funttastic/client/resources/certificates" \
     -e GATEWAY_CONF_FOLDER="/root/hummingbot/gateway/conf" \
     -e GATEWAY_LOGS_FOLDER="/root/hummingbot/gateway/logs" \
@@ -1003,6 +1003,10 @@ unified_docker_create_image_choice_two () {
 }
 
 unified_docker_create_container_choice_two () {
+  if [ "$HB_CLIENT_AUTO_START" == 1 ]; then
+    HB_CLIENT_COMMAND="source /root/.bashrc && /root/miniconda3/envs/hummingbot/bin/python3 /root/hummingbot/client/bin/hummingbot_quickstart.py"
+  fi
+
   $BUILT \
   && docker run \
     -dit \
@@ -1053,6 +1057,10 @@ unified_docker_create_image_choice_three () {
 }
 
 unified_docker_create_container_choice_three () {
+  if [ "$HB_CLIENT_AUTO_START" == 1 ]; then
+    HB_CLIENT_COMMAND="source /root/.bashrc && /root/miniconda3/envs/hummingbot/bin/python3 /root/hummingbot/client/bin/hummingbot_quickstart.py"
+  fi
+
   $BUILT \
   && docker run \
     -dit \
@@ -1061,24 +1069,20 @@ unified_docker_create_container_choice_three () {
     --name "$UNIFIED_CONTAINER_NAME_CHOICE_3" \
     --network "$NETWORK" \
     --mount type=bind,source="$FUN_HB_CLIENT_RESOURCES_FOLDER",target=/root/funttastic/client/resources \
-    --mount type=bind,source="$FUN_HB_CLIENT_CERTS_FOLDER",target=/root/funttastic/client/resources/certificates \
     --mount type=bind,source="$HB_CLIENT_CONF_FOLDER",target=/root/hummingbot/client/conf \
     --mount type=bind,source="$HB_CLIENT_LOGS_FOLDER",target=/root/hummingbot/client/logs \
     --mount type=bind,source="$HB_CLIENT_DATA_FOLDER",target=/root/hummingbot/client/data \
     --mount type=bind,source="$HB_CLIENT_SCRIPTS_FOLDER",target=/root/hummingbot/client/scripts \
     --mount type=bind,source="$HB_CLIENT_PMM_SCRIPTS_FOLDER",target=/root/hummingbot/client/pmm_scripts \
-    --mount type=bind,source="$GATEWAY_CERTS_FOLDER",target=/root/hummingbot/gateway/certs \
     --mount type=bind,source="$GATEWAY_CONF_FOLDER",target=/root/hummingbot/gateway/conf \
     --mount type=bind,source="$GATEWAY_LOGS_FOLDER",target=/root/hummingbot/gateway/logs \
     --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
     -e FUN_HB_CLIENT_RESOURCES_FOLDER="/root/funttastic/client/resources" \
-    -e FUN_HB_CLIENT_CERTS_FOLDER="/root/funttastic/client/resources/certificates" \
     -e HB_CLIENT_CONF_FOLDER="/root/hummingbot/client/conf" \
     -e HB_CLIENT_LOGS_FOLDER="/root/hummingbot/client/logs" \
     -e HB_CLIENT_DATA_FOLDER="/root/hummingbot/client/data" \
     -e HB_CLIENT_SCRIPTS_FOLDER="/root/hummingbot/client/scripts" \
     -e HB_CLIENT_PMM_SCRIPTS_FOLDER="/root/hummingbot/client/pmm_scripts" \
-    -e GATEWAY_CERTS_FOLDER="/root/hummingbot/gateway/certs" \
     -e GATEWAY_CONF_FOLDER="/root/hummingbot/gateway/conf" \
     -e GATEWAY_LOGS_FOLDER="/root/hummingbot/gateway/logs" \
     -e FUN_HB_CLIENT_PORT="$FUN_HB_CLIENT_PORT" \
@@ -1099,6 +1103,13 @@ post_installation_fun_hb_client () {
   APP_PATH_PREFIX="/root"
 
   if [[ "$CHOICE" == "U1" || "$CHOICE" == "U2" || "$CHOICE" == "U3" ]]; then
+    if [ -n "$UNIFIED_IMAGE_NAME_CHOICE_1" ]; then
+      FUN_HB_CLIENT_CONTAINER_NAME="$UNIFIED_CONTAINER_NAME_CHOICE_1"
+    elif [ -n "$UNIFIED_IMAGE_NAME_CHOICE_2" ]; then
+      FUN_HB_CLIENT_CONTAINER_NAME="$UNIFIED_CONTAINER_NAME_CHOICE_2"
+    else
+      FUN_HB_CLIENT_CONTAINER_NAME="$UNIFIED_CONTAINER_NAME_CHOICE_3"
+    fi
     APP_PATH_PREFIX="/root/funttastic/client"
   fi
 
@@ -1106,7 +1117,7 @@ post_installation_fun_hb_client () {
 
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cp -r $APP_PATH_PREFIX/resources_temp/* $APP_PATH_PREFIX/resources"
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "rm -rf $APP_PATH_PREFIX/resources_temp"
-  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -lc 'python '$APP_PATH_PREFIX'/resources/scripts/generate_ssl_certificates.py --passphrase "$(cat '$APP_PATH_PREFIX'/selected_passphrase.txt)" --cert-path '$APP_PATH_PREFIX'/resources/certificates'
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -lc 'conda deactivate && python '$APP_PATH_PREFIX'/resources/scripts/generate_ssl_certificates.py --passphrase "$(cat '$APP_PATH_PREFIX'/selected_passphrase.txt)" --cert-path '$APP_PATH_PREFIX'/resources/certificates'
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'sed -i "s/<password>/"$(cat '$APP_PATH_PREFIX'/selected_passphrase.txt)"/g" '$APP_PATH_PREFIX'/resources/configuration/production.yml'
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' $APP_PATH_PREFIX/resources/configuration/common.yml"
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i -e '/logging:/,/use_telegram: true/ s/use_telegram: true/use_telegram: false/' -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' $APP_PATH_PREFIX/resources/configuration/production.yml"
@@ -1176,7 +1187,7 @@ choice_one_installation () {
 
   mkdir -p "$SHARED_FOLDER"
   mkdir -p "$CERTS_FOLDER"
-  mkdir -p "$RESOURCES_FOLDER"
+  mkdir -p "$FUN_HB_CLIENT_RESOURCES_FOLDER"
 
   # Create a new separated image for Funttastic Hummingbot Client
   docker_create_image_fun_hb_client
@@ -1250,7 +1261,7 @@ unified_default_installation () {
   mkdir -p "$SHARED_FOLDER"
   mkdir -p "$CERTS_FOLDER"
 
-  mkdir -p "$RESOURCES_FOLDER"
+  mkdir -p "$FUN_HB_CLIENT_RESOURCES_FOLDER"
 
   mkdir -p "$GATEWAY_FOLDER"
   mkdir -p "$GATEWAY_CONF_FOLDER"
@@ -1297,7 +1308,7 @@ unified_choice_three_installation () {
   mkdir -p "$SHARED_FOLDER"
   mkdir -p "$CERTS_FOLDER"
 
-  mkdir -p "$RESOURCES_FOLDER"
+  mkdir -p "$FUN_HB_CLIENT_RESOURCES_FOLDER"
 
   mkdir -p "$HB_CLIENT_FOLDER"
   mkdir -p "$HB_CLIENT_CONF_FOLDER"
@@ -1552,7 +1563,7 @@ then
     printf "%25s %5s\n" "Autostart:"    		    "$FUN_HB_CLIENT_AUTO_START"
     echo
     printf "%25s %5s\n" "Fun HB Client folder:" "$FUN_HB_CLIENT_FOLDER"
-    printf "%25s %5s\n" "Resources folder:"     "$RESOURCES_FOLDER"
+    printf "%25s %5s\n" "Resources folder:"     "$FUN_HB_CLIENT_RESOURCES_FOLDER"
     echo
   fi
 
