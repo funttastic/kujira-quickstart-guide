@@ -1116,6 +1116,7 @@ post_installation_fun_hb_client () {
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "echo '$SELECTED_PASSPHRASE' > $APP_PATH_PREFIX/selected_passphrase.txt"
 
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cp -r $APP_PATH_PREFIX/resources_temp/* $APP_PATH_PREFIX/resources"
+  sleep 1
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "rm -rf $APP_PATH_PREFIX/resources_temp"
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -lc 'conda deactivate && python '$APP_PATH_PREFIX'/resources/scripts/generate_ssl_certificates.py --passphrase "$(cat '$APP_PATH_PREFIX'/selected_passphrase.txt)" --cert-path '$APP_PATH_PREFIX'/resources/certificates'
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'sed -i "s/<password>/"$(cat '$APP_PATH_PREFIX'/selected_passphrase.txt)"/g" '$APP_PATH_PREFIX'/resources/configuration/production.yml'
@@ -1126,7 +1127,7 @@ post_installation_fun_hb_client () {
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX/resources && chmod -R a+rwX ."
 
   if [ "$FUN_HB_CLIENT_AUTO_START" == 1 ]; then
-    docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -lc "cd $APP_PATH_PREFIX && python '$APP_PATH_PREFIX'/app.py" > /dev/null 2>&1 &
+    docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -lc "conda deactivate && cd $APP_PATH_PREFIX && python '$APP_PATH_PREFIX'/app.py" > /dev/null 2>&1 &
   fi
 
   if [ -n "$RANDOM_PASSPHRASE" ]; then
