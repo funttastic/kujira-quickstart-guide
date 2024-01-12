@@ -1101,6 +1101,7 @@ unified_docker_create_container_choice_three () {
 
 post_installation_fun_hb_client () {
   APP_PATH_PREFIX="/root"
+  CONDA_DEACTIVATE=""
 
   if [[ "$CHOICE" == "U1" || "$CHOICE" == "U2" || "$CHOICE" == "U3" ]]; then
     if [ -n "$UNIFIED_IMAGE_NAME_CHOICE_1" ]; then
@@ -1110,6 +1111,11 @@ post_installation_fun_hb_client () {
     else
       FUN_HB_CLIENT_CONTAINER_NAME="$UNIFIED_CONTAINER_NAME_CHOICE_3"
     fi
+
+    if [ "$CHOICE" == "U3" ]; then
+      CONDA_DEACTIVATE="conda deactivate &&"
+    fi
+
     APP_PATH_PREFIX="/root/funttastic/client"
   fi
 
@@ -1118,7 +1124,7 @@ post_installation_fun_hb_client () {
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cp -r $APP_PATH_PREFIX/resources_temp/* $APP_PATH_PREFIX/resources"
   sleep 1
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "rm -rf $APP_PATH_PREFIX/resources_temp"
-  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -lc 'conda deactivate && python '$APP_PATH_PREFIX'/resources/scripts/generate_ssl_certificates.py --passphrase "$(cat '$APP_PATH_PREFIX'/selected_passphrase.txt)" --cert-path '$APP_PATH_PREFIX'/resources/certificates'
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -lc "$CONDA_DEACTIVATE python '$APP_PATH_PREFIX'/resources/scripts/generate_ssl_certificates.py --passphrase $(cat $APP_PATH_PREFIX/selected_passphrase.txt) --cert-path '$APP_PATH_PREFIX'/resources/certificates"
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'sed -i "s/<password>/"$(cat '$APP_PATH_PREFIX'/selected_passphrase.txt)"/g" '$APP_PATH_PREFIX'/resources/configuration/production.yml'
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' $APP_PATH_PREFIX/resources/configuration/common.yml"
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i -e '/logging:/,/use_telegram: true/ s/use_telegram: true/use_telegram: false/' -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' $APP_PATH_PREFIX/resources/configuration/production.yml"
@@ -1127,7 +1133,7 @@ post_installation_fun_hb_client () {
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX/resources && chmod -R a+rwX ."
 
   if [ "$FUN_HB_CLIENT_AUTO_START" == 1 ]; then
-    docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -lc "conda deactivate && cd $APP_PATH_PREFIX && python '$APP_PATH_PREFIX'/app.py" > /dev/null 2>&1 &
+    docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -lc "$CONDA_DEACTIVATE cd $APP_PATH_PREFIX && python '$APP_PATH_PREFIX'/app.py" > /dev/null 2>&1 &
   fi
 
   if [ -n "$RANDOM_PASSPHRASE" ]; then
