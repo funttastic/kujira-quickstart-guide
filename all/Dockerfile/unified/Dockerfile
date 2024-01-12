@@ -133,39 +133,15 @@ RUN <<-EOF
     ln -s /usr/bin/python3 /usr/bin/python
     ln -s /usr/bin/pip3 /usr/bin/pip
 
-    set +ex
-  fi
-EOF
-
-RUN <<-EOF
-  if [[ "$CHOICE" == "U1" || "$CHOICE" == "U3" ]]; then \
-    set -ex
-
     git clone -b $FUN_HB_CLIENT_REPOSITORY_BRANCH $FUN_HB_CLIENT_REPOSITORY_URL /tmp/funttastic
     mkdir -p funttastic/client
     cp -a /tmp/funttastic/. funttastic/client
     rm -rf /tmp/funttastic
     pip install -r funttastic/client/requirements.txt
 
-    set +ex
-  fi
-EOF
-
-RUN <<-EOF
-  if [[ "$CHOICE" == "U1" || "$CHOICE" == "U3" ]]; then \
-    set -ex
-
     mkdir -p funttastic/client/resources/certificates
     cp funttastic/client/resources/configuration/production.example.yml funttastic/client/resources/configuration/production.yml
     cp -R funttastic/client/resources/strategies/templates/* funttastic/client/resources/strategies
-
-    set +ex
-  fi
-EOF
-
-RUN <<-EOF
-  if [[ "$CHOICE" == "U1" || "$CHOICE" == "U3" ]]; then \
-    set -ex
 
     mv funttastic/client/resources funttastic/client/resources_temp
 
@@ -252,7 +228,6 @@ RUN echo "Starting Hummingbot Client build process"
 # This will create the directory automatically
 WORKDIR /root/hummingbot/client
 
-
 RUN <<-EOF
   if [[ "$CHOICE" == "U2" || "$CHOICE" == "U3" ]]; then \
     set -ex
@@ -261,15 +236,6 @@ RUN <<-EOF
     cp -a /tmp/hummingbot/client/. .
 
     rm -rf /tmp/hummingbot
-
-    set +ex
-  fi
-EOF
-
-# Install miniconda
-RUN <<-EOF
-  if [[ "$CHOICE" == "U2" || "$CHOICE" == "U3" ]]; then \
-    set -ex
 
     ARCHITECTURE="$(uname -m)"
 
@@ -325,14 +291,6 @@ RUN <<-EOF
     echo "export MINICONDA_VERSION=$MINICONDA_VERSION" >> /root/.bashrc
     echo "export MINICONDA_URL=$MINICONDA_URL" >> /root/.bashrc
 
-    set +ex
-  fi
-EOF
-
-RUN <<-EOF
-  if [[ "$CHOICE" == "U2" || "$CHOICE" == "U3" ]]; then \
-    set -ex
-
     MINICONDA_ENVIRONMENT=$(head -1 setup/environment.yml | cut -d' ' -f2)
     if [ -z "$MINICONDA_ENVIRONMENT" ]
     then
@@ -345,26 +303,10 @@ RUN <<-EOF
     /root/miniconda3/bin/conda clean -tipy
     rm -rf /root/.cache
 
-    set +ex
-  fi
-EOF
-
-RUN <<-EOF
-  if [[ "$CHOICE" == "U2" || "$CHOICE" == "U3" ]]; then \
-    set -ex
-
     echo "source /root/miniconda3/etc/profile.d/conda.sh && conda activate $MINICONDA_ENVIRONMENT" >> /root/.bashrc
     /root/miniconda3/envs/$MINICONDA_ENVIRONMENT/bin/python3 setup.py build_ext --inplace -j 8
     rm -rf build/
     find . -type f -name "*.cpp" -delete
-
-    set +ex
-  fi
-EOF
-
-RUN <<-EOF
-  if [[ "$CHOICE" == "U2" || "$CHOICE" == "U3" ]]; then \
-    set -ex
 
     mkdir -p \
       certs \
@@ -383,15 +325,20 @@ EOF
 WORKDIR /root
 
 RUN <<-EOF
-  set -ex
+  if [ "$CHOICE" == "U2" ]; then \
+    set -ex
 
-  mkdir -p utils
-  cd utils
-  curl -O https://raw.githubusercontent.com/funttastic/fun-hb-client/community/resources/scripts/generate_ssl_certificates.py
-  curl -O https://raw.githubusercontent.com/funttastic/fun-hb-client/community/requirements.txt
-  source /root/.bashrc && pip install -r requirements.txt
+    mkdir -p utils
+    cd utils
+    curl -O https://raw.githubusercontent.com/funttastic/fun-hb-client/community/resources/scripts/generate_ssl_certificates.py
+    curl -O https://raw.githubusercontent.com/funttastic/fun-hb-client/community/environment.yml
 
-  set +ex
+    source /root/.bashrc
+    conda update -n base -c conda-forge conda -y
+    conda env create -f environment.yml
+
+    set +ex
+  fi
 EOF
 
 RUN echo "Ending Hummingbot Client build process"

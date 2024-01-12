@@ -1106,7 +1106,7 @@ post_installation_fun_hb_client () {
 
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cp -r $APP_PATH_PREFIX/resources_temp/* $APP_PATH_PREFIX/resources"
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "rm -rf $APP_PATH_PREFIX/resources_temp"
-  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'python '$APP_PATH_PREFIX'/resources/scripts/generate_ssl_certificates.py --passphrase "$(cat '$APP_PATH_PREFIX'/selected_passphrase.txt)" --cert-path '$APP_PATH_PREFIX'/resources/certificates'
+  docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -lc 'python '$APP_PATH_PREFIX'/resources/scripts/generate_ssl_certificates.py --passphrase "$(cat '$APP_PATH_PREFIX'/selected_passphrase.txt)" --cert-path '$APP_PATH_PREFIX'/resources/certificates'
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c 'sed -i "s/<password>/"$(cat '$APP_PATH_PREFIX'/selected_passphrase.txt)"/g" '$APP_PATH_PREFIX'/resources/configuration/production.yml'
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' $APP_PATH_PREFIX/resources/configuration/common.yml"
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "sed -i -e '/logging:/,/use_telegram: true/ s/use_telegram: true/use_telegram: false/' -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' $APP_PATH_PREFIX/resources/configuration/production.yml"
@@ -1115,7 +1115,7 @@ post_installation_fun_hb_client () {
   docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX/resources && chmod -R a+rwX ."
 
   if [ "$FUN_HB_CLIENT_AUTO_START" == 1 ]; then
-    docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX && python '$APP_PATH_PREFIX'/app.py" > /dev/null 2>&1 &
+    docker exec "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -lc "cd $APP_PATH_PREFIX && python '$APP_PATH_PREFIX'/app.py" > /dev/null 2>&1 &
   fi
 
   if [ -n "$RANDOM_PASSPHRASE" ]; then
@@ -1140,7 +1140,7 @@ post_installation_hb_client () {
   fi
 
   if [ "$HB_CLIENT_AUTO_START" == 1 ]; then
-    docker exec -it "$HB_CLIENT_CONTAINER_NAME" /bin/bash -c "source /root/.bashrc && /root/miniconda3/envs/hummingbot/bin/python3 $PY_PATH_PREFIX/bin/hummingbot_quickstart.py"
+    docker exec -it "$HB_CLIENT_CONTAINER_NAME" /bin/bash -lc "source /root/.bashrc && /root/miniconda3/envs/hummingbot/bin/python3 $PY_PATH_PREFIX/bin/hummingbot_quickstart.py"
   fi
 }
 
@@ -1157,17 +1157,19 @@ post_installation_hb_gateway () {
   docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX/logs && chown -RH :$GROUP ."
   docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd $APP_PATH_PREFIX/logs && chmod -R a+rw ."
 
-  if [[ "$CHOICE" == "U1" || "$CHOICE" == "U2" || "$CHOICE" == "U3" ]]; then
+  if [[ "$CHOICE" == "U1" || "$CHOICE" == "U3" ]]; then
       docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "ln -fs /root/funttastic/client/resources/certificates/* $APP_PATH_PREFIX/certs"
   fi
 
   if [ "$CHOICE" == "U2" ]; then
     docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "mkdir -p ~/temp && echo '$SELECTED_PASSPHRASE' > ~/temp/selected_passphrase.txt" > /dev/null 2>&1 &
-    docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c 'source /root/.bashrc && python ~/utils/generate_ssl_certificates.py --passphrase "$(cat ~/temp/selected_passphrase.txt)" --cert-path '$APP_PATH_PREFIX'/certs' > /dev/null 2>&1 &
+    docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -lc 'source /root/.bashrc && conda activate fun-hb-client && python ~/utils/generate_ssl_certificates.py --passphrase "$(cat ~/temp/selected_passphrase.txt)" --cert-path '$APP_PATH_PREFIX'/certs' > /dev/null 2>&1 &
+#    docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "ln -fs /root/hummingbot/gateway/certs/* /root/hummingbot/client/certs"
+    docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/hummingbot/client/certs && cp -s /root/hummingbot/gateway/certs/* ."
   fi
 
   if [ "$GATEWAY_AUTO_START" == 1 ]; then
-    docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "source /root/.bashrc && cd $APP_PATH_PREFIX && yarn start --passphrase=$SELECTED_PASSPHRASE" > /dev/null 2>&1 &
+    docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -lc "source /root/.bashrc && cd $APP_PATH_PREFIX && yarn start --passphrase=$SELECTED_PASSPHRASE" > /dev/null 2>&1 &
   fi
 }
 

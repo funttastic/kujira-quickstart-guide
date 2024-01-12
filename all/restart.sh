@@ -125,7 +125,7 @@ authentication() {
 
     read -srp "   >>> " passphrase
 
-    echo $passphrase > /dev/null 2>&1
+    echo "$passphrase" > /dev/null 2>&1
 }
 
 # Specific functions to restart containers
