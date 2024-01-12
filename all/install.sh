@@ -1163,9 +1163,7 @@ post_installation_hb_gateway () {
 
   if [ "$CHOICE" == "U2" ]; then
     docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "mkdir -p ~/temp && echo '$SELECTED_PASSPHRASE' > ~/temp/selected_passphrase.txt" > /dev/null 2>&1 &
-    docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -lc 'source /root/.bashrc && conda activate fun-hb-client && python ~/utils/generate_ssl_certificates.py --passphrase "$(cat ~/temp/selected_passphrase.txt)" --cert-path '$APP_PATH_PREFIX'/certs' > /dev/null 2>&1 &
-#    docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "ln -fs /root/hummingbot/gateway/certs/* /root/hummingbot/client/certs"
-    docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -c "cd /root/hummingbot/client/certs && cp -s /root/hummingbot/gateway/certs/* ."
+    docker exec "$GATEWAY_CONTAINER_NAME" /bin/bash -lc 'source /root/.bashrc && conda activate fun-hb-client && python ~/utils/generate_ssl_certificates.py --passphrase "$(cat ~/temp/selected_passphrase.txt)" --cert-path '$APP_PATH_PREFIX'/certs && ln -fs /root/hummingbot/gateway/certs/* /root/hummingbot/client/certs' > /dev/null 2>&1 &
   fi
 
   if [ "$GATEWAY_AUTO_START" == 1 ]; then
@@ -1292,7 +1290,7 @@ unified_choice_two_installation () {
   unified_docker_create_container_choice_two
 
   post_installation_hb_gateway
-  post_installation_hb_client
+#  post_installation_hb_client
 }
 
 unified_choice_three_installation () {
@@ -1323,7 +1321,7 @@ unified_choice_three_installation () {
 
   post_installation_fun_hb_client
   post_installation_hb_gateway
-  post_installation_hb_client
+#  post_installation_hb_client
 }
 
 execute_installation () {
