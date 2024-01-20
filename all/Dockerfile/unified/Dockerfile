@@ -4,60 +4,32 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ="Etc/GMT"
 ARG SSH_PUBLIC_KEY
 ARG SSH_PRIVATE_KEY
-ENV BUILD_DATE=${DATE}
-ENV INSTALLATION_TYPE=docker
-ENV WALLET=${WALLET}
-ENV CONFIG_PASSWORD=${CONFIG_PASSWORD}
+ARG GATEWAY_PASSPHRASE
+ARG RANDOM_PASSPHRASE
+ARG HOST_USER_GROUP
+ARG LOCK_APT
 
-ARG CHOICE
-ENV CHOICE=${CHOICE}
-
+ARG FUN_HB_CLIENT_COMMAND=$FUN_HB_CLIENT_COMMAND
 ARG FUN_HB_CLIENT_REPOSITORY_URL="${FUN_HB_CLIENT_REPOSITORY_URL:-https://github.com/funttastic/fun-hb-client.git}"
 ARG FUN_HB_CLIENT_REPOSITORY_BRANCH="${FUN_HB_CLIENT_REPOSITORY_BRANCH:-community}"
 ENV FUN_HB_CLIENT_PORT=${FUN_HB_CLIENT_PORT:-5000}
-ENV FUN_HB_CLIENT_COMMAND="${FUN_HB_CLIENT_COMMAND:-echo}"
-ENV FUN_HB_CLIENT_COMMIT_BRANCH=${FUN_HB_CLIENT_BRANCH}
-ENV FUN_HB_CLIENT_COMMIT_SHA=${FUN_HB_CLIENT_COMMIT}
-ENV FUN_HB_CLIENT_BUILD_DATE=${FUN_HB_CLIENT_BUILD_DATE}
 
+ARG GATEWAY_COMMAND=$GATEWAY_COMMAND
 ARG GATEWAY_REPOSITORY_URL=${GATEWAY_REPOSITORY_URL:-https://github.com/Team-Kujira/gateway.git}
 ARG GATEWAY_REPOSITORY_BRANCH=${GATEWAY_REPOSITORY_BRANCH:-community}
 ENV GATEWAY_PORT=${GATEWAY_PORT:-15888}
-ENV GATEWAY_COMMAND=${GATEWAY_COMMAND:-echo}
-ENV GATEWAY_COMMIT_BRANCH=${GATEWAY_BRANCH}
-ENV GATEWAY_COMMIT_SHA=${GATEWAY_COMMIT}
-ENV GATEWAY_BUILD_DATE=${GATEWAY_BUILD_DATE}
 
+ARG HB_CLIENT_COMMAND=$HB_CLIENT_COMMAND
 ARG HB_CLIENT_REPOSITORY_URL=${REPOSITORY_URL:-https://github.com/Team-Kujira/hummingbot.git}
 ARG HB_CLIENT_REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-community}
-ENV STRATEGY=${STRATEGY}
-ENV HB_CLIENT_CONFIG_FILE_NAME=${HB_CLIENT_CONFIG_FILE_NAME}
-ENV HB_CLIENT_COMMIT_BRANCH=${HB_CLIENT_BRANCH}
-ENV HB_CLIENT_COMMIT_SHA=${HB_CLIENT_COMMIT}
-ENV HB_CLIENT_BUILD_DATE=${HB_CLIENT_BUILD_DATE}
-ENV HB_CLIENT_COMMAND=${HB_CLIENT_COMMAND:-echo}
-
-#ENV CONCATENATED_COMMAND="$FUN_HB_CLIENT_COMMAND; $GATEWAY_COMMAND; $HB_CLIENT_COMMAND"
-
-LABEL hb_client_branch=${HB_CLIENT_BRANCH}
-LABEL hb_client_commit=${HB_CLIENT_COMMIT}
-LABEL hb_client_date=${HB_CLIENT_BUILD_DATE}
-
-LABEL gateway_application="gateway-v2"
-LABEL gateway_branch=${GATEWAY_BRANCH}
-LABEL gateway_commit=${GATEWAY_COMMIT}
-LABEL gateway_build_date=${GATEWAY_BUILD_DATE}
 
 EXPOSE $FUN_HB_CLIENT_PORT
-#EXPOSE $GATEWAY_PORT
 
 WORKDIR /root
 
 RUN :> /root/.bashrc
 
-SHELL [ "/bin/bash", "-lc" ]
-
-RUN echo "Starting the package installation on the Ubuntu system."
+RUN rm /usr/bin/sh && ln -s /bin/bash /usr/bin/sh
 
 RUN <<-EOF
   set -ex
@@ -86,29 +58,26 @@ RUN <<-EOF
   set +ex
 EOF
 
-RUN echo "Ending the package installation on the Ubuntu system."
-
-RUN echo "Starting the SSH key loading process."
-
-# Authorizing the ssh host
 RUN <<-EOF
+  set -e
+  set +x
+
   if [[ "$SSH_PUBLIC_KEY" && "$SSH_PRIVATE_KEY" ]]; then \
     set -ex
 
     mkdir -p /root/.ssh
     chmod 0700 /root/.ssh
     ssh-keyscan github.com > /root/.ssh/known_hosts
-
-    set +ex
   fi
+
+  set +ex
 EOF
 
-# Adding the keys and setting the permissions
 RUN <<-EOF
-  if [[ "$SSH_PUBLIC_KEY" && "$SSH_PRIVATE_KEY" ]]; then \
-    set -e
-    set +x
+  set -e
+  set +x
 
+  if [[ "$SSH_PUBLIC_KEY" && "$SSH_PRIVATE_KEY" ]]; then \
     echo "$SSH_PRIVATE_KEY" > /root/.ssh/id_rsa
 
     set -ex
@@ -116,75 +85,21 @@ RUN <<-EOF
     echo "$SSH_PUBLIC_KEY" > /root/.ssh/id_rsa.pub
     chmod 600 /root/.ssh/id_rsa
     chmod 600 /root/.ssh/id_rsa.pub
-
-    set +ex
   fi
-EOF
-
-RUN echo "Finishing the SSH key loading process."
-
-RUN echo "Starting Funttastic Hummingbot Client build process"
-
-RUN <<-EOF
-  if [[ "$CHOICE" == "U1" || "$CHOICE" == "U3" ]]; then \
-    set -ex
-
-    unlink /usr/bin/pip
-    ln -s /usr/bin/python3 /usr/bin/python
-    ln -s /usr/bin/pip3 /usr/bin/pip
-
-    git clone -b $FUN_HB_CLIENT_REPOSITORY_BRANCH $FUN_HB_CLIENT_REPOSITORY_URL /tmp/funttastic
-    mkdir -p funttastic/client
-    cp -a /tmp/funttastic/. funttastic/client
-    rm -rf /tmp/funttastic
-    pip install -r funttastic/client/requirements.txt
-
-    mkdir -p funttastic/client/resources/certificates
-    cp funttastic/client/resources/configuration/production.example.yml funttastic/client/resources/configuration/production.yml
-    cp -R funttastic/client/resources/strategies/templates/* funttastic/client/resources/strategies
-
-    mv funttastic/client/resources funttastic/client/resources_temp
-
-    set +ex
-  fi
-EOF
-
-RUN echo "Ending Funttastic Hummingbot Client build process"
-
-RUN echo "Starting Hummingbot Gateway build process"
-
-RUN <<-EOF
-	set -ex
-
-	git clone -b $GATEWAY_REPOSITORY_BRANCH $GATEWAY_REPOSITORY_URL /tmp/hummingbot/gateway
-	mkdir -p hummingbot/gateway
-	cp -a /tmp/hummingbot/gateway/. hummingbot/gateway
 
   set +ex
-EOF
-
-RUN <<-EOF
-	set -ex
-
-	mkdir -p \
-		hummingbot/gateway/certs \
-		hummingbot/gateway/db \
-		hummingbot/gateway/conf \
-		hummingbot/gateway/logs \
-		/var/lib
-
-	set +ex
 EOF
 
 RUN <<-EOF
   set -ex
 
-  cp -R hummingbot/gateway/src/templates/. hummingbot/gateway/conf
+  unlink /usr/bin/pip
+  ln -s /usr/bin/python3 /usr/bin/python
+  ln -s /usr/bin/pip3 /usr/bin/pip
 
   set +ex
 EOF
 
-# Install nvm and CeloCLI; note: nvm adds own section to /root/.bashrc
 RUN <<-EOF
 	set -ex
 
@@ -211,9 +126,109 @@ RUN <<-EOF
 EOF
 
 RUN <<-EOF
+  ARCHITECTURE="$(uname -m)"
+
+  case $(uname | tr '[:upper:]' '[:lower:]') in
+    linux*)
+      OS="Linux"
+      FILE_EXTENSION="sh"
+      case $(uname -r	| tr '[:upper:]' '[:lower:]') in
+      *raspi*)
+        IS_RASPBERRY="TRUE"
+        ;;
+      *)
+        IS_RASPBERRY="FALSE"
+        ;;
+      esac
+      ;;
+    darwin*)
+      OS="MacOSX"
+      FILE_EXTENSION="sh"
+      ;;
+    msys*)
+      OS="Windows"
+      FILE_EXTENSION="exe"
+      ;;
+    *)
+      echo "Unrecognized OS"
+      exit 1
+      ;;
+  esac
+
+  echo "export ARCHITECTURE=$ARCHITECTURE" >> /root/.bashrc
+  echo "export OS=$OS" >> /root/.bashrc
+  echo "export FILE_EXTENSION=$FILE_EXTENSION" >> /root/.bashrc
+  echo "export IS_RASPBERRY=$IS_RASPBERRY" >> /root/.bashrc
+
+  if [ "$ARCHITECTURE" == "aarch64" ]
+  then
+    echo "export ARCHITECTURE_SUFFIX=\"-$ARCHITECTURE\"" >> /root/.bashrc
+    MINICONDA_VERSION="Mambaforge-$(uname)-$(uname -m).sh"
+    MINICONDA_URL="https://github.com/conda-forge/miniforge/releases/latest/download/$MINICONDA_VERSION"
+    ln -s /root/mambaforge /root/miniconda3
+  else
+    MINICONDA_VERSION="Miniconda3-py38_4.10.3-$OS-$ARCHITECTURE.$FILE_EXTENSION"
+    MINICONDA_URL="https://repo.anaconda.com/miniconda/$MINICONDA_VERSION"
+  fi
+
+  curl -L "$MINICONDA_URL" -o "/root/miniconda.$MINICONDA_EXTENSION"
+  /bin/bash "/root/miniconda.$MINICONDA_EXTENSION" -b
+  rm "/root/miniconda.$MINICONDA_EXTENSION"
+
+  echo 'export PATH=/root/miniconda3/bin:$PATH' >> /root/.bashrc
+  source /root/.bashrc
+
+  conda update -n base -c conda-forge conda -y
+  conda clean -tipy
+
+  echo "export MINICONDA_VERSION=$MINICONDA_VERSION" >> /root/.bashrc
+  echo "export MINICONDA_URL=$MINICONDA_URL" >> /root/.bashrc
+
+  conda init --all
+
+  set +ex
+EOF
+
+RUN <<-EOF
+  set -ex
+
+  source /root/.bashrc
+
+  mkdir -p funttastic/client
+  cd funttastic/client
+
+  git clone -b $FUN_HB_CLIENT_REPOSITORY_BRANCH $FUN_HB_CLIENT_REPOSITORY_URL .
+
+  conda env create -f environment.yml
+
+  conda activate funttastic
+
+  mkdir -p resources/certificates
+  cp resources/configuration/production.example.yml resources/configuration/production.yml
+  cp -a resources/strategies/templates/. resources/strategies
+
+  set +ex
+EOF
+
+RUN <<-EOF
 	set -ex
 
-  cd hummingbot/gateway
+  source /root/.bashrc
+
+	mkdir -p hummingbot/gateway
+	cd hummingbot/gateway
+
+	git clone -b $GATEWAY_REPOSITORY_BRANCH $GATEWAY_REPOSITORY_URL .
+
+	mkdir -p \
+		certs \
+		db \
+		conf \
+		logs \
+		/var/lib
+
+  cp -a src/templates/. conf
+
 	yarn
 	yarn prebuild
 	yarn build
@@ -221,126 +236,104 @@ RUN <<-EOF
 	set +ex
 EOF
 
-RUN echo "Ending Hummingbot Gateway build process"
-
-RUN echo "Starting Hummingbot Client build process"
-
-# This will create the directory automatically
-WORKDIR /root/hummingbot/client
-
 RUN <<-EOF
-  if [[ "$CHOICE" == "U2" || "$CHOICE" == "U3" ]]; then \
-    set -ex
+  set -ex
 
-    git clone -b $HB_CLIENT_REPOSITORY_BRANCH $HB_CLIENT_REPOSITORY_URL /tmp/hummingbot/client
-    cp -a /tmp/hummingbot/client/. .
+  source /root/.bashrc
 
-    rm -rf /tmp/hummingbot
+  mkdir -p hummingbot/client
+  cd hummingbot/client
 
-    ARCHITECTURE="$(uname -m)"
+  git clone -b $HB_CLIENT_REPOSITORY_BRANCH $HB_CLIENT_REPOSITORY_URL .
 
-    case $(uname | tr '[:upper:]' '[:lower:]') in
-      linux*)
-        OS="Linux"
-        FILE_EXTENSION="sh"
-        case $(uname -r	| tr '[:upper:]' '[:lower:]') in
-        *raspi*)
-          IS_RASPBERRY="TRUE"
-          ;;
-        *)
-          IS_RASPBERRY="FALSE"
-          ;;
-        esac
-        ;;
-      darwin*)
-        OS="MacOSX"
-        FILE_EXTENSION="sh"
-        ;;
-      msys*)
-        OS="Windows"
-        FILE_EXTENSION="exe"
-        ;;
-      *)
-        echo "Unrecognized OS"
-        exit 1
-        ;;
-    esac
-
-    echo "export ARCHITECTURE=$ARCHITECTURE" >> /root/.bashrc
-    echo "export OS=$OS" >> /root/.bashrc
-    echo "export FILE_EXTENSION=$FILE_EXTENSION" >> /root/.bashrc
-    echo "export IS_RASPBERRY=$IS_RASPBERRY" >> /root/.bashrc
-
-    if [ "$ARCHITECTURE" == "aarch64" ]
-    then
-      echo "export ARCHITECTURE_SUFFIX=\"-$ARCHITECTURE\"" >> /root/.bashrc
-      MINICONDA_VERSION="Mambaforge-$(uname)-$(uname -m).sh"
-      MINICONDA_URL="https://github.com/conda-forge/miniforge/releases/latest/download/$MINICONDA_VERSION"
-      ln -s /root/mambaforge /root/miniconda3
-    else
-      MINICONDA_VERSION="Miniconda3-py38_4.10.3-$OS-$ARCHITECTURE.$FILE_EXTENSION"
-      MINICONDA_URL="https://repo.anaconda.com/miniconda/$MINICONDA_VERSION"
-    fi
-
-    curl -L "$MINICONDA_URL" -o "/root/miniconda.$MINICONDA_EXTENSION"
-    /bin/bash "/root/miniconda.$MINICONDA_EXTENSION" -b
-    rm "/root/miniconda.$MINICONDA_EXTENSION"
-    /root/miniconda3/bin/conda update -n base conda -y
-    /root/miniconda3/bin/conda clean -tipy
-
-    echo "export MINICONDA_VERSION=$MINICONDA_VERSION" >> /root/.bashrc
-    echo "export MINICONDA_URL=$MINICONDA_URL" >> /root/.bashrc
-
-    MINICONDA_ENVIRONMENT=$(head -1 setup/environment.yml | cut -d' ' -f2)
-    if [ -z "$MINICONDA_ENVIRONMENT" ]
-    then
-      echo "The MINICONDA_ENVIRONMENT environment variable could not be defined."
-      exit 1
-    fi
-    echo "export MINICONDA_ENVIRONMENT=$MINICONDA_ENVIRONMENT" >> /root/.bashrc
-
-    /root/miniconda3/bin/conda env create -f setup/environment.yml
-    /root/miniconda3/bin/conda clean -tipy
-    rm -rf /root/.cache
-
-    echo "source /root/miniconda3/etc/profile.d/conda.sh && conda activate $MINICONDA_ENVIRONMENT" >> /root/.bashrc
-    /root/miniconda3/envs/$MINICONDA_ENVIRONMENT/bin/python3 setup.py build_ext --inplace -j 8
-    rm -rf build/
-    find . -type f -name "*.cpp" -delete
-
-    mkdir -p \
-      certs \
-      conf/connectors \
-      conf/strategies \
-      conf/scripts \
-      logs \
-      data \
-      scripts \
-      pmm_scripts
-
-    set +ex
+  MINICONDA_ENVIRONMENT=$(head -1 setup/environment.yml | cut -d' ' -f2)
+  if [ -z "$MINICONDA_ENVIRONMENT" ]
+  then
+    echo "The MINICONDA_ENVIRONMENT environment variable could not be defined."
+    exit 1
   fi
+  echo "export MINICONDA_ENVIRONMENT=$MINICONDA_ENVIRONMENT" >> /root/.bashrc
+
+  conda env create -f setup/environment.yml
+  conda clean -tipy
+  rm -rf /root/.cache
+
+  echo "source /root/miniconda3/etc/profile.d/conda.sh && conda activate $MINICONDA_ENVIRONMENT" >> /root/.bashrc
+  /root/miniconda3/envs/$MINICONDA_ENVIRONMENT/bin/python3 setup.py build_ext --inplace -j 8
+  rm -rf build/
+  find . -type f -name "*.cpp" -delete
+
+  mkdir -p \
+    certs \
+    conf/connectors \
+    conf/strategies \
+    conf/scripts \
+    logs \
+    data \
+    scripts \
+    pmm_scripts
+
+  set +ex
 EOF
 
-WORKDIR /root
-
 RUN <<-EOF
-  if [ "$CHOICE" == "U2" ]; then \
-    set -ex
+	set -ex
 
-    mkdir -p utils
-    cd utils
-    curl -O https://raw.githubusercontent.com/funttastic/fun-hb-client/community/resources/scripts/generate_ssl_certificates.py
-    curl -O https://raw.githubusercontent.com/funttastic/fun-hb-client/community/environment.yml
+	rm -rf /tmp/hummingbot
 
-    source /root/.bashrc
-    conda update -n base -c conda-forge conda -y
-    conda env create -f environment.yml
+  if [ "$LOCK_APT" == "Yes" ]
+  then
+    apt autoremove -y
 
-    set +ex
+    apt clean autoclean
+
+    rm -rf \
+      /var/lib/apt/lists/* \
+      /etc/apt/sources.list \
+      /etc/apt/sources.list.d/* \
+      /tmp/* \
+      /var/tmp/*
   fi
+
+	set +ex
 EOF
 
-RUN echo "Ending Hummingbot Client build process"
+RUN <<-EOF
+	set -ex
 
-CMD ["sh", "-c", "$FUN_HB_CLIENT_COMMAND; $GATEWAY_COMMAND; $HB_CLIENT_COMMAND"]
+  echo "export GATEWAY_PASSPHRASE=$GATEWAY_PASSPHRASE" >> /root/.bashrc
+  rm -rf /root/temp
+
+  source /root/.bashrc
+
+  conda activate funttastic
+
+  python funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $GATEWAY_PASSPHRASE --cert-path funttastic/client/resources/certificates
+
+  ln -rfs funttastic/client/resources/certificates/* hummingbot/gateway/certs
+  ln -rfs funttastic/client/resources/certificates/* hummingbot/client/certs
+
+  sed -i "s/<password>/"$GATEWAY_PASSPHRASE"/g" funttastic/client/resources/configuration/production.yml
+  sed -i -e '/logging:/,/use_telegram: true/ s/use_telegram: true/use_telegram: false/' -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' funttastic/client/resources/configuration/production.yml
+  sed -i -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' funttastic/client/resources/configuration/common.yml
+
+  groupadd -f $HOST_USER_GROUP
+  chown -RH :$HOST_USER_GROUP funttastic/client/resources
+  chmod -R a+rwX funttastic/client/resources
+
+  chown -RH :$HOST_USER_GROUP hummingbot/gateway/conf
+  chmod -R a+rw hummingbot/gateway/conf
+  chown -RH :$HOST_USER_GROUP hummingbot/gateway/logs
+  chmod -R a+rw hummingbot/gateway/logs
+
+  if [ "$GATEWAY_PASSPHRASE" == "$RANDOM_PASSPHRASE" ]
+  then
+    echo $RANDOM_PASSPHRASE > funttastic/client/resources/random_passphrase.txt
+  fi
+
+  echo -e "# AUTOMATIC STARTUP COMMANDS >>\n"$FUN_HB_CLIENT_COMMAND"\n"$GATEWAY_COMMAND"\n"$HB_CLIENT_COMMAND"\ncd ~\n# AUTOMATIC STARTUP COMMANDS <<" >> /root/.bashrc
+
+	set +ex
+EOF
+
+CMD ["/bin/bash", "-l"]
