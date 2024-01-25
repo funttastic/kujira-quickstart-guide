@@ -96,6 +96,20 @@ pre_installation_fun_hb_client () {
     FUN_HB_CLIENT_CONTAINER_NAME=$RESPONSE
   fi
 
+  # Exposed port?
+  RESPONSE="$FUN_HB_CLIENT_PORT"
+  if [ "$RESPONSE" == "" ]
+  then
+    echo
+    read -p "   Enter a port for expose your new Funttastic Hummingbot Client instance (default = \"5000\") >>> " RESPONSE
+  fi
+  if [ "$RESPONSE" == "" ]
+  then
+    FUN_HB_CLIENT_PORT=5000
+  else
+    FUN_HB_CLIENT_PORT=$RESPONSE
+  fi
+
   # Prompt the user for the passphrase to encrypt the certificates
   while true; do
       echo
@@ -514,6 +528,7 @@ docker_create_image_fun_hb_client () {
     "$FUN_HB_CLIENT_BUILD_CACHE" \
     --build-arg RANDOM_PASSPHRASE="$RANDOM_PASSPHRASE" \
     --build-arg DEFINED_PASSPHRASE="$DEFINED_PASSPHRASE" \
+    --build-arg PORT="$FUN_HB_CLIENT_PORT" \
     -t $FUN_HB_CLIENT_IMAGE_NAME -f ./all/Dockerfile/Dockerfile-Fun-HB-Client .)
   fi
 }
@@ -867,6 +882,7 @@ then
     echo
     printf "%25s %5s\n" "Instance name:" "$FUN_HB_CLIENT_CONTAINER_NAME"
     printf "%25s %5s\n" "Version:" "$TAG"
+    printf "%25s %5s\n" "Port:" "$FUN_HB_CLIENT_PORT"
     printf "%25s %5s\n" "Base folder:" "$SHARED_FOLDER_SUFFIX"
     printf "%25s %5s\n" "Funttastic Hummingbot Client folder:" "├── $FUN_HB_CLIENT_FOLDER"
     printf "%25s %5s\n" "Resources folder:" "├── $RESOURCES_FOLDER"

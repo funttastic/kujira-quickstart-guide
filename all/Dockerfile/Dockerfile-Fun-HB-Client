@@ -6,10 +6,10 @@ FROM ubuntu:latest
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ="Etc/GMT"
-
 ARG CLONE_BRANCH="community"
+ARG PORT=${PORT:-5000}
 
-ENV PORT="${PORT:-5000}"
+ENV PORT=$PORT
 
 RUN set -ex \
   && apt-get update \
@@ -47,5 +47,3 @@ WORKDIR /root/app
 RUN set -ex \
   && mv resources resources_temp \
   && set +ex
-
-EXPOSE $PORT
