@@ -14,8 +14,8 @@ filter_containers() {
     # Filtering the containers
     for name in $containers; do
         # Checking if the name contains 'fun' and 'client'
-        if [[ $name =~ fun ]] && [[ $name =~ client ]] && [ -z "$FUN_HB_CLIENT_CONTAINER_NAME" ]; then
-            FUN_HB_CLIENT_CONTAINER_NAME=$name
+        if [[ $name =~ fun ]] && [[ $name =~ client ]] && [ -z "$FUN_CLIENT_CONTAINER_NAME" ]; then
+            FUN_CLIENT_CONTAINER_NAME=$name
         fi
 
         # Checking if the name contains 'hb' and 'client', but not 'fun'
@@ -51,9 +51,9 @@ get_container_name() {
     # Using indirect variable reference to get the value of the container variable
     local current_value=${!container_var_name}
 
-    if [ "$container_var_name" == "FUN_HB_CLIENT_CONTAINER_NAME" ]; then
-        app_name="Funttastic Hummingbot Client"
-        current_value="$FUN_HB_CLIENT_CONTAINER_NAME"
+    if [ "$container_var_name" == "FUN_CLIENT_CONTAINER_NAME" ]; then
+        app_name="FUNTTASTIC CLIENT"
+        current_value="$FUN_CLIENT_CONTAINER_NAME"
     elif [ "$container_var_name" == "HB_CLIENT_CONTAINER_NAME" ]; then
         app_name="Hummingbot Client"
         current_value="$HB_CLIENT_CONTAINER_NAME"
@@ -129,14 +129,14 @@ authentication() {
 }
 
 # Specific functions to restart containers
-restart_fun_hb_client() {
-    get_container_name FUN_HB_CLIENT_CONTAINER_NAME
+restart_fun_client() {
+    get_container_name FUN_CLIENT_CONTAINER_NAME
 
-    if [ ! "$FUN_HB_CLIENT_CONTAINER_NAME" == "skip" ]; then
+    if [ ! "$FUN_CLIENT_CONTAINER_NAME" == "skip" ]; then
         authentication
     fi
 
-    restart_container "$FUN_HB_CLIENT_CONTAINER_NAME" "python app.py $passphrase"
+    restart_container "$FUN_CLIENT_CONTAINER_NAME" "python app.py $passphrase"
 }
 
 restart_hb_client() {
@@ -156,7 +156,7 @@ restart_hb_gateway() {
 
 # Function to restart all containers
 restart_all() {
-    restart_fun_hb_client
+    restart_fun_client
     restart_hb_client
     restart_hb_gateway
 }
@@ -170,14 +170,14 @@ choose() {
     echo "   CHOOSE WHICH CONTAINERS AND SERVICES YOU WOULD LIKE TO RESTART:"
     echo
     echo "   [1] ALL"
-    echo "   [2] FUNTTASTIC HUMMINGBOT CLIENT"
+    echo "   [2] FUNTTASTIC CLIENT"
     echo "   [3] HUMMINGBOT CLIENT"
     echo "   [4] HUMMINGBOT GATEWAY"
     echo
     echo "   [0] RETURN TO MAIN MENU"
     echo "   [exit] STOP SCRIPT EXECUTION"
     echo
-    echo "   For more information about the FUNTTASTIC HUMMINGBOT CLIENT, please visit:"
+    echo "   For more information about the FUNTTASTIC CLIENT, please visit:"
     echo
     echo "         https://www.funttastic.com/partners/kujira"
     echo
@@ -196,7 +196,7 @@ choose() {
                 break
                 ;;
             2)
-                restart_fun_hb_client
+                restart_fun_client
                 sleep 3
                 clear
                 exec "$SCRIPT_RELATIVE_PATH"

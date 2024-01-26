@@ -56,28 +56,28 @@ default_values_info () {
   echo
 }
 
-pre_installation_fun_hb_client () {
+pre_installation_fun_client () {
   clear
   echo
   echo
-  echo "   ===============    FUNTTASTIC HUMMINGBOT CLIENT INSTALLATION SETUP    ==============="
+  echo "   ===============    FUNTTASTIC CLIENT INSTALLATION SETUP    ==============="
   echo
 
   default_values_info
 
   if [ ! "$CHOICE" == "U1" ]; then
     # Customize the Client image to be used?
-    RESPONSE="$FUN_HB_CLIENT_IMAGE_NAME"
+    RESPONSE="$FUN_CLIENT_IMAGE_NAME"
     if [ "$RESPONSE" == "" ]
     then
       echo
-      read -rp "   Enter a Funttastic Hummingbot Client image name you want to use (default = \"fun-hb-client\") >>> " RESPONSE
+      read -rp "   Enter a FUNTTASTIC CLIENT image name you want to use (default = \"fun-hb-client\") >>> " RESPONSE
     fi
     if [ "$RESPONSE" == "" ]
     then
-      FUN_HB_CLIENT_IMAGE_NAME="fun-hb-client"
+      FUN_CLIENT_IMAGE_NAME="fun-hb-client"
     else
-      FUN_HB_CLIENT_IMAGE_NAME="$RESPONSE"
+      FUN_CLIENT_IMAGE_NAME="$RESPONSE"
     fi
   else
     DEFAULT_IMAGE_NAME="fun-kuji-hb"
@@ -94,13 +94,13 @@ pre_installation_fun_hb_client () {
   fi
 
   if [ ! "$CHOICE" == "U1" ]; then
-    APP_NAME="Funttastic Hummingbot Client"
+    APP_NAME="FUNTTASTIC CLIENT"
   else
     APP_NAME="unified"
   fi
 
   # Create a new image?
-  RESPONSE="$FUN_HB_CLIENT_BUILD_CACHE"
+  RESPONSE="$FUN_CLIENT_BUILD_CACHE"
   if [ "$RESPONSE" == "" ]
   then
     echo
@@ -111,26 +111,26 @@ pre_installation_fun_hb_client () {
     echo
     echo "      A new image will be created..."
 
-    FUN_HB_CLIENT_BUILD_CACHE="--no-cache"
-    UNIFIED_BUILD_CACHE=$FUN_HB_CLIENT_BUILD_CACHE
+    FUN_CLIENT_BUILD_CACHE="--no-cache"
+    UNIFIED_BUILD_CACHE=$FUN_CLIENT_BUILD_CACHE
   else
-    FUN_HB_CLIENT_BUILD_CACHE=""
-    UNIFIED_BUILD_CACHE=$FUN_HB_CLIENT_BUILD_CACHE
+    FUN_CLIENT_BUILD_CACHE=""
+    UNIFIED_BUILD_CACHE=$FUN_CLIENT_BUILD_CACHE
   fi
 
   if [ ! "$CHOICE" == "U1" ]; then
     # Create a new container?
-    RESPONSE="$FUN_HB_CLIENT_CONTAINER_NAME"
+    RESPONSE="$FUN_CLIENT_CONTAINER_NAME"
     if [ "$RESPONSE" == "" ]
     then
       echo
-      read -rp "   Enter a name for your new Funttastic Hummingbot Client instance (default = \"fun-hb-client\") >>> " RESPONSE
+      read -rp "   Enter a name for your new FUNTTASTIC CLIENT instance (default = \"fun-hb-client\") >>> " RESPONSE
     fi
     if [ "$RESPONSE" == "" ]
     then
-      FUN_HB_CLIENT_CONTAINER_NAME="fun-hb-client"
+      FUN_CLIENT_CONTAINER_NAME="fun-hb-client"
     else
-      FUN_HB_CLIENT_CONTAINER_NAME=$RESPONSE
+      FUN_CLIENT_CONTAINER_NAME=$RESPONSE
     fi
   else
     DEFAULT_CONTAINER_NAME="fun-kuji-hb"
@@ -168,39 +168,39 @@ pre_installation_fun_hb_client () {
   fi
 
   # Exposed port?
-  RESPONSE="$FUN_HB_CLIENT_PORT"
+  RESPONSE="$FUN_CLIENT_PORT"
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -rp "   Enter a port for expose your new Funttastic Hummingbot Client $INSTANCE_TYPE (default = \"5000\") >>> " RESPONSE
+    read -rp "   Enter a port for expose your new FUNTTASTIC CLIENT $INSTANCE_TYPE (default = \"5000\") >>> " RESPONSE
   fi
 
   if [ "$RESPONSE" == "" ]
   then
-    FUN_HB_CLIENT_PORT=5000
+    FUN_CLIENT_PORT=5000
   else
-    FUN_HB_CLIENT_PORT=$RESPONSE
+    FUN_CLIENT_PORT=$RESPONSE
   fi
 
   # Location to save files?
-  RESPONSE="$FUN_HB_CLIENT_FOLDER"
+  RESPONSE="$FUN_CLIENT_FOLDER"
   if [ "$RESPONSE" == "" ]
   then
-    FUN_HB_CLIENT_FOLDER_SUFFIX="funttastic"
+    FUN_CLIENT_FOLDER_SUFFIX="funttastic"
     echo
-    read -rp "   Enter a folder name where your Funttastic Hummingbot Client files will be saved
-   (default = \"$FUN_HB_CLIENT_FOLDER_SUFFIX\") >>> " RESPONSE
+    read -rp "   Enter a folder name where your FUNTTASTIC CLIENT files will be saved
+   (default = \"$FUN_CLIENT_FOLDER_SUFFIX\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
-    FUN_HB_CLIENT_FOLDER=$SHARED_FOLDER/$FUN_HB_CLIENT_FOLDER_SUFFIX
+    FUN_CLIENT_FOLDER=$SHARED_FOLDER/$FUN_CLIENT_FOLDER_SUFFIX
   elif [[ ${RESPONSE::1} != "/" ]]; then
-    FUN_HB_CLIENT_FOLDER=$SHARED_FOLDER/$RESPONSE
+    FUN_CLIENT_FOLDER=$SHARED_FOLDER/$RESPONSE
   else
-    FUN_HB_CLIENT_FOLDER=$RESPONSE
+    FUN_CLIENT_FOLDER=$RESPONSE
   fi
 
-  RESPONSE="$FUN_HB_CLIENT_REPOSITORY_URL"
+  RESPONSE="$FUN_CLIENT_REPOSITORY_URL"
   if [ "$RESPONSE" == "" ]
   then
     echo
@@ -209,12 +209,12 @@ pre_installation_fun_hb_client () {
   fi
   if [ "$RESPONSE" == "" ]
   then
-    FUN_HB_CLIENT_REPOSITORY_URL="https://github.com/funttastic/fun-hb-client.git"
+    FUN_CLIENT_REPOSITORY_URL="https://github.com/funttastic/fun-hb-client.git"
   else
-    FUN_HB_CLIENT_REPOSITORY_URL="$RESPONSE"
+    FUN_CLIENT_REPOSITORY_URL="$RESPONSE"
   fi
 
-  RESPONSE="$FUN_HB_CLIENT_REPOSITORY_BRANCH"
+  RESPONSE="$FUN_CLIENT_REPOSITORY_BRANCH"
   if [ "$RESPONSE" == "" ]
   then
     echo
@@ -222,12 +222,12 @@ pre_installation_fun_hb_client () {
   fi
   if [ "$RESPONSE" == "" ]
   then
-    FUN_HB_CLIENT_REPOSITORY_BRANCH="community"
+    FUN_CLIENT_REPOSITORY_BRANCH="community"
   else
-    FUN_HB_CLIENT_REPOSITORY_BRANCH="$RESPONSE"
+    FUN_CLIENT_REPOSITORY_BRANCH="$RESPONSE"
   fi
 
-  RESPONSE="$FUN_HB_CLIENT_AUTO_START"
+  RESPONSE="$FUN_CLIENT_AUTO_START"
   if [ "$RESPONSE" == "" ]
   then
     echo
@@ -237,13 +237,13 @@ pre_installation_fun_hb_client () {
   then
     echo
     echo "      The server will start automatically after installation."
-    FUN_HB_CLIENT_AUTO_START="Yes"
+    FUN_CLIENT_AUTO_START="Yes"
   else
-    FUN_HB_CLIENT_AUTO_START="No"
+    FUN_CLIENT_AUTO_START="No"
   fi
 
-  RESPONSE="$FUN_HB_CLIENT_AUTO_START_EVERY_TIME"
-  if [[ "$FUN_HB_CLIENT_AUTO_START" == "Yes" && "$FUN_HB_CLIENT_AUTO_START_EVERY_TIME" == "" ]]
+  RESPONSE="$FUN_CLIENT_AUTO_START_EVERY_TIME"
+  if [[ "$FUN_CLIENT_AUTO_START" == "Yes" && "$FUN_CLIENT_AUTO_START_EVERY_TIME" == "" ]]
   then
     echo
     read -rp "   Should the Funttastic Client server start automatically every time the container starts?
@@ -253,9 +253,9 @@ pre_installation_fun_hb_client () {
   then
     echo
     echo "      The Funttastic Client server will start automatically every time the container starts."
-    FUN_HB_CLIENT_AUTO_START_EVERY_TIME="Yes"
+    FUN_CLIENT_AUTO_START_EVERY_TIME="Yes"
   else
-    FUN_HB_CLIENT_AUTO_START_EVERY_TIME="No"
+    FUN_CLIENT_AUTO_START_EVERY_TIME="No"
   fi
   fi
 }
@@ -634,15 +634,15 @@ then
     echo
     echo "   CHOOSE WHICH INSTALLATION YOU WOULD LIKE TO DO:"
     echo
-    echo "   [1] FUNTTASTIC HUMMINGBOT CLIENT"
+    echo "   [1] FUNTTASTIC CLIENT"
     echo "   [2] HUMMINGBOT CLIENT"
     echo "   [3] HUMMINGBOT GATEWAY"
-    echo "   [4] FUNTTASTIC HUMMINGBOT CLIENT and HUMMINGBOT GATEWAY [RECOMMENDED]"
+    echo "   [4] FUNTTASTIC CLIENT and HUMMINGBOT GATEWAY [RECOMMENDED]"
     echo "   [5] ALL"
     echo
     echo "   [0] RETURN TO MAIN MENU"
     echo
-    echo "   For more information about the FUNTTASTIC HUMMINGBOT CLIENT, please visit:"
+    echo "   For more information about the FUNTTASTIC CLIENT, please visit:"
     echo
     echo "         https://www.funttastic.com/partners/kujira"
     echo
@@ -666,7 +666,7 @@ then
 
     case $CHOICE in
         1)
-            pre_installation_fun_hb_client
+            pre_installation_fun_client
             pre_installation_lock_apt
             ;;
         2)
@@ -678,12 +678,12 @@ then
             pre_installation_lock_apt
             ;;
         4)
-            pre_installation_fun_hb_client
+            pre_installation_fun_client
             pre_installation_hb_gateway
             pre_installation_lock_apt
             ;;
         5)
-            pre_installation_fun_hb_client
+            pre_installation_fun_client
             pre_installation_hb_gateway
             pre_installation_hb_client
             pre_installation_lock_apt
@@ -695,24 +695,24 @@ then
     esac
   else
     CHOICE="U1"
-    pre_installation_fun_hb_client
+    pre_installation_fun_client
     pre_installation_hb_gateway
     pre_installation_hb_client
     pre_installation_lock_apt
   fi
 else
-  # Default settings to install Funttastic Hummingbot Client, Hummingbot Gateway and Hummingbot Client
+  # Default settings to install FUNTTASTIC CLIENT, Hummingbot Gateway and Hummingbot Client
 
-  # Funttastic Hummingbot Client Settings
-  FUN_HB_CLIENT_IMAGE_NAME=${FUN_HB_CLIENT_IMAGE_NAME:-"fun-hb-client"}
-  FUN_HB_CLIENT_CONTAINER_NAME=${FUN_HB_CLIENT_CONTAINER_NAME:-"fun-hb-client"}
-  FUN_HB_CLIENT_FOLDER_SUFFIX=${FUN_HB_CLIENT_FOLDER_SUFFIX:-"funttastic"}
-  FUN_HB_CLIENT_FOLDER="$SHARED_FOLDER"/"$FUN_HB_CLIENT_FOLDER_SUFFIX"
-  FUN_HB_CLIENT_PORT=${FUN_HB_CLIENT_PORT:-5000}
-  FUN_HB_CLIENT_BUILD_CACHE=${FUN_HB_CLIENT_BUILD_CACHE:-"--no-cache"}
-  FUN_HB_CLIENT_REPOSITORY_URL=${FUN_HB_CLIENT_REPOSITORY_URL:-"https://github.com/funttastic/fun-hb-client.git"}
-  FUN_HB_CLIENT_REPOSITORY_BRANCH=${FUN_HB_CLIENT_REPOSITORY_BRANCH:-"community"}
-  FUN_HB_CLIENT_AUTO_START=${FUN_HB_CLIENT_AUTO_START:-"Yes"}
+  # FUNTTASTIC CLIENT Settings
+  FUN_CLIENT_IMAGE_NAME=${FUN_CLIENT_IMAGE_NAME:-"fun-hb-client"}
+  FUN_CLIENT_CONTAINER_NAME=${FUN_CLIENT_CONTAINER_NAME:-"fun-hb-client"}
+  FUN_CLIENT_FOLDER_SUFFIX=${FUN_CLIENT_FOLDER_SUFFIX:-"funttastic"}
+  FUN_CLIENT_FOLDER="$SHARED_FOLDER"/"$FUN_CLIENT_FOLDER_SUFFIX"
+  FUN_CLIENT_PORT=${FUN_CLIENT_PORT:-5000}
+  FUN_CLIENT_BUILD_CACHE=${FUN_CLIENT_BUILD_CACHE:-"--no-cache"}
+  FUN_CLIENT_REPOSITORY_URL=${FUN_CLIENT_REPOSITORY_URL:-"https://github.com/funttastic/fun-hb-client.git"}
+  FUN_CLIENT_REPOSITORY_BRANCH=${FUN_CLIENT_REPOSITORY_BRANCH:-"community"}
+  FUN_CLIENT_AUTO_START=${FUN_CLIENT_AUTO_START:-"Yes"}
   SSH_PUBLIC_KEY="$SSH_PUBLIC_KEY"
   SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY"
 
@@ -755,22 +755,22 @@ else
 	RANDOM_PASSPHRASE=$(generate_passphrase 32)
 fi
 
-FUN_HB_CLIENT_RESOURCES_FOLDER="$FUN_HB_CLIENT_FOLDER/client/resources"
+FUN_CLIENT_RESOURCES_FOLDER="$FUN_CLIENT_FOLDER/client/resources"
 SELECTED_PASSPHRASE=${RANDOM_PASSPHRASE:-$DEFINED_PASSPHRASE}
 if [[ "$SSH_PUBLIC_KEY" && "$SSH_PRIVATE_KEY" ]]; then
-    FUN_HB_CLIENT_REPOSITORY_URL="git@github.com:funttastic/fun-hb-client.git"
+    FUN_CLIENT_REPOSITORY_URL="git@github.com:funttastic/fun-hb-client.git"
 fi
 
 if [ "$CHOICE" == "U1" ]; then
-  FUN_HB_CLIENT_APP_PATH_PREFIX="/root/funttastic/client"
+  FUN_CLIENT_APP_PATH_PREFIX="/root/funttastic/client"
   GATEWAY_APP_PATH_PREFIX="/root/hummingbot/gateway"
   HB_CLIENT_APP_PATH_PREFIX="/root/hummingbot/client"
 
-  FUN_HB_CLIENT_CONTAINER_NAME="$UNIFIED_CONTAINER_NAME"
+  FUN_CLIENT_CONTAINER_NAME="$UNIFIED_CONTAINER_NAME"
   GATEWAY_CONTAINER_NAME="$UNIFIED_CONTAINER_NAME"
   HB_CLIENT_CONTAINER_NAME="$UNIFIED_CONTAINER_NAME"
 else
-  FUN_HB_CLIENT_APP_PATH_PREFIX="/root"
+  FUN_CLIENT_APP_PATH_PREFIX="/root"
   GATEWAY_APP_PATH_PREFIX="/root"
   HB_CLIENT_APP_PATH_PREFIX="/root"
 fi
@@ -788,35 +788,35 @@ echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"; \
 echo; \
 fi
 
-docker_create_image_fun_hb_client () {
-  if [ ! "$FUN_HB_CLIENT_BUILD_CACHE" == "" ]
+docker_create_image_fun_client () {
+  if [ ! "$FUN_CLIENT_BUILD_CACHE" == "" ]
   then
     BUILT=$(DOCKER_BUILDKIT=1 docker build \
-    "$FUN_HB_CLIENT_BUILD_CACHE" \
+    "$FUN_CLIENT_BUILD_CACHE" \
     --build-arg SSH_PUBLIC_KEY="$SSH_PUBLIC_KEY" \
     --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" \
-    --build-arg REPOSITORY_URL="$FUN_HB_CLIENT_REPOSITORY_URL" \
-    --build-arg REPOSITORY_BRANCH="$FUN_HB_CLIENT_REPOSITORY_BRANCH" \
-    -t "$FUN_HB_CLIENT_IMAGE_NAME" -f ./all/Dockerfile/fun-hb-client/Dockerfile .)
+    --build-arg REPOSITORY_URL="$FUN_CLIENT_REPOSITORY_URL" \
+    --build-arg REPOSITORY_BRANCH="$FUN_CLIENT_REPOSITORY_BRANCH" \
+    -t "$FUN_CLIENT_IMAGE_NAME" -f ./all/Dockerfile/fun-hb-client/Dockerfile .)
   fi
 }
 
-docker_create_container_fun_hb_client () {
+docker_create_container_fun_client () {
   $BUILT \
   && docker run \
     -dit \
     --log-opt max-size=10m \
     --log-opt max-file=5 \
-    --name "$FUN_HB_CLIENT_CONTAINER_NAME" \
+    --name "$FUN_CLIENT_CONTAINER_NAME" \
     --network "$NETWORK" \
-    --mount type=bind,source="$FUN_HB_CLIENT_RESOURCES_FOLDER",target=/root/resources \
+    --mount type=bind,source="$FUN_CLIENT_RESOURCES_FOLDER",target=/root/resources \
     --mount type=bind,source="$CERTS_FOLDER",target=/root/resources/certificates \
     --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
-    -e FUN_HB_CLIENT_RESOURCES_FOLDER="/root/resources" \
+    -e FUN_CLIENT_RESOURCES_FOLDER="/root/resources" \
     -e CERTS_FOLDER="/root/resources/certificates" \
-    -e PORT="$FUN_HB_CLIENT_PORT" \
+    -e PORT="$FUN_CLIENT_PORT" \
     --entrypoint="$ENTRYPOINT" \
-    "$FUN_HB_CLIENT_IMAGE_NAME":$TAG
+    "$FUN_CLIENT_IMAGE_NAME":$TAG
 }
 
 docker_create_image_hb_client () {
@@ -887,10 +887,10 @@ docker_create_container_hb_gateway () {
 }
 
 unified_docker_create_image () {
-  if [ "$FUN_HB_CLIENT_AUTO_START_EVERY_TIME" == "Yes" ]; then
-    FUN_HB_CLIENT_COMMAND="conda activate funttastic && python "$FUN_HB_CLIENT_APP_PATH_PREFIX"/app.py "$OUTPUT_SUPPRESSION" &"
+  if [ "$FUN_CLIENT_AUTO_START_EVERY_TIME" == "Yes" ]; then
+    FUN_CLIENT_COMMAND="conda activate funttastic && python "$FUN_CLIENT_APP_PATH_PREFIX"/app.py "$OUTPUT_SUPPRESSION" &"
   else
-    FUN_HB_CLIENT_COMMAND="#"
+    FUN_CLIENT_COMMAND="#"
   fi
 
   if [ "$GATEWAY_AUTO_START_EVERY_TIME" == "Yes" ]; then
@@ -912,15 +912,15 @@ unified_docker_create_image () {
     --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" \
     --build-arg GATEWAY_PASSPHRASE="$SELECTED_PASSPHRASE" \
     --build-arg RANDOM_PASSPHRASE="$RANDOM_PASSPHRASE" \
-    --build-arg FUN_HB_CLIENT_REPOSITORY_URL="$FUN_HB_CLIENT_REPOSITORY_URL" \
-    --build-arg FUN_HB_CLIENT_REPOSITORY_BRANCH="$FUN_HB_CLIENT_REPOSITORY_BRANCH" \
+    --build-arg FUN_CLIENT_REPOSITORY_URL="$FUN_CLIENT_REPOSITORY_URL" \
+    --build-arg FUN_CLIENT_REPOSITORY_BRANCH="$FUN_CLIENT_REPOSITORY_BRANCH" \
     --build-arg HB_CLIENT_REPOSITORY_URL="$HB_CLIENT_REPOSITORY_URL" \
     --build-arg HB_CLIENT_REPOSITORY_BRANCH="$HB_CLIENT_REPOSITORY_BRANCH" \
     --build-arg GATEWAY_REPOSITORY_URL="$GATEWAY_REPOSITORY_URL" \
     --build-arg GATEWAY_REPOSITORY_BRANCH="$GATEWAY_REPOSITORY_BRANCH" \
     --build-arg HOST_USER_GROUP="$GROUP" \
     --build-arg LOCK_APT="$LOCK_APT" \
-    --build-arg FUN_HB_CLIENT_COMMAND="$FUN_HB_CLIENT_COMMAND" \
+    --build-arg FUN_CLIENT_COMMAND="$FUN_CLIENT_COMMAND" \
     --build-arg GATEWAY_COMMAND="$GATEWAY_COMMAND" \
     --build-arg HB_CLIENT_COMMAND="$HB_CLIENT_COMMAND" \
     -t "$UNIFIED_IMAGE_NAME" -f ./all/Dockerfile/unified/Dockerfile .)
@@ -935,16 +935,8 @@ unified_docker_create_container () {
     --log-opt max-file=5 \
     --name "$UNIFIED_CONTAINER_NAME" \
     --network "$NETWORK" \
-    --mount type=bind,source="$FUN_HB_CLIENT_RESOURCES_FOLDER",target=/root/funttastic/client/resources \
-    --mount type=bind,source="$HB_CLIENT_CONF_FOLDER",target=/root/hummingbot/client/conf \
-    --mount type=bind,source="$HB_CLIENT_LOGS_FOLDER",target=/root/hummingbot/client/logs \
-    --mount type=bind,source="$HB_CLIENT_DATA_FOLDER",target=/root/hummingbot/client/data \
-    --mount type=bind,source="$HB_CLIENT_SCRIPTS_FOLDER",target=/root/hummingbot/client/scripts \
-    --mount type=bind,source="$HB_CLIENT_PMM_SCRIPTS_FOLDER",target=/root/hummingbot/client/pmm_scripts \
-    --mount type=bind,source="$GATEWAY_CONF_FOLDER",target=/root/hummingbot/gateway/conf \
-    --mount type=bind,source="$GATEWAY_LOGS_FOLDER",target=/root/hummingbot/gateway/logs \
     --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
-    -e FUN_HB_CLIENT_RESOURCES_FOLDER="/root/funttastic/client/resources" \
+    -e FUN_CLIENT_RESOURCES_FOLDER="/root/funttastic/client/resources" \
     -e HB_CLIENT_CONF_FOLDER="/root/hummingbot/client/conf" \
     -e HB_CLIENT_LOGS_FOLDER="/root/hummingbot/client/logs" \
     -e HB_CLIENT_DATA_FOLDER="/root/hummingbot/client/data" \
@@ -952,18 +944,18 @@ unified_docker_create_container () {
     -e HB_CLIENT_PMM_SCRIPTS_FOLDER="/root/hummingbot/client/pmm_scripts" \
     -e GATEWAY_CONF_FOLDER="/root/hummingbot/gateway/conf" \
     -e GATEWAY_LOGS_FOLDER="/root/hummingbot/gateway/logs" \
-    -e FUN_HB_CLIENT_PORT="$FUN_HB_CLIENT_PORT" \
+    -e FUN_CLIENT_PORT="$FUN_CLIENT_PORT" \
     -e GATEWAY_PORT="$GATEWAY_PORT" \
-    -e FUN_HB_CLIENT_COMMAND="$FUN_HB_CLIENT_COMMAND" \
+    -e FUN_CLIENT_COMMAND="$FUN_CLIENT_COMMAND" \
     -e GATEWAY_COMMAND="$GATEWAY_COMMAND" \
     -e HB_CLIENT_COMMAND="$HB_CLIENT_COMMAND" \
     --entrypoint="$ENTRYPOINT" \
     "$UNIFIED_IMAGE_NAME":$TAG
 }
 
-post_installation_fun_hb_client () {
-  if [[ "$FUN_HB_CLIENT_AUTO_START" == "Yes" && "$FUN_HB_CLIENT_AUTO_START_EVERY_TIME" == "No" ]]; then
-    docker exec -it "$FUN_HB_CLIENT_CONTAINER_NAME" /bin/bash -lc "conda activate funttastic && python "$FUN_HB_CLIENT_APP_PATH_PREFIX"/app.py "$OUTPUT_SUPPRESSION" &"
+post_installation_fun_client () {
+  if [[ "$FUN_CLIENT_AUTO_START" == "Yes" && "$FUN_CLIENT_AUTO_START_EVERY_TIME" == "No" ]]; then
+    docker exec -it "$FUN_CLIENT_CONTAINER_NAME" /bin/bash -lc "conda activate funttastic && python "$FUN_CLIENT_APP_PATH_PREFIX"/app.py "$OUTPUT_SUPPRESSION" &"
   fi
 }
 
@@ -984,16 +976,16 @@ choice_one_installation () {
 
   mkdir -p "$SHARED_FOLDER"
   mkdir -p "$CERTS_FOLDER"
-  mkdir -p "$FUN_HB_CLIENT_RESOURCES_FOLDER"
+  mkdir -p "$FUN_CLIENT_RESOURCES_FOLDER"
 
-  # Create a new separated image for Funttastic Hummingbot Client
-  docker_create_image_fun_hb_client
+  # Create a new separated image for FUNTTASTIC CLIENT
+  docker_create_image_fun_client
 
   # Create a new separated container from image
-  docker_create_container_fun_hb_client
+  docker_create_container_fun_client
 
   # Makes some configurations within the container after its creation
-  post_installation_fun_hb_client
+  post_installation_fun_client
 }
 
 choice_two_installation () {
@@ -1058,7 +1050,7 @@ unified_installation () {
   mkdir -p "$SHARED_FOLDER"
   mkdir -p "$CERTS_FOLDER"
 
-  mkdir -p "$FUN_HB_CLIENT_RESOURCES_FOLDER"
+  mkdir -p "$FUN_CLIENT_RESOURCES_FOLDER"
 
   mkdir -p "$HB_CLIENT_FOLDER"
   mkdir -p "$HB_CLIENT_CONF_FOLDER"
@@ -1080,7 +1072,7 @@ unified_installation () {
   unified_docker_create_image
   unified_docker_create_container
 
-  post_installation_fun_hb_client
+  post_installation_fun_client
   post_installation_hb_gateway
   post_installation_hb_client
 }
@@ -1108,7 +1100,7 @@ execute_installation () {
         echo
         echo "   Installing:"
         echo
-        echo "     > Funttastic Hummingbot Client"
+        echo "     > FUNTTASTIC CLIENT"
         echo
 
         choice_one_installation
@@ -1135,7 +1127,7 @@ execute_installation () {
         echo
         echo "   Installing:"
         echo
-        echo "     > Funttastic Hummingbot Client"
+        echo "     > FUNTTASTIC CLIENT"
         echo "     > Hummingbot Gateway"
         echo
 
@@ -1145,7 +1137,7 @@ execute_installation () {
         echo
         echo "   Installing:"
         echo
-        echo "     > Funttastic Hummingbot Client"
+        echo "     > FUNTTASTIC CLIENT"
         echo "     > Hummingbot Client"
         echo "     > Hummingbot Gateway"
         echo
@@ -1156,7 +1148,7 @@ execute_installation () {
         echo
         echo "   Installing:"
         echo
-        echo "     > Funttastic Hummingbot Client"
+        echo "     > FUNTTASTIC CLIENT"
         echo "     > Hummingbot Client"
         echo "     > Hummingbot Gateway"
         echo
@@ -1280,27 +1272,27 @@ then
   if [[ "$CHOICE" == 1 || "$CHOICE" == 4 || "$CHOICE" == 5 || "$CHOICE" == "U1" ]]; then
 
     if [ "$CHOICE" == "U1" ]; then
-      FUN_HB_CLIENT_IMAGE_NAME="$UNIFIED_IMAGE_NAME"
-      FUN_HB_CLIENT_CONTAINER_NAME="$UNIFIED_CONTAINER_NAME"
+      FUN_CLIENT_IMAGE_NAME="$UNIFIED_IMAGE_NAME"
+      FUN_CLIENT_CONTAINER_NAME="$UNIFIED_CONTAINER_NAME"
     fi
 
     echo
-    echo "ℹ️  Confirm below if the Funttastic Hummingbot Client instance and its folders are correct:"
+    echo "ℹ️  Confirm below if the FUNTTASTIC CLIENT instance and its folders are correct:"
     echo
     if [ ! "$CHOICE" == "U1" ]; then
-      printf "%25s %5s\n" "Image:"              	"$FUN_HB_CLIENT_IMAGE_NAME:$TAG"
-      printf "%25s %5s\n" "Instance:"        			"$FUN_HB_CLIENT_CONTAINER_NAME"
+      printf "%25s %5s\n" "Image:"              	"$FUN_CLIENT_IMAGE_NAME:$TAG"
+      printf "%25s %5s\n" "Instance:"        			"$FUN_CLIENT_CONTAINER_NAME"
     fi
-    printf "%25s %5s\n" "Repository url:"       "$FUN_HB_CLIENT_REPOSITORY_URL"
-    printf "%25s %5s\n" "Repository branch:"    "$FUN_HB_CLIENT_REPOSITORY_BRANCH"
-    printf "%25s %4s\n" "Exposed port:"					"$FUN_HB_CLIENT_PORT"
+    printf "%25s %5s\n" "Repository url:"       "$FUN_CLIENT_REPOSITORY_URL"
+    printf "%25s %5s\n" "Repository branch:"    "$FUN_CLIENT_REPOSITORY_BRANCH"
+    printf "%25s %4s\n" "Exposed port:"					"$FUN_CLIENT_PORT"
     if [ ! "$CHOICE" == "U1" ]; then
-      printf "%25s %5s\n" "Reuse image?:"    		  "$FUN_HB_CLIENT_BUILD_CACHE"
+      printf "%25s %5s\n" "Reuse image?:"    		  "$FUN_CLIENT_BUILD_CACHE"
     fi
-    printf "%25s %3s\n" "Autostart:"    		    "$FUN_HB_CLIENT_AUTO_START"
+    printf "%25s %3s\n" "Autostart:"    		    "$FUN_CLIENT_AUTO_START"
     echo
-    printf "%25s %5s\n" "Fun HB Client folder:" "$FUN_HB_CLIENT_FOLDER"
-    printf "%25s %5s\n" "Resources folder:"     "$FUN_HB_CLIENT_RESOURCES_FOLDER"
+    printf "%25s %5s\n" "FUN Client folder:" "$FUN_CLIENT_FOLDER"
+    printf "%25s %5s\n" "Resources folder:"     "$FUN_CLIENT_RESOURCES_FOLDER"
     echo
   fi
 

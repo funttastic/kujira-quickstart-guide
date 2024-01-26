@@ -3,7 +3,7 @@
 choose() {
 		clear
     echo
-    echo "   ===============     WELCOME TO FUNTTASTIC HUMMINGBOT CLIENT SETUP     ==============="
+    echo "   ===============     WELCOME TO FUNTTASTIC CLIENT SETUP     ==============="
     echo
     echo "   CHOOSE WHICH ACTION YOU WOULD LIKE TO DO:"
     echo
@@ -13,7 +13,7 @@ choose() {
     echo
     echo "   [exit] STOP SCRIPT EXECUTION"
     echo
-    echo "   For more information about the FUNTTASTIC HUMMINGBOT CLIENT, please visit:"
+    echo "   For more information about the FUNTTASTIC CLIENT, please visit:"
     echo
     echo "         https://www.funttastic.com/partners/kujira"
     echo
@@ -23,15 +23,15 @@ choose() {
     while true; do
         case $CHOICE in
             1)
-                ./all/install.sh
+                ./scripts/install.sh
                 break
                 ;;
             2)
-                ./all/restart.sh
+                ./scripts/restart.sh
                 break
                 ;;
             3)
-                ./all/utils.sh
+                ./scripts/commands.sh
                 break
                 ;;
             "exit")

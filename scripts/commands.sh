@@ -49,6 +49,8 @@ send_request() {
 		-d "$payload" \
 		"$host:$port$url"
 
+	docker exec
+
 	echo
 }
 
@@ -240,7 +242,7 @@ wallet() {
 choose() {
     clear
     echo
-    echo "   ==========      BOT CONTROL -> FUNTTASTIC HUMMINGBOT CLIENT / GATEWAY      =========="
+    echo "   ==========      BOT CONTROL -> FUNTTASTIC CLIENT / GATEWAY      =========="
     echo
     echo "   CHOOSE WHICH ACTION YOU WOULD LIKE TO PERFORM:"
     echo
@@ -253,7 +255,7 @@ choose() {
     echo "   [0] RETURN TO MAIN MENU"
     echo "   [exit] STOP SCRIPT EXECUTION"
     echo
-    echo "   For more information about the FUNTTASTIC HUMMINGBOT CLIENT, please visit:"
+    echo "   For more information about the FUNTTASTIC CLIENT, please visit:"
     echo
     echo "         https://www.funttastic.com/partners/kujira"
     echo
