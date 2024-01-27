@@ -6,7 +6,6 @@ ARG SSH_PUBLIC_KEY
 ARG SSH_PRIVATE_KEY
 ARG GATEWAY_PASSPHRASE
 ARG RANDOM_PASSPHRASE
-ARG HOST_USER_GROUP
 ARG LOCK_APT
 
 ARG FUN_CLIENT_COMMAND=$FUN_CLIENT_COMMAND
@@ -26,6 +25,7 @@ ARG HB_CLIENT_REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-community}
 ENV FILEBROWSER_PORT=${FILEBROWSER_PORT:-50000}
 
 EXPOSE $FUN_CLIENT_PORT
+#EXPOSE $GATEWAY_PORT
 
 WORKDIR /root
 
@@ -328,21 +328,11 @@ RUN <<-EOF
 	sed -i -e '/logging:/,/use_telegram: true/ s/use_telegram: true/use_telegram: false/' -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' funttastic/client/resources/configuration/production.yml
 	sed -i -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' funttastic/client/resources/configuration/common.yml
 
-	groupadd -f $HOST_USER_GROUP
-	chown -RH :$HOST_USER_GROUP funttastic/client/resources
-	chmod -R a+rwX funttastic/client/resources
-
-	chown -RH :$HOST_USER_GROUP hummingbot/gateway/conf
-	chmod -R a+rw hummingbot/gateway/conf
-	chown -RH :$HOST_USER_GROUP hummingbot/gateway/logs
-	chmod -R a+rw hummingbot/gateway/logs
-
 	if [ "$GATEWAY_PASSPHRASE" == "$RANDOM_PASSPHRASE" ]
 	then
-		echo $RANDOM_PASSPHRASE > funttastic/client/resources/random_passphrase.txt
+	  mkdir -p shared/temporary
+		echo $RANDOM_PASSPHRASE > shared/temporary/random_passphrase.txt
 	fi
-
-	echo -e "# AUTOMATIC STARTUP COMMANDS >>\n"$FUN_CLIENT_COMMAND"\n"$GATEWAY_COMMAND"\n"$HB_CLIENT_COMMAND"\ncd ~\n# AUTOMATIC STARTUP COMMANDS <<" >> /root/.bashrc
 
 	set +ex
 EOF
@@ -351,8 +341,8 @@ RUN <<-EOF
 	set -ex
 
 	mkdir -p \
-		shared/funttastic/client
-		shared/hummingot/client
+		shared/funttastic/client \
+		shared/hummingot/client \
 		shared/hummingbot/gateway
 
 	mv funttastic/client/resources shared/funttastic/client/
@@ -364,7 +354,7 @@ EOF
 RUN <<-EOF
 	set -ex
 
-	filebrowser -p $FILEBROWSER_PORT -r /root/shared
+	filebrowser -p $FILEBROWSER_PORT -r shared
 
 	set +ex
 EOF
