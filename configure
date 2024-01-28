@@ -11,14 +11,14 @@ choose() {
     echo "   [2] RESTART"
     echo "   [3] DISPATCH ACTIONS"
     echo
-    echo "   [exit] STOP SCRIPT EXECUTION"
+    echo "   [exit] EXIT"
     echo
     echo "   For more information about the FUNTTASTIC CLIENT, please visit:"
     echo
     echo "         https://www.funttastic.com/partners/kujira"
     echo
 
-    read -p "   Enter your choice (1-3): " CHOICE
+    read -p "   Enter your choice (1, 2, 3, or exit): " CHOICE
 
     while true; do
         case $CHOICE in
@@ -44,9 +44,9 @@ choose() {
                 ;;
             *)
                 echo
-                echo "   [!] Invalid Input. Enter a number between 1 and 3."
+                echo "   [!] Invalid Input. Enter a your choice (1, 2, 3) or type exit."
                 echo
-                read -p "   Enter your choice (1-3): " CHOICE
+                read -p "   Enter your choice (1, 2, 3, or exit): " CHOICE
                 ;;
         esac
     done
