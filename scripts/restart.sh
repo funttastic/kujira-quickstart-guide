@@ -1,8 +1,8 @@
 #!/bin/bash
 
-DIR_NAME=$(dirname "$0")
+SCRIPT_DIR=$(dirname "$0")
 SCRIPT_NAME="$(basename "$0")"
-SCRIPT_RELATIVE_PATH="$DIR_NAME/$SCRIPT_NAME"
+SCRIPT_PATH="$SCRIPT_DIR/$SCRIPT_NAME"
 
 # Function to filter containers
 filter_containers() {
@@ -52,7 +52,7 @@ get_container_name() {
     local current_value=${!container_var_name}
 
     if [ "$container_var_name" == "FUN_CLIENT_CONTAINER_NAME" ]; then
-        app_name="FUNTTASTIC CLIENT"
+        app_name="Funttastic Client"
         current_value="$FUN_CLIENT_CONTAINER_NAME"
     elif [ "$container_var_name" == "HB_CLIENT_CONTAINER_NAME" ]; then
         app_name="Hummingbot Client"
@@ -117,7 +117,7 @@ authentication() {
     echo "   Please enter your SSL certificates passphrase"
     echo
     echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-    echo "   | [i] This password was set during the Funttastic HB Client installation            |"
+    echo "   | [i] This password was set during the Funttastic Client installation               |"
     echo "   |     or by running the 'gateway generate-certs' command in the Hummingbot Client   |"
     echo "   |     or during the Hummingbot Gateway installation if you installed it separately. |"
     echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -165,7 +165,7 @@ restart_all() {
 choose() {
     clear
     echo
-    echo "   =====================     DOCKER CONTAINERS START / RESTART     ====================="
+    echo "   =====================     DOCKER CONTAINERS RESTART     ====================="
     echo
     echo "   CHOOSE WHICH CONTAINERS AND SERVICES YOU WOULD LIKE TO RESTART:"
     echo
@@ -174,15 +174,15 @@ choose() {
     echo "   [3] HUMMINGBOT CLIENT"
     echo "   [4] HUMMINGBOT GATEWAY"
     echo
-    echo "   [0] RETURN TO MAIN MENU"
-    echo "   [exit] STOP SCRIPT EXECUTION"
+    echo "   [back] RETURN TO MAIN MENU"
+    echo "   [exit] Exit"
     echo
     echo "   For more information about the FUNTTASTIC CLIENT, please visit:"
     echo
     echo "         https://www.funttastic.com/partners/kujira"
     echo
 
-    read -rp "   Enter your choice (1-4): " CHOICE
+    read -rp "   Enter your choice (1, 2, 3, 4, back or exit): " CHOICE
 
     clear
 
@@ -192,31 +192,31 @@ choose() {
                 restart_all
                 sleep 3
                 clear
-                exec "$SCRIPT_RELATIVE_PATH"
+                exec "$SCRIPT_PATH"
                 break
                 ;;
             2)
                 restart_fun_client
                 sleep 3
                 clear
-                exec "$SCRIPT_RELATIVE_PATH"
+                exec "$SCRIPT_PATH"
                 break
                 ;;
             3)
                 restart_hb_client
                 sleep 3
                 clear
-                exec "$SCRIPT_RELATIVE_PATH"
+                exec "$SCRIPT_PATH"
                 break
                 ;;
             4)
                 restart_hb_gateway
                 sleep 3
                 clear
-                exec "$SCRIPT_RELATIVE_PATH"
+                exec "$SCRIPT_PATH"
                 break
                 ;;
-            0)
+            "back")
                 ./configure
                 break
                 ;;
@@ -230,9 +230,9 @@ choose() {
                 ;;
             *)
                 echo
-                echo "   [!] Invalid Input. Enter a number between 1 and 4."
+                echo "   [!] Invalid Input. Enter a your choice (1, 2, 3, 4) or type back or exit."
                 echo
-                read -rp "   Enter your choice (1-4): " CHOICE
+                read -rp "   Enter your choice (1, 2, 3, 4, back, or exit): " CHOICE
                 ;;
         esac
     done

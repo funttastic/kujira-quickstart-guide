@@ -1,18 +1,20 @@
 #!/bin/bash
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-CERTIFICATES_FOLDER=$(readlink -f "$SCRIPT_DIR/../shared/common/certificates")
+SCRIPT_DIR=$(dirname "$0")
+SCRIPT_NAME="$(basename "$0")"
+SCRIPT_PATH="$SCRIPT_DIR/$SCRIPT_NAME"
+
+CONTAINER_NAME="fun-kuji-hb"
 
 HOST=https://localhost
-PORT=5000
+PORT=50001
 
 STRATEGY="pure_market_making"
 VERSION="1.0.0"
-ID="id"
+ID="default"
 
-DIR_NAME=$(dirname "$0")
-SCRIPT_NAME="$(basename "$0")"
-SCRIPT_RELATIVE_PATH="$DIR_NAME/$SCRIPT_NAME"
+# Inside the container
+CERTIFICATES_FOLDER="/root/shared/common/certificates"
 
 send_request() {
 	local method=""
@@ -41,15 +43,15 @@ send_request() {
 
 	echo
 
-	curl -X "$method" \
-		--cert "$certificates_folder/client_cert.pem" \
-		--key "$certificates_folder/client_key.pem" \
-		--cacert "$certificates_folder/ca_cert.pem" \
-		--header "Content-Type: application/json" \
-		-d "$payload" \
-		"$host:$port$url"
+  COMMAND="curl -X \"$method\" \
+    --cert \"$certificates_folder/client_cert.pem\" \
+    --key \"$certificates_folder/client_key.pem\" \
+    --cacert \"$certificates_folder/ca_cert.pem\" \
+    --header \"Content-Type: application/json\" \
+    -d \"$payload\" \
+    \"$host:$port$url\""
 
-	docker exec
+  docker exec -e method -e certificates_folder -e payload -e host -e port -e url $CONTAINER_NAME /bin/bash -c "$COMMAND"
 
 	echo
 }
@@ -229,8 +231,6 @@ wallet() {
     url="/wallet/remove"
   fi
 
-#  echo "$payload"
-
   if [[ "$method" == "POST" && ! "$mnemonic" == "back" || "$method" == "DELETE" && ! "$public_key" == "back" ]]; then
     send_request \
     --method "$method" \
@@ -252,7 +252,7 @@ choose() {
     echo "   [4] ADD WALLET"
     echo "   [5] REMOVE WALLET"
     echo
-    echo "   [0] RETURN TO MAIN MENU"
+    echo "   [back] RETURN TO MAIN MENU"
     echo "   [exit] STOP SCRIPT EXECUTION"
     echo
     echo "   For more information about the FUNTTASTIC CLIENT, please visit:"
@@ -260,7 +260,7 @@ choose() {
     echo "         https://www.funttastic.com/partners/kujira"
     echo
 
-    read -rp "   Enter your choice (1-5): " CHOICE
+    read -rp "   Enter your choice (1, 2, 3, 4, 5, back or exit): " CHOICE
 
     while true; do
         case $CHOICE in
@@ -268,38 +268,38 @@ choose() {
                 start
                 sleep 3
                 clear
-                exec "$SCRIPT_RELATIVE_PATH"
+                exec "$SCRIPT_PATH"
                 break
                 ;;
             2)
                 stop
                 sleep 3
                 clear
-                exec "$SCRIPT_RELATIVE_PATH"
+                exec "$SCRIPT_PATH"
                 break
                 ;;
             3)
                 status
                 sleep 3
                 clear
-                exec "$SCRIPT_RELATIVE_PATH"
+                exec "$SCRIPT_PATH"
                 break
                 ;;
             4)
                 wallet "POST"
                 sleep 3
                 clear
-                exec "$SCRIPT_RELATIVE_PATH"
+                exec "$SCRIPT_PATH"
                 break
                 ;;
             5)
                 wallet "DELETE"
                 sleep 3
                 clear
-                exec "$SCRIPT_RELATIVE_PATH"
+                exec "$SCRIPT_PATH"
                 break
                 ;;
-            0)
+            "back")
                 clear
                 ./configure
                 break
@@ -314,9 +314,9 @@ choose() {
                 ;;
             *)
                 echo
-                echo "   [!] Invalid Input. Enter a number between 1 and 5."
+                echo "   [!] Invalid Input. Enter a your choice (1, 2, 3, 4) or type back or exit."
                 echo
-                read -rp "   Enter your choice (1-5): " CHOICE
+                read -rp "   Enter your choice (1, 2, 3, 4, 5, back, or exit): " CHOICE
                 ;;
         esac
     done

@@ -5,11 +5,11 @@ USER=$(whoami)
 GROUP=$(id -gn)
 TAG="latest"
 CHOICE=0
-PASSPHRASE_LENGTH=4
+MIN_PASSPHRASE_LENGTH=4
 ENTRYPOINT="/bin/bash"
 NETWORK="host"
 FUN_CLIENT_APP_PATH_PREFIX="/root/funttastic/client"
-GATEWAY_APP_PATH_PREFIX="/root/hummingbot/gateway"
+HB_GATEWAY_APP_PATH_PREFIX="/root/hummingbot/gateway"
 HB_CLIENT_APP_PATH_PREFIX="/root/hummingbot/client"
 OUTPUT_SUPPRESSION_MODE="stdout+stderr"
 OUTPUT_SUPPRESSION=""
@@ -73,7 +73,6 @@ pre_installation_fun_client () {
     read -rp "   Enter a name for your new image you want to use (default = \"fun-kuji-hb\") >>> " RESPONSE
   fi
   echo
-
   if [ "$RESPONSE" == "" ]
   then
     IMAGE_NAME="fun-kuji-hb"
@@ -105,7 +104,6 @@ pre_installation_fun_client () {
     echo
     read -rp "   Enter a name for your new instance\/container (default = \"fun-kuji-hb\") >>> " RESPONSE
   fi
-
   if [ "$RESPONSE" == "" ]
   then
     CONTAINER_NAME="fun-kuji-hb"
@@ -116,8 +114,8 @@ pre_installation_fun_client () {
   # Prompt the user for the passphrase to encrypt the certificates
   while true; do
       echo
-      read -s -rp "   Enter a passphrase to encrypt the certificates with at least $PASSPHRASE_LENGTH characters >>> " DEFINED_PASSPHRASE
-      if [ -z "$DEFINED_PASSPHRASE" ] || [ ${#DEFINED_PASSPHRASE} -lt "$PASSPHRASE_LENGTH" ]; then
+      read -s -rp "   Enter a passphrase to encrypt the certificates with at least $MIN_PASSPHRASE_LENGTH characters >>> " DEFINED_PASSPHRASE
+      if [ -z "$DEFINED_PASSPHRASE" ] || [ ${#DEFINED_PASSPHRASE} -lt "$MIN_PASSPHRASE_LENGTH" ]; then
           echo
           echo
           echo "      Weak passphrase, please try again."
@@ -132,7 +130,7 @@ pre_installation_fun_client () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -rp "   Enter a port to expose the Funttastic Client from instance (default = \"50001\") >>> " RESPONSE
+    read -rp "   Enter a port to expose the Funttastic Client from the instance (default = \"50001\") >>> " RESPONSE
   fi
 
   if [ "$RESPONSE" == "" ]
@@ -179,13 +177,13 @@ pre_installation_fun_client () {
   then
     echo
     echo "      The server will start automatically after installation."
-    FUN_CLIENT_AUTO_START="Yes"
+    FUN_CLIENT_AUTO_START="TRUE"
   else
-    FUN_CLIENT_AUTO_START="No"
+    FUN_CLIENT_AUTO_START="FALSE"
   fi
 
   RESPONSE="$FUN_CLIENT_AUTO_START_EVERY_TIME"
-  if [[ "$FUN_CLIENT_AUTO_START" == "Yes" && "$FUN_CLIENT_AUTO_START_EVERY_TIME" == "" ]]; then
+  if [[ "$FUN_CLIENT_AUTO_START" == "TRUE" && "$FUN_CLIENT_AUTO_START_EVERY_TIME" == "" ]]; then
     echo
     read -rp "   Should the Funttastic Client server start automatically every time the container starts?
    If you choose \"No\", you will need to start it manually every time the container starts. (\"Y/n\") >>> " RESPONSE
@@ -193,9 +191,9 @@ pre_installation_fun_client () {
     if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]; then
       echo
       echo "      The Funttastic Client server will start automatically every time the container starts."
-      FUN_CLIENT_AUTO_START_EVERY_TIME="Yes"
+      FUN_CLIENT_AUTO_START_EVERY_TIME="TRUE"
     else
-      FUN_CLIENT_AUTO_START_EVERY_TIME="No"
+      FUN_CLIENT_AUTO_START_EVERY_TIME="FALSE"
     fi
   fi
 }
@@ -246,9 +244,9 @@ pre_installation_hb_client () {
   then
     echo
     echo "      The app will start automatically after installation."
-    HB_CLIENT_AUTO_START="Yes"
+    HB_CLIENT_AUTO_START="TRUE"
   else
-    HB_CLIENT_AUTO_START="No"
+    HB_CLIENT_AUTO_START="FALSE"
   fi
 }
 
@@ -262,11 +260,11 @@ pre_installation_hb_gateway () {
   default_values_info
 
   # Exposed port?
-  RESPONSE="$EXPOSE_GATEWAY_PORT"
+  RESPONSE="$EXPOSE_HB_GATEWAY_PORT"
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -rp "   Do you want to expose the Gateway port from instance?
+    read -rp "   Do you want to expose the Gateway port from the instance?
    The recommended option is \"No\", but if you choose \"No\",
    you will not be able to make calls directly to the Gateway. (\"y/N\") >>> " RESPONSE
   fi
@@ -274,25 +272,25 @@ pre_installation_hb_gateway () {
     echo
     echo "      The Gateway port will not be exposed from the instance, only Funttastic Client and
       Hummingbot Client will be able to make calls to it from within the container."
-    EXPOSE_GATEWAY_PORT="No"
+    EXPOSE_HB_GATEWAY_PORT="FALSE"
   else
-    EXPOSE_GATEWAY_PORT="Yes"
+    EXPOSE_HB_GATEWAY_PORT="TRUE"
 
-    RESPONSE="$GATEWAY_PORT"
+    RESPONSE="$HB_GATEWAY_PORT"
     if [ "$RESPONSE" == "" ]
     then
       echo
-      read -rp "   Enter a port to expose the Hummingbot Gateway from instance (default = \"15888\") >>> " RESPONSE
+      read -rp "   Enter a port to expose the Hummingbot Gateway from the instance (default = \"15888\") >>> " RESPONSE
     fi
     if [ "$RESPONSE" == "" ]
     then
-      GATEWAY_PORT=15888
+      HB_GATEWAY_PORT=15888
     else
-      GATEWAY_PORT=$RESPONSE
+      HB_GATEWAY_PORT=$RESPONSE
     fi
   fi
 
-  RESPONSE="$GATEWAY_REPOSITORY_URL"
+  RESPONSE="$HB_GATEWAY_REPOSITORY_URL"
   if [ "$RESPONSE" == "" ]
   then
     echo
@@ -301,12 +299,12 @@ pre_installation_hb_gateway () {
   fi
   if [ "$RESPONSE" == "" ]
   then
-    GATEWAY_REPOSITORY_URL="https://github.com/Team-Kujira/gateway.git"
+    HB_GATEWAY_REPOSITORY_URL="https://github.com/Team-Kujira/gateway.git"
   else
-    GATEWAY_REPOSITORY_URL="$RESPONSE"
+    HB_GATEWAY_REPOSITORY_URL="$RESPONSE"
   fi
 
-  RESPONSE="$GATEWAY_REPOSITORY_BRANCH"
+  RESPONSE="$HB_GATEWAY_REPOSITORY_BRANCH"
   if [ "$RESPONSE" == "" ]
   then
     echo
@@ -314,12 +312,12 @@ pre_installation_hb_gateway () {
   fi
   if [ "$RESPONSE" == "" ]
   then
-    GATEWAY_REPOSITORY_BRANCH="community"
+    HB_GATEWAY_REPOSITORY_BRANCH="community"
   else
-    GATEWAY_REPOSITORY_BRANCH="$RESPONSE"
+    HB_GATEWAY_REPOSITORY_BRANCH="$RESPONSE"
   fi
 
-  RESPONSE="$GATEWAY_AUTO_START"
+  RESPONSE="$HB_GATEWAY_AUTO_START"
   if [ "$RESPONSE" == "" ]
   then
     echo
@@ -330,13 +328,13 @@ pre_installation_hb_gateway () {
   then
     echo
     echo "      The server will start automatically after installation."
-    GATEWAY_AUTO_START="Yes"
+    HB_GATEWAY_AUTO_START="TRUE"
   else
-    GATEWAY_AUTO_START="No"
+    HB_GATEWAY_AUTO_START="FALSE"
   fi
 
-  RESPONSE="$GATEWAY_AUTO_START_EVERY_TIME"
-  if [[ "$GATEWAY_AUTO_START" == "Yes" && "$GATEWAY_AUTO_START_EVERY_TIME" == "" ]]
+  RESPONSE="$HB_GATEWAY_AUTO_START_EVERY_TIME"
+  if [[ "$HB_GATEWAY_AUTO_START" == "TRUE" && "$HB_GATEWAY_AUTO_START_EVERY_TIME" == "" ]]
   then
     echo
     read -rp "   Should the Gateway server start automatically every time the container starts?
@@ -346,9 +344,9 @@ pre_installation_hb_gateway () {
   then
     echo
     echo "      The Gateway server will start automatically every time the container starts."
-    GATEWAY_AUTO_START_EVERY_TIME="Yes"
+    HB_GATEWAY_AUTO_START_EVERY_TIME="TRUE"
   else
-    GATEWAY_AUTO_START_EVERY_TIME="No"
+    HB_GATEWAY_AUTO_START_EVERY_TIME="FALSE"
   fi
   fi
 }
@@ -357,7 +355,7 @@ pre_installation_lock_apt () {
   clear
   echo
   echo
-  echo "   ======================  LOCK ADDING NEW PROGRAMS   ======================"
+  echo "   ======================  LOCK ADDING NEW PACKAGES   ======================"
   echo
 
   default_values_info
@@ -366,19 +364,19 @@ pre_installation_lock_apt () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -rp "   Do you want to eliminate the possibility of installing new programs in the
-   container system after its creation? (\"y/N\") >>> " RESPONSE
+    read -rp "   Do you want to eliminate the possibility of installing new packages inside the
+   container after its creation? (\"y/N\") >>> " RESPONSE
   fi
   if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "No" || "$RESPONSE" == "no" || "$RESPONSE" == "" ]]
   then
     echo
-    echo "      The installation of new programs will be allowed."
-    LOCK_APT="No"
+    echo "      The installation of new packages will be allowed."
+    LOCK_APT="FALSE"
     sleep 3
   else
     echo
-    echo "      You have chosen to block the addition of new programs."
-    LOCK_APT="Yes"
+    echo "      You have chosen to block the addition of new packages."
+    LOCK_APT="TRUE"
     sleep 3
   fi
 }
@@ -391,14 +389,14 @@ echo "   Do you want to automate the entire process,
    including setting a random passphrase? [Y/n]"
 
 echo
-echo "ℹ️  Enter the value [0] to return to the previous question."
+echo "ℹ️  Enter the value [back] to return to the previous question."
 echo
 
-read -rp "   [Y/n/0] >>> " RESPONSE
+read -rp "   [Y/n/back] >>> " RESPONSE
 if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "" ]]
 then
   echo
-elif [[ "$RESPONSE" == "0" ]]; then
+elif [[ "$RESPONSE" == "back" ]]; then
   clear
   ./all/install.sh
   exit 0
@@ -420,19 +418,19 @@ else
   FUN_CLIENT_PORT=${FUN_CLIENT_PORT:-50001}
   FUN_CLIENT_REPOSITORY_URL=${FUN_CLIENT_REPOSITORY_URL:-"https://github.com/funttastic/fun-hb-client.git"}
   FUN_CLIENT_REPOSITORY_BRANCH=${FUN_CLIENT_REPOSITORY_BRANCH:-"community"}
-  FUN_CLIENT_AUTO_START=${FUN_CLIENT_AUTO_START:-"Yes"}
+  FUN_CLIENT_AUTO_START=${FUN_CLIENT_AUTO_START:-"TRUE"}
 
   # Hummingbot Client Settings
   HB_CLIENT_REPOSITORY_URL=${HB_CLIENT_REPOSITORY_URL:-"https://github.com/Team-Kujira/hummingbot.git"}
   HB_CLIENT_REPOSITORY_BRANCH=${HB_CLIENT_REPOSITORY_BRANCH:-"community"}
-  HB_CLIENT_AUTO_START=${HB_CLIENT_AUTO_START:-"Yes"}
+  HB_CLIENT_AUTO_START=${HB_CLIENT_AUTO_START:-"TRUE"}
 
   # Hummingbot Gateway Settings
-  GATEWAY_PORT=${GATEWAY_PORT:-15888}
-  GATEWAY_REPOSITORY_URL=${GATEWAY_REPOSITORY_URL:-"https://github.com/Team-Kujira/gateway.git"}
-  GATEWAY_REPOSITORY_BRANCH=${GATEWAY_REPOSITORY_BRANCH:-"community"}
-  GATEWAY_AUTO_START=${GATEWAY_AUTO_START:-"Yes"}
-  EXPOSE_GATEWAY_PORT=${EXPOSE_GATEWAY_PORT:-"No"}
+  HB_GATEWAY_PORT=${HB_GATEWAY_PORT:-15888}
+  HB_GATEWAY_REPOSITORY_URL=${HB_GATEWAY_REPOSITORY_URL:-"https://github.com/Team-Kujira/gateway.git"}
+  HB_GATEWAY_REPOSITORY_BRANCH=${HB_GATEWAY_REPOSITORY_BRANCH:-"community"}
+  HB_GATEWAY_AUTO_START=${HB_GATEWAY_AUTO_START:-"TRUE"}
+  EXPOSE_HB_GATEWAY_PORT=${EXPOSE_HB_GATEWAY_PORT:-"FALSE"}
 
   # Common Settings
   IMAGE_NAME="fun-kuji-hb"
@@ -443,12 +441,13 @@ else
   SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY"
   TAG=${TAG:-"latest"}
   ENTRYPOINT=${ENTRYPOINT:-"/bin/bash"}
-  LOCK_APT=${LOCK_APT:-"No"}
+  LOCK_APT=${LOCK_APT:-"FALSE"}
 
 	RANDOM_PASSPHRASE=$(generate_passphrase 32)
 fi
 
 SELECTED_PASSPHRASE=${RANDOM_PASSPHRASE:-$DEFINED_PASSPHRASE}
+
 if [[ "$SSH_PUBLIC_KEY" && "$SSH_PRIVATE_KEY" ]]; then
   FUN_CLIENT_REPOSITORY_URL="git@github.com:funttastic/fun-hb-client.git"
 fi
@@ -463,7 +462,7 @@ if [ -n "$RANDOM_PASSPHRASE" ]; then
   echo "   |                                                                 |"
   echo "   |      temporary/random_passphrase.txt                            |"
   echo "   |                                                                 |"
-  echo "   |   To access this file, use the File Browser at                  |"
+  echo "   |   To access this file, use the FileBrowser at                  |"
   echo "   |      https://localhost:50000/                                   |"
   echo "   |   or                                                            |"
   echo "   |      https://127.0.0.1:50000/                                   |"
@@ -475,16 +474,16 @@ if [ -n "$RANDOM_PASSPHRASE" ]; then
 fi
 
 docker_create_image () {
-  if [ "$FUN_CLIENT_AUTO_START_EVERY_TIME" == "Yes" ]; then
-    FUN_CLIENT_COMMAND="conda activate funttastic && python $FUN_CLIENT_APP_PATH_PREFIX/app.py $OUTPUT_SUPPRESSION &"
+  if [ "$FUN_CLIENT_AUTO_START_EVERY_TIME" == "TRUE" ]; then
+    FUN_CLIENT_COMMAND="conda activate funttastic && cd $FUN_CLIENT_APP_PATH_PREFIX && python app.py $OUTPUT_SUPPRESSION &"
   fi
 
-  if [ "$GATEWAY_AUTO_START_EVERY_TIME" == "Yes" ]; then
-    GATEWAY_COMMAND="cd $GATEWAY_APP_PATH_PREFIX && yarn start $OUTPUT_SUPPRESSION &"
+  if [ "$HB_GATEWAY_AUTO_START_EVERY_TIME" == "TRUE" ]; then
+    HB_GATEWAY_COMMAND="cd $HB_GATEWAY_APP_PATH_PREFIX && yarn start $OUTPUT_SUPPRESSION &"
   fi
 
-   if [ "$HB_CLIENT_AUTO_START_EVERY_TIME" == "Yes" ]; then
-     HB_CLIENT_COMMAND="conda activate hummingbot && cd $HB_CLIENT_APP_PATH_PREFIX && ./bin/hummingbot_quickstart.py 2>> ./logs/errors.log"
+   if [ "$HB_CLIENT_AUTO_START_EVERY_TIME" == "TRUE" ]; then
+     HB_CLIENT_COMMAND="conda activate hummingbot && cd $HB_CLIENT_APP_PATH_PREFIX && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log"
    fi
 
   if [ ! "$UNIFIED_BUILD_CACHE" == "" ]
@@ -492,26 +491,26 @@ docker_create_image () {
     BUILT=$(DOCKER_BUILDKIT=1 docker build \
     --build-arg SSH_PUBLIC_KEY="$SSH_PUBLIC_KEY" \
     --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" \
-    --build-arg GATEWAY_PASSPHRASE="$SELECTED_PASSPHRASE" \
+    --build-arg HB_GATEWAY_PASSPHRASE="$SELECTED_PASSPHRASE" \
     --build-arg RANDOM_PASSPHRASE="$RANDOM_PASSPHRASE" \
     --build-arg FUN_CLIENT_REPOSITORY_URL="$FUN_CLIENT_REPOSITORY_URL" \
     --build-arg FUN_CLIENT_REPOSITORY_BRANCH="$FUN_CLIENT_REPOSITORY_BRANCH" \
     --build-arg HB_CLIENT_REPOSITORY_URL="$HB_CLIENT_REPOSITORY_URL" \
     --build-arg HB_CLIENT_REPOSITORY_BRANCH="$HB_CLIENT_REPOSITORY_BRANCH" \
-    --build-arg GATEWAY_REPOSITORY_URL="$GATEWAY_REPOSITORY_URL" \
-    --build-arg GATEWAY_REPOSITORY_BRANCH="$GATEWAY_REPOSITORY_BRANCH" \
+    --build-arg HB_GATEWAY_REPOSITORY_URL="$HB_GATEWAY_REPOSITORY_URL" \
+    --build-arg HB_GATEWAY_REPOSITORY_BRANCH="$HB_GATEWAY_REPOSITORY_BRANCH" \
     --build-arg HOST_USER_GROUP="$GROUP" \
     --build-arg LOCK_APT="$LOCK_APT" \
     --build-arg FUN_CLIENT_COMMAND="$FUN_CLIENT_COMMAND" \
-    --build-arg GATEWAY_COMMAND="$GATEWAY_COMMAND" \
+    --build-arg HB_GATEWAY_COMMAND="$HB_GATEWAY_COMMAND" \
     --build-arg HB_CLIENT_COMMAND="$HB_CLIENT_COMMAND" \
     -t "$UNIFIED_IMAGE_NAME" -f ./Dockerfile .)
   fi
 }
 
 docker_create_container () {
-  if [ "$EXPOSE_GATEWAY_PORT" == "Yes" ]; then
-    sed -i "s/#EXPOSE $GATEWAY_PORT/EXPOSE $GATEWAY_PORT/g" Dockerfile
+  if [ "$EXPOSE_HB_GATEWAY_PORT" == "TRUE" ]; then
+    sed -i "s/#EXPOSE $HB_GATEWAY_PORT/EXPOSE $HB_GATEWAY_PORT/g" Dockerfile
   fi
 
   $BUILT \
@@ -528,25 +527,25 @@ docker_create_container () {
     -e HB_CLIENT_DATA_FOLDER="/root/hummingbot/client/data" \
     -e HB_CLIENT_SCRIPTS_FOLDER="/root/hummingbot/client/scripts" \
     -e HB_CLIENT_PMM_SCRIPTS_FOLDER="/root/hummingbot/client/pmm_scripts" \
-    -e GATEWAY_CONF_FOLDER="/root/hummingbot/gateway/conf" \
-    -e GATEWAY_LOGS_FOLDER="/root/hummingbot/gateway/logs" \
+    -e HB_GATEWAY_CONF_FOLDER="/root/hummingbot/gateway/conf" \
+    -e HB_GATEWAY_LOGS_FOLDER="/root/hummingbot/gateway/logs" \
     -e FUN_CLIENT_PORT="$FUN_CLIENT_PORT" \
-    -e GATEWAY_PORT="$GATEWAY_PORT" \
+    -e HB_GATEWAY_PORT="$HB_GATEWAY_PORT" \
     --entrypoint="$ENTRYPOINT" \
     "$UNIFIED_IMAGE_NAME":$TAG
 }
 
 post_installation_fun_client () {
-  if [[ "$FUN_CLIENT_AUTO_START" == "Yes" && "$FUN_CLIENT_AUTO_START_EVERY_TIME" == "No" ]]; then
-    docker exec -it "$FUN_CLIENT_CONTAINER_NAME" /bin/bash -lc "conda activate funttastic && python $FUN_CLIENT_APP_PATH_PREFIX/app.py $OUTPUT_SUPPRESSION &"
+  if [[ "$FUN_CLIENT_AUTO_START" == "TRUE" && "$FUN_CLIENT_AUTO_START_EVERY_TIME" == "FALSE" ]]; then
+    docker exec -it "$FUN_CLIENT_CONTAINER_NAME" /bin/bash -lc "conda activate funttastic && cd $FUN_CLIENT_APP_PATH_PREFIX && python app.py $OUTPUT_SUPPRESSION &"
   fi
 
-  if [[ "$GATEWAY_AUTO_START" == "Yes" && "$GATEWAY_AUTO_START_EVERY_TIME" == "No" ]]; then
-    docker exec -it "$GATEWAY_CONTAINER_NAME" /bin/bash -lc "cd $GATEWAY_APP_PATH_PREFIX && yarn start $OUTPUT_SUPPRESSION &"
+  if [[ "$HB_GATEWAY_AUTO_START" == "TRUE" && "$HB_GATEWAY_AUTO_START_EVERY_TIME" == "FALSE" ]]; then
+    docker exec -it "$HB_GATEWAY_CONTAINER_NAME" /bin/bash -lc "cd $HB_GATEWAY_APP_PATH_PREFIX && yarn start $OUTPUT_SUPPRESSION &"
   fi
 
-  if [ "$HB_CLIENT_AUTO_START" == "Yes" ]; then
-    docker exec -it "$HB_CLIENT_CONTAINER_NAME" /bin/bash -lc "conda activate hummingbot && cd /root/hummingbot/client && ./bin/hummingbot_quickstart.py 2>> ./logs/errors.log"
+  if [ "$HB_CLIENT_AUTO_START" == "TRUE" ]; then
+    docker exec -it "$HB_CLIENT_CONTAINER_NAME" /bin/bash -lc "conda activate hummingbot && cd $HB_CLIENT_APP_PATH_PREFIX && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log"
   fi
 }
 
@@ -565,7 +564,7 @@ execute_installation () {
         echo
         echo "   Installing:"
         echo
-        echo "     > FUNTTASTIC CLIENT"
+        echo "     > Funttasstic Client"
         echo "     > Hummingbot Client"
         echo "     > Hummingbot Gateway"
         echo
@@ -680,7 +679,7 @@ then
   echo
 
   echo
-  echo "ℹ️  Confirm below if the FUNTTASTIC CLIENT instance and its folders are correct:"
+  echo "ℹ️  Confirm below if the Funttastic Client instance and its folders are correct:"
   echo
   printf "%25s %5s\n" "Repository url:"       "$FUN_CLIENT_REPOSITORY_URL"
   printf "%25s %5s\n" "Repository branch:"    "$FUN_CLIENT_REPOSITORY_BRANCH"
@@ -700,12 +699,12 @@ then
   echo
   echo "ℹ️  Confirm below if the Hummingbot Gateway instance and its folders are correct:"
   echo
-  if [ ! "$EXPOSE_GATEWAY_PORT" == "Yes" ]; then
-    printf "%25s %4s\n" "Exposed port:"					"$GATEWAY_PORT"
+  if [ ! "$EXPOSE_HB_GATEWAY_PORT" == "TRUE" ]; then
+    printf "%25s %4s\n" "Exposed port:"		    "$HB_GATEWAY_PORT"
   fi
-  printf "%25s %5s\n" "Repository url:"       "$GATEWAY_REPOSITORY_URL"
-  printf "%25s %5s\n" "Repository branch:"    "$GATEWAY_REPOSITORY_BRANCH"
-  printf "%25s %3s\n" "Autostart:"    		    "$GATEWAY_AUTO_START"
+  printf "%25s %5s\n" "Repository url:"       "$HB_GATEWAY_REPOSITORY_URL"
+  printf "%25s %5s\n" "Repository branch:"    "$HB_GATEWAY_REPOSITORY_BRANCH"
+  printf "%25s %3s\n" "Autostart:"    		    "$HB_GATEWAY_AUTO_START"
   echo
 
   prompt_proceed
