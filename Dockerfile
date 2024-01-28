@@ -2,30 +2,34 @@ FROM ubuntu:latest
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ="Etc/GMT"
-ARG SSH_PUBLIC_KEY
-ARG SSH_PRIVATE_KEY
-ARG GATEWAY_PASSPHRASE
+ARG LOCK_APT=${LOCK_AP:-"TRUE"}
+
 ARG RANDOM_PASSPHRASE
-ARG LOCK_APT
+ARG SSH_DEPLOY_PUBLIC_KEY
+ARG SSH_DEPLOY_PRIVATE_KEY
 
 ARG FUN_CLIENT_COMMAND=$FUN_CLIENT_COMMAND
 ARG FUN_CLIENT_REPOSITORY_URL="${FUN_CLIENT_REPOSITORY_URL:-https://github.com/funttastic/fun-hb-client.git}"
 ARG FUN_CLIENT_REPOSITORY_BRANCH="${FUN_CLIENT_REPOSITORY_BRANCH:-community}"
 ENV FUN_CLIENT_PORT=${FUN_CLIENT_PORT:-50001}
 
-ARG GATEWAY_COMMAND=$GATEWAY_COMMAND
-ARG GATEWAY_REPOSITORY_URL=${GATEWAY_REPOSITORY_URL:-https://github.com/Team-Kujira/gateway.git}
-ARG GATEWAY_REPOSITORY_BRANCH=${GATEWAY_REPOSITORY_BRANCH:-community}
-ENV GATEWAY_PORT=${GATEWAY_PORT:-15888}
+ARG HB_GATEWAY_COMMAND=$HB_GATEWAY_COMMAND
+ARG HB_GATEWAY_REPOSITORY_URL=${HB_GATEWAY_REPOSITORY_URL:-https://github.com/Team-Kujira/gateway.git}
+ARG HB_GATEWAY_REPOSITORY_BRANCH=${HB_GATEWAY_REPOSITORY_BRANCH:-community}
+ENV HB_GATEWAY_PORT=${HB_GATEWAY_PORT:-15888}
+ARG HB_GATEWAY_PASSPHRASE
+ENV GATEWAY_PORT=$HB_GATEWAY_PORT
+ENV GATEWAY_PASSPHRASE=$HB_GATEWAY_PASSPHRASE
 
 ARG HB_CLIENT_COMMAND=$HB_CLIENT_COMMAND
-ARG HB_CLIENT_REPOSITORY_URL=${REPOSITORY_URL:-https://github.com/Team-Kujira/hummingbot.git}
-ARG HB_CLIENT_REPOSITORY_BRANCH=${REPOSITORY_BRANCH:-community}
+ARG HB_CLIENT_REPOSITORY_URL=${HB_CLIENT_REPOSITORY_URL:-https://github.com/Team-Kujira/hummingbot.git}
+ARG HB_CLIENT_REPOSITORY_BRANCH=${HB_CLIENT_REPOSITORY_BRANCH:-community}
 
+ARG FILEBROWSER_COMMAND=$FILEBROWSER_COMMAND
 ENV FILEBROWSER_PORT=${FILEBROWSER_PORT:-50000}
 
 EXPOSE $FUN_CLIENT_PORT
-#EXPOSE $GATEWAY_PORT
+#EXPOSE $HB_GATEWAY_PORT
 
 WORKDIR /root
 
@@ -64,29 +68,21 @@ RUN <<-EOF
 	set -e
 	set +x
 
-	if [[ "$SSH_PUBLIC_KEY" && "$SSH_PRIVATE_KEY" ]]; then \
-		set -ex
+	if [[ "$SSH_DEPLOY_PUBLIC_KEY" && "$SSH_DEPLOY_PRIVATE_KEY" ]]; then \
+	  set -ex
 
-		mkdir -p /root/.ssh
-		chmod 0700 /root/.ssh
-		ssh-keyscan github.com > /root/.ssh/known_hosts
-	fi
+    mkdir -p /root/.ssh
+    chmod 0700 /root/.ssh
+    ssh-keyscan github.com > /root/.ssh/known_hosts
 
-	set +ex
-EOF
+		echo "$SSH_DEPLOY_PUBLIC_KEY" > /root/.ssh/id_rsa.pub
 
-RUN <<-EOF
-	set -e
-	set +x
-
-	if [[ "$SSH_PUBLIC_KEY" && "$SSH_PRIVATE_KEY" ]]; then \
-		echo "$SSH_PRIVATE_KEY" > /root/.ssh/id_rsa
+		set +x
+		echo "$SSH_DEPLOY_PRIVATE_KEY" > /root/.ssh/id_rsa
 
 		set -ex
-
-		echo "$SSH_PUBLIC_KEY" > /root/.ssh/id_rsa.pub
-		chmod 600 /root/.ssh/id_rsa
-		chmod 600 /root/.ssh/id_rsa.pub
+    chmod 600 /root/.ssh/id_rsa
+    chmod 600 /root/.ssh/id_rsa.pub
 	fi
 
 	set +ex
@@ -114,29 +110,8 @@ EOF
 RUN <<-EOF
 	set -ex
 
-	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+	source /root/.bashrc
 
-	export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-	[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
-
-	nvm install 16.3.0
-	nvm use 16.3.0
-	nvm cache clear
-
-#	if [ ! "$ARCHITECTURE" == "aarch64" ]
-#	then
-#		npm install --unsafe-perm --only=production -g @celo/celocli@1.0.3
-#	fi
-
-	npm install --global yarn
-	npm cache clean --force
-
-	rm -rf /root/.cache
-
-	set +ex
-EOF
-
-RUN <<-EOF
 	ARCHITECTURE="$(uname -m)"
 
 	case $(uname | tr '[:upper:]' '[:lower:]') in
@@ -205,6 +180,33 @@ RUN <<-EOF
 
 	source /root/.bashrc
 
+	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+
+	export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+	[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+
+	nvm install 16.3.0
+	nvm use 16.3.0
+	nvm cache clear
+
+#	if [ ! "$ARCHITECTURE" == "aarch64" ]
+#	then
+#		npm install --unsafe-perm --only=production -g @celo/celocli@1.0.3
+#	fi
+
+	npm install --global yarn
+	npm cache clean --force
+
+	rm -rf /root/.cache
+
+	set +ex
+EOF
+
+RUN <<-EOF
+	set -ex
+
+	source /root/.bashrc
+
 	mkdir -p funttastic/client
 	cd funttastic/client
 
@@ -229,7 +231,7 @@ RUN <<-EOF
 	mkdir -p hummingbot/gateway
 	cd hummingbot/gateway
 
-	git clone -b $GATEWAY_REPOSITORY_BRANCH $GATEWAY_REPOSITORY_URL .
+	git clone -b $HB_GATEWAY_REPOSITORY_BRANCH $HB_GATEWAY_REPOSITORY_URL .
 
 	mkdir -p \
 		certs \
@@ -290,45 +292,23 @@ EOF
 RUN <<-EOF
 	set -ex
 
-	rm -rf /tmp/hummingbot
-
-	if [ "$LOCK_APT" == "Yes" ]
-	then
-		apt autoremove -y
-
-		apt clean autoclean
-
-		rm -rf \
-			/var/lib/apt/lists/* \
-			/etc/apt/sources.list \
-			/etc/apt/sources.list.d/* \
-			/tmp/* \
-			/var/tmp/*
-	fi
-
-	set +ex
-EOF
-
-RUN <<-EOF
-	set -ex
-
-	echo "export GATEWAY_PASSPHRASE=$GATEWAY_PASSPHRASE" >> /root/.bashrc
+	echo "export GATEWAY_PASSPHRASE=$HB_GATEWAY_PASSPHRASE" >> /root/.bashrc
 	rm -rf /root/temp
 
 	source /root/.bashrc
 
 	conda activate funttastic
 
-	python funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $GATEWAY_PASSPHRASE --cert-path funttastic/client/resources/certificates
+	python funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $HB_GATEWAY_PASSPHRASE --cert-path funttastic/client/resources/certificates
 
 	ln -rfs funttastic/client/resources/certificates/* hummingbot/gateway/certs
 	ln -rfs funttastic/client/resources/certificates/* hummingbot/client/certs
 
-	sed -i "s/<password>/"$GATEWAY_PASSPHRASE"/g" funttastic/client/resources/configuration/production.yml
+	sed -i "s/<password>/"$HB_GATEWAY_PASSPHRASE"/g" funttastic/client/resources/configuration/production.yml
 	sed -i -e '/logging:/,/use_telegram: true/ s/use_telegram: true/use_telegram: false/' -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' funttastic/client/resources/configuration/production.yml
 	sed -i -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' funttastic/client/resources/configuration/common.yml
 
-	if [ "$GATEWAY_PASSPHRASE" == "$RANDOM_PASSPHRASE" ]
+	if [ "$HB_GATEWAY_PASSPHRASE" == "$RANDOM_PASSPHRASE" ]
 	then
 	  mkdir -p shared/temporary
 		echo $RANDOM_PASSPHRASE > shared/temporary/random_passphrase.txt
@@ -354,29 +334,29 @@ EOF
 RUN <<-EOF
 	set -ex
 
-	filebrowser -p $FILEBROWSER_PORT -r shared
+	filebrowser -p $FILEBROWSER_PORT -r /root/shared
 
 	set +ex
 EOF
 
 RUN <<-EOF
-  set -ex
+	set -ex
 
-  if [ "$LOCK_APT" == "Yes" ]
-  then
-    apt autoremove -y
+	if [ "$LOCK_APT" == "TRUE" ]
+	then
+		apt autoremove -y
 
-    apt clean autoclean
+		apt clean autoclean
 
-    rm -rf \
-      /var/lib/apt/lists/* \
-      /etc/apt/sources.list \
-      /etc/apt/sources.list.d/* \
-      /tmp/* \
-      /var/tmp/*
-  fi
+		rm -rf \
+			/var/lib/apt/lists/* \
+			/etc/apt/sources.list \
+			/etc/apt/sources.list.d/* \
+			/tmp/* \
+			/var/tmp/*
+	fi
 
-  set +ex
+	set +ex
 EOF
 
-CMD ["/bin/bash", "-c", "$FUN_HB_CLIENT_COMMAND; $GATEWAY_COMMAND; $HB_CLIENT_COMMAND"]
+CMD ["/bin/bash", "-c", "$FUN_HB_CLIENT_COMMAND; $HB_GATEWAY_COMMAND; $HB_CLIENT_COMMAND; $FILEBROWSER_COMMAND"]
