@@ -321,12 +321,38 @@ RUN <<-EOF
 	set -ex
 
 	mkdir -p \
+		shared/common \
 		shared/funttastic/client \
 		shared/hummingot/client \
 		shared/hummingbot/gateway
 
+	mv funttastic/client/resources/certificates shared/common/
+	rm -rf hummingbot/client/certs
+	rm -rf hummingbot/gateway/certs
+	ln -s shared/common/certificates funttastic/client/resources/certificates
+	ln -s shared/common/certificates hummingbot/client/certs
+	ln -s shared/common/certificates hummingbot/gateway/certs
+
 	mv funttastic/client/resources shared/funttastic/client/
 	ln -s shared/funttastic/client/resources funttastic/client/resources
+
+  mv hummingbot/gateway/db shared/hummingbot/gateway/
+  mv hummingbot/gateway/conf shared/hummingbot/gateway/
+  mv hummingbot/gateway/logs shared/hummingbot/gateway/
+  ln -s shared/hummingbot/gateway/db humminbot/gateway/db
+  ln -s shared/hummingbot/gateway/conf humminbot/gateway/conf
+  ln -s shared/hummingbot/gateway/logs humminbot/gateway/logs
+
+  mv hummingbot/client/conf shared/hummingbot/client/
+  mv hummingbot/client/logs shared/hummingbot/client/
+  mv hummingbot/client/data shared/hummingbot/client/
+  mv hummingbot/client/scripts shared/hummingbot/client/
+  mv hummingbot/client/pmm_scripts shared/hummingbot/client/
+  ln -s shared/hummingbot/client/conf hummingbot/client/conf
+  ln -s shared/hummingbot/client/logs hummingbot/client/logs
+  ln -s shared/hummingbot/client/data hummingbot/client/data
+  ln -s shared/hummingbot/client/scripts hummingbot/client/scripts
+  ln -s shared/hummingbot/client/pmm_scripts hummingbot/client/pmm_scripts
 
 	set +ex
 EOF
