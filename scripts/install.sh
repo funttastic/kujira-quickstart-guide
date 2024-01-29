@@ -4,7 +4,7 @@ CUSTOMIZE=$1
 USER=$(whoami)
 GROUP=$(id -gn)
 TAG="latest"
-CHOICE=0
+CHOICE=""
 MIN_PASSPHRASE_LENGTH=4
 ENTRYPOINT="/bin/bash"
 NETWORK="host"
@@ -13,9 +13,6 @@ HB_GATEWAY_APP_PATH_PREFIX="/root/hummingbot/gateway"
 HB_CLIENT_APP_PATH_PREFIX="/root/hummingbot/client"
 OUTPUT_SUPPRESSION_MODE="stdout+stderr"
 OUTPUT_SUPPRESSION=""
-UNIFIED_IMAGE_NAME="fun-kuji-hb"
-UNIFIED_IMAGE_NAME="fun-kuji-hb"
-UNIFIED_BUILD_CACHE="--no-cache"
 
 if [ "$OUTPUT_SUPPRESSION_MODE" == "stdout+stderr" ]
   then
@@ -409,7 +406,7 @@ fi
 
 if [ "$CUSTOMIZE" == "--customize" ]
 then
-  CHOICE="U1"
+  CHOICE="ALL"
   pre_installation_fun_client
   pre_installation_hb_gateway
   pre_installation_hb_client
@@ -439,7 +436,8 @@ else
   IMAGE_NAME="fun-kuji-hb"
   CONTAINER_NAME="$IMAGE_NAME"
   BUILD_CACHE=${BUILD_CACHE:-"--no-cache"}
-  FILEBROWSER_PORT=${FILEBROWSER_PORT:-50000}
+  FUN_FRONTEND_PORT=${FUN_FRONTEND_PORT:-50000}=
+  FILEBROWSER_PORT=${FILEBROWSER_PORT:-50002}
   SSH_PUBLIC_KEY="$SSH_PUBLIC_KEY"
   SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY"
   TAG=${TAG:-"latest"}
@@ -454,9 +452,6 @@ SELECTED_PASSPHRASE=${RANDOM_PASSPHRASE:-$DEFINED_PASSPHRASE}
 if [[ "$SSH_PUBLIC_KEY" && "$SSH_PRIVATE_KEY" ]]; then
   FUN_CLIENT_REPOSITORY_URL="git@github.com:funttastic/fun-hb-client.git"
 fi
-
-IMAGE_NAME="$IMAGE_NAME"
-CONTAINER_NAME="$CONTAINER_NAME"
 
 if [ -n "$RANDOM_PASSPHRASE" ]; then
   echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -489,7 +484,7 @@ docker_create_image () {
      HB_CLIENT_COMMAND="conda activate hummingbot && cd $HB_CLIENT_APP_PATH_PREFIX && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log"
    fi
 
-  if [ ! "$UNIFIED_BUILD_CACHE" == "" ]
+  if [ ! "$BUILD_CACHE" == "" ]
   then
     BUILT=$(DOCKER_BUILDKIT=1 docker build \
     --build-arg SSH_PUBLIC_KEY="$SSH_PUBLIC_KEY" \
@@ -507,7 +502,7 @@ docker_create_image () {
     --build-arg FUN_CLIENT_COMMAND="$FUN_CLIENT_COMMAND" \
     --build-arg HB_GATEWAY_COMMAND="$HB_GATEWAY_COMMAND" \
     --build-arg HB_CLIENT_COMMAND="$HB_CLIENT_COMMAND" \
-    -t "$UNIFIED_IMAGE_NAME" -f ./Dockerfile .)
+    -t "$IMAGE_NAME" -f ./Dockerfile .)
   fi
 }
 
@@ -521,7 +516,7 @@ docker_create_container () {
     -dit \
     --log-opt max-size=10m \
     --log-opt max-file=5 \
-    --name "$UNIFIED_CONTAINER_NAME" \
+    --name "$CONTAINER_NAME" \
     --network "$NETWORK" \
     --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
     -e FUN_CLIENT_RESOURCES_FOLDER="/root/funttastic/client/resources" \
@@ -535,7 +530,7 @@ docker_create_container () {
     -e FUN_CLIENT_PORT="$FUN_CLIENT_PORT" \
     -e HB_GATEWAY_PORT="$HB_GATEWAY_PORT" \
     --entrypoint="$ENTRYPOINT" \
-    "$UNIFIED_IMAGE_NAME":$TAG
+    "$IMAGE_NAME":$TAG
 }
 
 post_installation () {
@@ -560,7 +555,7 @@ installation () {
 
 execute_installation () {
   case $CHOICE in
-    "U1")
+    "ALL")
         echo
         echo "   Installing:"
         echo
@@ -720,11 +715,7 @@ then
   fi
 else
   if [ ! "$NOT_IMPLEMENTED" ]; then
-    if [ "$INDIVIDUAL_CONTAINERS" == "True" ]; then
-      CHOICE=4
-    else
-      CHOICE="U1"
-    fi
+    CHOICE="ALL"
     install_docker
   fi
 fi

@@ -8,6 +8,9 @@ ARG RANDOM_PASSPHRASE
 ARG SSH_DEPLOY_PUBLIC_KEY
 ARG SSH_DEPLOY_PRIVATE_KEY
 
+ARG FUN_FRONTEND_COMMAND=$FUN_FRONTEND_COMMAND
+ENV FUN_FRONTEND_PORT=${FUN_FRONTEND_PORT:-50000}
+
 ARG FUN_CLIENT_COMMAND=$FUN_CLIENT_COMMAND
 ARG FUN_CLIENT_REPOSITORY_URL="${FUN_CLIENT_REPOSITORY_URL:-https://github.com/funttastic/fun-hb-client.git}"
 ARG FUN_CLIENT_REPOSITORY_BRANCH="${FUN_CLIENT_REPOSITORY_BRANCH:-community}"
@@ -26,7 +29,7 @@ ARG HB_CLIENT_REPOSITORY_URL=${HB_CLIENT_REPOSITORY_URL:-https://github.com/Team
 ARG HB_CLIENT_REPOSITORY_BRANCH=${HB_CLIENT_REPOSITORY_BRANCH:-community}
 
 ARG FILEBROWSER_COMMAND=$FILEBROWSER_COMMAND
-ENV FILEBROWSER_PORT=${FILEBROWSER_PORT:-50000}
+ENV FILEBROWSER_PORT=${FILEBROWSER_PORT:-50002}
 
 EXPOSE $FUN_CLIENT_PORT
 #EXPOSE $HB_GATEWAY_PORT
@@ -304,6 +307,7 @@ RUN <<-EOF
 	ln -rfs funttastic/client/resources/certificates/* hummingbot/gateway/certs
 	ln -rfs funttastic/client/resources/certificates/* hummingbot/client/certs
 
+	sed -i -e "/server:/,/port: 5000/ s/port: 5000/port: $FUN_CLIENT_PORT/" funttastic/client/resources/configuration/production.yml
 	sed -i "s/<password>/"$HB_GATEWAY_PASSPHRASE"/g" funttastic/client/resources/configuration/production.yml
 	sed -i -e '/logging:/,/use_telegram: true/ s/use_telegram: true/use_telegram: false/' -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' funttastic/client/resources/configuration/production.yml
 	sed -i -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' funttastic/client/resources/configuration/common.yml
@@ -317,45 +321,45 @@ RUN <<-EOF
 	set +ex
 EOF
 
-RUN <<-EOF
-	set -ex
-
-	mkdir -p \
-		shared/common \
-		shared/funttastic/client \
-		shared/hummingot/client \
-		shared/hummingbot/gateway
-
-	mv funttastic/client/resources/certificates shared/common/
-	rm -rf hummingbot/client/certs
-	rm -rf hummingbot/gateway/certs
-	ln -s shared/common/certificates funttastic/client/resources/certificates
-	ln -s shared/common/certificates hummingbot/client/certs
-	ln -s shared/common/certificates hummingbot/gateway/certs
-
-	mv funttastic/client/resources shared/funttastic/client/
-	ln -s shared/funttastic/client/resources funttastic/client/resources
-
-  mv hummingbot/gateway/db shared/hummingbot/gateway/
-  mv hummingbot/gateway/conf shared/hummingbot/gateway/
-  mv hummingbot/gateway/logs shared/hummingbot/gateway/
-  ln -s shared/hummingbot/gateway/db humminbot/gateway/db
-  ln -s shared/hummingbot/gateway/conf humminbot/gateway/conf
-  ln -s shared/hummingbot/gateway/logs humminbot/gateway/logs
-
-  mv hummingbot/client/conf shared/hummingbot/client/
-  mv hummingbot/client/logs shared/hummingbot/client/
-  mv hummingbot/client/data shared/hummingbot/client/
-  mv hummingbot/client/scripts shared/hummingbot/client/
-  mv hummingbot/client/pmm_scripts shared/hummingbot/client/
-  ln -s shared/hummingbot/client/conf hummingbot/client/conf
-  ln -s shared/hummingbot/client/logs hummingbot/client/logs
-  ln -s shared/hummingbot/client/data hummingbot/client/data
-  ln -s shared/hummingbot/client/scripts hummingbot/client/scripts
-  ln -s shared/hummingbot/client/pmm_scripts hummingbot/client/pmm_scripts
-
-	set +ex
-EOF
+#RUN <<-EOF
+#	set -ex
+#
+#	mkdir -p \
+#		shared/common \
+#		shared/funttastic/client \
+#		shared/hummingot/client \
+#		shared/hummingbot/gateway
+#
+#	mv funttastic/client/resources/certificates shared/common/
+#	rm -rf hummingbot/client/certs
+#	rm -rf hummingbot/gateway/certs
+#	ln -s shared/common/certificates funttastic/client/resources/certificates
+#	ln -s shared/common/certificates hummingbot/client/certs
+#	ln -s shared/common/certificates hummingbot/gateway/certs
+#
+#	mv funttastic/client/resources shared/funttastic/client/
+#	ln -s shared/funttastic/client/resources funttastic/client/resources
+#
+#  mv hummingbot/gateway/db shared/hummingbot/gateway/
+#  mv hummingbot/gateway/conf shared/hummingbot/gateway/
+#  mv hummingbot/gateway/logs shared/hummingbot/gateway/
+#  ln -s shared/hummingbot/gateway/db humminbot/gateway/db
+#  ln -s shared/hummingbot/gateway/conf humminbot/gateway/conf
+#  ln -s shared/hummingbot/gateway/logs humminbot/gateway/logs
+#
+#  mv hummingbot/client/conf shared/hummingbot/client/
+#  mv hummingbot/client/logs shared/hummingbot/client/
+#  mv hummingbot/client/data shared/hummingbot/client/
+#  mv hummingbot/client/scripts shared/hummingbot/client/
+#  mv hummingbot/client/pmm_scripts shared/hummingbot/client/
+#  ln -s shared/hummingbot/client/conf hummingbot/client/conf
+#  ln -s shared/hummingbot/client/logs hummingbot/client/logs
+#  ln -s shared/hummingbot/client/data hummingbot/client/data
+#  ln -s shared/hummingbot/client/scripts hummingbot/client/scripts
+#  ln -s shared/hummingbot/client/pmm_scripts hummingbot/client/pmm_scripts
+#
+#	set +ex
+#EOF
 
 RUN <<-EOF
 	set -ex
