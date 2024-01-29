@@ -176,7 +176,7 @@ wallet() {
    [or type 'back' to return to menu] >>> " mnemonic
 
       if [ "$mnemonic" == 'back' ]; then
-        echo -e "\n\n   [!] Returning to the menu..."
+        echo -e "\n\n   ℹ️ Returning to the menu..."
         echo
         break
       fi
@@ -184,7 +184,7 @@ wallet() {
       if [ -z "$mnemonic" ]; then
         echo
         echo
-        echo "      [!] Invalid mnemonic, please try again."
+        echo "      ❌ Invalid mnemonic, please try again."
       else
         echo
         break
@@ -207,14 +207,14 @@ wallet() {
    [or type 'back' to return to menu] >>> " public_key
 
       if [ "$public_key" == 'back' ]; then
-        echo -e "\n   [!] Returning to the menu..."
+        echo -e "\n   ℹ️ Returning to the menu..."
         echo
         break
       fi
 
       if [ -z "$public_key" ]; then
         echo
-        echo "      [!] Invalid account public key, please try again."
+        echo "      ❌ Invalid account public key, please try again."
       else
         echo
         break
@@ -318,7 +318,7 @@ choose() {
                 ;;
             *)
                 echo
-                echo "   [!] Invalid Input. Enter a your choice (1, 2, 3, 4) or type back or exit."
+                echo "      ❌ Invalid Input. Enter a your choice (1, 2, 3, 4) or type back or exit."
                 echo
                 read -rp "   Enter your choice (1, 2, 3, 4, 5, back, or exit): " CHOICE
                 ;;

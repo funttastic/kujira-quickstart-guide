@@ -191,7 +191,7 @@ pre_installation_fun_client () {
     echo
     if [ -z "$DEFINED_PASSPHRASE" ] || [ ${#DEFINED_PASSPHRASE} -lt "$MIN_PASSPHRASE_LENGTH" ]; then
       echo
-      echo "      Weak passphrase, please try again."
+      echo "      ⚠️  Weak passphrase, please try again."
     else
       while true; do
         echo
@@ -211,12 +211,12 @@ pre_installation_fun_client () {
         elif [ "$REPEATED_PASSPHRASE" = "$DEFINED_PASSPHRASE" ]; then
           tput cuu 1
           echo
-          echo -e "\r      Perfect, the passphrase has been set successfully.$(printf ' %.0s' {1..20})"
+          echo -e "\r      ✅ Perfect, the passphrase has been set successfully.$(printf ' %.0s' {1..20})"
           break
         else
           tput cuu 1
           echo
-          echo -e "\r      Passphrases do not match, please try again.$(printf ' %.0s' {1..20})"
+          echo -e "\r      ❌ Passphrases do not match, please try again.$(printf ' %.0s' {1..20})"
         fi
       done
       break
@@ -283,8 +283,10 @@ pre_installation_fun_client () {
   RESPONSE="$FUN_CLIENT_AUTO_START_EVERY_TIME"
   if [[ "$FUN_CLIENT_AUTO_START" == "TRUE" && "$FUN_CLIENT_AUTO_START_EVERY_TIME" == "" ]]; then
     echo
-    read -rp "   Should the Funttastic Client server start automatically every time the container starts?
-   If you choose \"No\", you will need to start it manually every time the container starts. (\"Y/n\") >>> " RESPONSE
+    echo "   Should the Funttastic Client server start automatically every time the container starts?
+   If you choose \"No\", you will need to start it manually every time the container starts."
+    echo
+    read -rp "   (\"Y/n\") >>> " RESPONSE
 
     if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]; then
       echo
@@ -362,7 +364,7 @@ pre_installation_hb_gateway () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -rp "   Do you want to expose the Gateway port from the instance?
+    echo "   Do you want to expose the Gateway port from the instance?
    The recommended option is \"No\", but if you choose \"No\",
    you will not be able to make calls directly to the Gateway."
     echo
@@ -370,8 +372,8 @@ pre_installation_hb_gateway () {
   fi
   if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "No" || "$RESPONSE" == "no" || "$RESPONSE" == "" ]]; then
     echo
-    echo "   |  The Gateway port will not be exposed from the instance, only Funttastic Client and
-   |  Hummingbot Client will be able to make calls to it from within the container."
+    echo "   ℹ️  The Gateway port will not be exposed from the instance, only Funttastic Client and
+      Hummingbot Client will be able to make calls to it from within the container."
     EXPOSE_HB_GATEWAY_PORT="FALSE"
   else
     EXPOSE_HB_GATEWAY_PORT="TRUE"
@@ -560,20 +562,20 @@ if [[ "$SSH_PUBLIC_KEY" && "$SSH_PRIVATE_KEY" ]]; then
 fi
 
 if [ -n "$RANDOM_PASSPHRASE" ]; then
-  echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-  echo "   |                                                                 |"
-  echo "   |   A new random passphrase will be saved in the file             |"
-  echo "   |                                                                 |"
-  echo "   |      temporary/random_passphrase.txt                            |"
-  echo "   |                                                                 |"
-  echo "   |   To access this file, use the FileBrowser at                  |"
-  echo "   |      https://localhost:50000/                                   |"
-  echo "   |   or                                                            |"
-  echo "   |      https://127.0.0.1:50000/                                   |"
-  echo "   |                                                                 |"
-  echo "   |   Copy the passphrase to a safe location and delete the file.   |"
-  echo "   |                                                                 |"
-  echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+  echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+  echo "   |                                                                   |"
+  echo "   |   A new random passphrase will be saved in the file               |"
+  echo "   |                                                                   |"
+  echo "   |      temporary/random_passphrase.txt                              |"
+  echo "   |                                                                   |"
+  echo "   |   To access this file, use the FileBrowser at                     |"
+  echo "   |      https://localhost:50000/                                     |"
+  echo "   |   or                                                              |"
+  echo "   |      https://127.0.0.1:50000/                                     |"
+  echo "   |                                                                   |"
+  echo "   |   ⚠️  Copy the passphrase to a safe location and delete the file.  |"
+  echo "   |                                                                   |"
+  echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
   echo
 fi
 
@@ -676,7 +678,7 @@ execute_installation () {
         echo "     > Hummingbot Client"
         echo "     > Hummingbot Gateway"
         echo
-        echo "     [i] All in just one container."
+        echo "     ℹ️  All in just one container."
         echo
 
         installation
@@ -777,9 +779,9 @@ then
   clear
 
   if [ "$BUILD_CACHE" == "--no-cache" ]; then
-      REUSE_IMAGE="No "
+      REUSE_IMAGE="FALSE"
   else
-      REUSE_IMAGE="Yes"
+      REUSE_IMAGE="TRUE"
   fi
 
   echo

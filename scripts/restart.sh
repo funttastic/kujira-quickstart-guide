@@ -117,9 +117,9 @@ authentication() {
     echo "   Please enter your SSL certificates passphrase"
     echo
     echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-    echo "   | [i] This password was set during the Funttastic Client installation               |"
-    echo "   |     or by running the 'gateway generate-certs' command in the Hummingbot Client   |"
-    echo "   |     or during the Hummingbot Gateway installation if you installed it separately. |"
+    echo "   | ℹ️  This password was set during the Funttastic Client installation                |"
+    echo "   |    or by running the 'gateway generate-certs' command in the Hummingbot Client    |"
+    echo "   |    or during the Hummingbot Gateway installation if you installed it separately.  |"
     echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
     echo
 
@@ -234,7 +234,7 @@ choose() {
                 ;;
             *)
                 echo
-                echo "   [!] Invalid Input. Enter a your choice (1, 2, 3, 4) or type back or exit."
+                echo "      ❌ Invalid Input. Enter a your choice (1, 2, 3, 4) or type back or exit."
                 echo
                 read -rp "   Enter your choice (1, 2, 3, 4, back, or exit): " CHOICE
                 ;;

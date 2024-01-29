@@ -49,7 +49,7 @@ choose() {
                 ;;
             *)
                 echo
-                echo "   [!] Invalid Input. Enter a your choice (1, 2, 3) or type exit."
+                echo "      ❌ Invalid Input. Enter a your choice (1, 2, 3) or type exit."
                 echo
                 read -p "   Enter your choice (1, 2, 3, or exit): " CHOICE
                 ;;
