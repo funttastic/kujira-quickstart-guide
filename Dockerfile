@@ -319,6 +319,88 @@ RUN <<-EOF
 	set +ex
 EOF
 
+RUN <<-EOF
+	set -ex
+
+	mkdir -p scripts
+
+# echo -e '#!/bin/bash\n\n# Initialize all variables as "False"\nSTART_ALL="False"\nSTART_FUN_CLIENT_FRONTEND="False"\nSTART_FILEBROWSER="False"\nSTART_FUN_CLIENT="False"\nSTART_HB_GATEWAY="False"\nSTART_HB_CLIENT="False"\n\n# Process command line arguments\nfor arg in "$@"\ndo\n    case $arg in\n        --start_all)\n        START_ALL="True"\n        START_FUN_CLIENT_FRONTEND="True"\n        START_FILEBROWSER="True"\n        START_FUN_CLIENT="True"\n        START_HB_GATEWAY="True"\n        START_HB_CLIENT="True"\n        shift\n        ;;\n        --start_fun_client_frontend)\n        START_FUN_CLIENT_FRONTEND="True"\n        shift\n        ;;\n        --start_filebrowser)\n        START_FILEBROWSER="True"\n        shift\n        ;;\n        --start_fun_client)\n        START_FUN_CLIENT="True"\n        shift\n        ;;\n        --start_hb_gateway)\n        START_HB_GATEWAY="True"\n        shift\n        ;;\n        --start_hb_client)\n        START_HB_CLIENT="True"\n        shift\n        ;;\n    esac\ndone\n\n# Reload .bashrc\nsource ~/.bashrc\n\n# Conditional function to check if a command should run\nshould_run() {\n    [ \"$START_ALL\" = \"True\" ] || [ \"$1\" = \"True\" ]\n}\n\n# Funttastic Client Frontend Start Command\nif should_run \"$START_FUN_CLIENT_FRONTEND\"; then\n    echo > /dev/null 2>&1 &\nfi\n\n# FileBrowser Start Command\nif should_run \"$START_FILEBROWSER\"; then\n    cd /root && filebrowser -p \"\${FILEBROWSER_PORT:-50002}\" -r shared > /dev/null 2>&1 &\nfi\n\n# Funttastic Client Start Command\nif should_run \"$START_FUN_CLIENT\"; then\n    conda activate funttastic && cd /root/funttastic/client && python app.py > /dev/null 2>&1 &\nfi\n\n# Hummingbot Gateway Start Command\nif should_run \"$START_HB_GATEWAY\"; then\n    cd /root/hummingbot/gateway && yarn start > /dev/null 2>&1 &\nfi\n\n# Hummingbot Client Start Command\nif should_run \"$START_HB_CLIENT\"; then\n    conda activate hummingbot && cd /root/hummingbot/client && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log\nfi' > scripts/start.sh
+
+  echo -e '#!/bin/bash\n'\
+  '\n# Initialize all variables as "False"\n'\
+  'START_ALL="False"\n'\
+  'START_FUN_CLIENT_FRONTEND="False"\n'\
+  'START_FILEBROWSER="False"\n'\
+  'START_FUN_CLIENT="False"\n'\
+  'START_HB_GATEWAY="False"\n'\
+  'START_HB_CLIENT="False"\n'\
+  '\n# Process command line arguments\n'\
+  'for arg in "$@"\n'\
+  'do\n'\
+  '    case $arg in\n'\
+  '        --start_all)\n'\
+  '        START_ALL="True"\n'\
+  '        START_FUN_CLIENT_FRONTEND="True"\n'\
+  '        START_FILEBROWSER="True"\n'\
+  '        START_FUN_CLIENT="True"\n'\
+  '        START_HB_GATEWAY="True"\n'\
+  '        START_HB_CLIENT="True"\n'\
+  '        shift\n'\
+  '        ;;\n'\
+  '        --start_fun_client_frontend)\n'\
+  '        START_FUN_CLIENT_FRONTEND="True"\n'\
+  '        shift\n'\
+  '        ;;\n'\
+  '        --start_filebrowser)\n'\
+  '        START_FILEBROWSER="True"\n'\
+  '        shift\n'\
+  '        ;;\n'\
+  '        --start_fun_client)\n'\
+  '        START_FUN_CLIENT="True"\n'\
+  '        shift\n'\
+  '        ;;\n'\
+  '        --start_hb_gateway)\n'\
+  '        START_HB_GATEWAY="True"\n'\
+  '        shift\n'\
+  '        ;;\n'\
+  '        --start_hb_client)\n'\
+  '        START_HB_CLIENT="True"\n'\
+  '        shift\n'\
+  '        ;;\n'\
+  '    esac\n'\
+  'done\n'\
+  '\n# Reload .bashrc\n'\
+  'source ~/.bashrc\n'\
+  '\n# Conditional function to check if a command should run\n'\
+  'should_run() {\n'\
+  '    [ "$START_ALL" = "True" ] || [ "$1" = "True" ]\n'\
+  '}\n'\
+  '\n# Funttastic Client Frontend Start Command\n'\
+  'if should_run "$START_FUN_CLIENT_FRONTEND"; then\n'\
+  '    echo > /dev/null 2>&1 &\n'\
+  'fi\n'\
+  '\n# FileBrowser Start Command\n'\
+  'if should_run "$START_FILEBROWSER"; then\n'\
+  '    cd /root && filebrowser -p "\${FILEBROWSER_PORT:-50002}" -r shared > /dev/null 2>&1 &\n'\
+  'fi\n'\
+  '\n# Funttastic Client Start Command\n'\
+  'if should_run "$START_FUN_CLIENT"; then\n'\
+  '    conda activate funttastic && cd /root/funttastic/client && python app.py > /dev/null 2>&1 &\n'\
+  'fi\n'\
+  '\n# Hummingbot Gateway Start Command\n'\
+  'if should_run "$START_HB_GATEWAY"; then\n'\
+  '    cd /root/hummingbot/gateway && yarn start > /dev/null 2>&1 &\n'\
+  'fi\n'\
+  '\n# Hummingbot Client Start Command\n'\
+  'if should_run "$START_HB_CLIENT"; then\n'\
+  '    conda activate hummingbot && cd /root/hummingbot/client && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log\n'\
+  'fi' > scripts/start.sh
+
+  chmod +x scripts/start.sh
+
+	set +ex
+EOF
+
 #RUN <<-EOF
 #	set -ex
 #
@@ -379,4 +461,4 @@ RUN <<-EOF
 	set +ex
 EOF
 
-CMD ["/bin/bash", "-c", "eval $FUN_FRONTEND_COMMAND $FILEBROWSER_COMMAND $FUN_CLIENT_COMMAND $HB_GATEWAY_COMMAND $HB_CLIENT_COMMAND"]
+CMD ["/bin/bash", "-c", "eval scripts/start.sh --start_all"]
