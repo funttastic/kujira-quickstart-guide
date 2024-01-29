@@ -161,6 +161,12 @@ restart_all() {
     restart_hb_gateway
 }
 
+more_information(){
+  echo "   For more information about the FUNTTASTIC CLIENT, please visit:"
+  echo
+  echo "      https://www.funttastic.com/partners/kujira"
+}
+
 # Function to choose which container to restart
 choose() {
     clear
@@ -177,9 +183,7 @@ choose() {
     echo "   [back] RETURN TO MAIN MENU"
     echo "   [exit] Exit"
     echo
-    echo "   For more information about the FUNTTASTIC CLIENT, please visit:"
-    echo
-    echo "         https://www.funttastic.com/partners/kujira"
+    more_information
     echo
 
     read -rp "   Enter your choice (1, 2, 3, 4, back or exit): " CHOICE
@@ -222,10 +226,10 @@ choose() {
                 ;;
             "exit")
                 echo
+                echo "      Feel free to come back whenever you want."
                 echo
-                echo "      The script will close automatically in 3 seconds..."
+                more_information
                 echo
-                sleep 3
                 exit 0
                 ;;
             *)

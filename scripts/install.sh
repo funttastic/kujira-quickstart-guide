@@ -489,7 +489,7 @@ echo "   Do you want to automate the entire process,
    including setting a random passphrase? [Y/n]"
 
 echo
-echo "ℹ️  Enter the value [back] to return to the previous question."
+echo "ℹ️  Enter the value [back] to return to the main menu."
 echo
 
 read -rp "   [Y/n/back] >>> " RESPONSE
@@ -498,7 +498,7 @@ then
   echo
 elif [[ "$RESPONSE" == "back" ]]; then
   clear
-  ./install.sh
+  ./configure
   exit 0
 else
   CUSTOMIZE="--customize"

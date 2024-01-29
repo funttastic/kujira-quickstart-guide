@@ -178,7 +178,6 @@ wallet() {
       if [ "$mnemonic" == 'back' ]; then
         echo -e "\n\n   [!] Returning to the menu..."
         echo
-        sleep 2
         break
       fi
 
@@ -210,7 +209,6 @@ wallet() {
       if [ "$public_key" == 'back' ]; then
         echo -e "\n   [!] Returning to the menu..."
         echo
-        sleep 2
         break
       fi
 
@@ -239,6 +237,12 @@ wallet() {
   fi
 }
 
+more_information(){
+  echo "   For more information about the FUNTTASTIC CLIENT, please visit:"
+  echo
+  echo "      https://www.funttastic.com/partners/kujira"
+}
+
 choose() {
     clear
     echo
@@ -255,12 +259,12 @@ choose() {
     echo "   [back] RETURN TO MAIN MENU"
     echo "   [exit] STOP SCRIPT EXECUTION"
     echo
-    echo "   For more information about the FUNTTASTIC CLIENT, please visit:"
-    echo
-    echo "         https://www.funttastic.com/partners/kujira"
+    more_information
     echo
 
     read -rp "   Enter your choice (1, 2, 3, 4, 5, back or exit): " CHOICE
+
+    clear
 
     while true; do
         case $CHOICE in
@@ -306,10 +310,10 @@ choose() {
                 ;;
             "exit")
                 echo
+                echo "      Feel free to come back whenever you want."
                 echo
-                echo "      The script will close automatically in 3 seconds..."
+                more_information
                 echo
-                sleep 3
                 exit 0
                 ;;
             *)
