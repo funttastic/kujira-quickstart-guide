@@ -42,6 +42,42 @@ generate_passphrase() {
     echo "$passphrase"
 }
 
+container_exists() {
+    # Use the provided container name or the global variable CONTAINER_NAME
+    local container_name="${1:-$CONTAINER_NAME}"
+
+    # Getting the list of containers
+    local containers
+    containers=$(docker ps -a --format "{{.Names}}")
+
+    # Checking if the container exists
+    CONTAINER_EXISTS="FALSE"
+    for name in $containers; do
+        if [ "$name" = "$container_name" ]; then
+            CONTAINER_EXISTS="TRUE"
+            break
+        fi
+    done
+}
+
+image_exists() {
+    # Use the provided image name or the global variable IMAGE_NAME
+    local image_name="${1:-$IMAGE_NAME}"
+
+    # Getting the list of images
+    local images
+    images=$(docker images --format "{{.Repository}}")
+
+    # Checking if the image exists
+    IMAGE_EXISTS="FALSE"
+    for name in $images; do
+        if [ "$name" = "$image_name" ]; then
+            IMAGE_EXISTS="TRUE"
+            break
+        fi
+    done
+}
+
 prompt_proceed () {
   RESPONSE=""
   read -rp "   Do you want to proceed? [Y/n] >>> " RESPONSE
@@ -116,20 +152,21 @@ pre_installation_fun_client () {
 
   default_values_info
 
-  # Create a new image?
-  RESPONSE="$BUILD_CACHE"
-  if [ "$RESPONSE" == "" ]
-  then
-    echo
-    read -rp "   Do you want to use an image from a previous installation? (\"y/N\") >>> " RESPONSE
-  fi
-  if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]
-  then
-    echo
-    echo "      A new image/installation will be done..."
+  remove_docker_image() {
+    # Docker image name
+    local image_name=${1:-$IMAGE_NAME}
 
-    BUILD_CACHE="--no-cache"
+    # Stop all containers that are using the image
+    docker stop "$(docker ps -a -q --filter ancestor="$image_name")" "$OUTPUT_SUPPRESSION"
 
+    # Remove all containers that are using the image
+    docker rm "$(docker ps -a -q --filter ancestor="$image_name")" "$OUTPUT_SUPPRESSION"
+
+    # Remove the image
+    docker rmi "$image_name" "$OUTPUT_SUPPRESSION"
+  }
+
+  customize_image_name () {
     # Customize the new image name?
     RESPONSE=$IMAGE_NAME
     if [ "$RESPONSE" == "" ]; then
@@ -144,8 +181,77 @@ pre_installation_fun_client () {
     else
       IMAGE_NAME="$RESPONSE"
     fi
+  }
 
-    echo "      The name {$IMAGE_NAME} has been defined for your new image."
+  # Create a new image?
+  RESPONSE="$BUILD_CACHE"
+  if [ "$RESPONSE" == "" ]
+  then
+    echo
+    read -rp "   Do you want to use an image from a previous installation? (\"y/N\") >>> " RESPONSE
+  fi
+  if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]
+  then
+    echo
+    echo "      A new image/installation will be done..."
+
+    BUILD_CACHE="--no-cache"
+
+    customize_image_name
+
+    image_exists "$IMAGE_NAME"
+
+    if [ "$IMAGE_EXISTS" == "TRUE" ]; then
+      NO_CONFLICT="FALSE"
+
+      echo "      ⚠️  An installation image with the name \"$IMAGE_NAME\", which you defined
+         for this new installation, already exists!"
+      echo
+      echo "      To ensure that no crashes occur while creating this new image, choose one
+      of the options below."
+      echo
+      echo "      [1] SET A DIFFERENT NAME"
+      echo "      [2] REMOVE EXISTING IMAGE"
+      echo "      [3] REMOVE ALL IMAGES & CONTAINERS"
+      echo
+
+      read -rp "      Enter your choice (1, 2 or 3): " OPTION
+
+      while true; do
+          case $OPTION in
+              1)
+                  customize_image_name
+                  image_exists "$IMAGE_NAME"
+
+                  if [ "$IMAGE_EXISTS" == "FALSE" ]; then
+                    NO_CONFLICT="TRUE"
+                  fi
+
+                  break
+                  ;;
+              2)
+                  remove_docker_image "$IMAGE_NAME"
+                  NO_CONFLICT="TRUE"
+                  break
+                  ;;
+              3)
+                  ./scripts/utils/destroy-all-containers-and-images.sh "$OUTPUT_SUPPRESSION" &
+                  NO_CONFLICT="TRUE"
+                  break
+                  ;;
+              *)
+                  echo
+                  echo "      ❌ Invalid Input. Enter a your choice (1, 2 or 3)"
+                  echo
+                  read -rp "      Enter your choice (1, 2 or 3): " OPTION
+                  ;;
+          esac
+      done
+    fi
+
+    if [[ "$NO_CONFLICT" == "TRUE" ||  "$IMAGE_EXISTS" == "FALSE" ]]; then
+      echo "      The name {$IMAGE_NAME} has been defined for your new image."
+    fi
   else
     BUILD_CACHE=""
 
