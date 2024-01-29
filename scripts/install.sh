@@ -529,7 +529,7 @@ fi
 
 docker_create_image () {
   FUN_FRONTEND_COMMAND=""
-  FILEBROWSER_COMMAND=""
+  FILEBROWSER_COMMAND="cd /root && filebrowser -p $FILEBROWSER_PORT -r shared"
 
   if [ "$FUN_CLIENT_AUTO_START_EVERY_TIME" == "TRUE" ]; then
     FUN_CLIENT_COMMAND="conda activate funttastic && cd $FUN_CLIENT_APP_PATH_PREFIX && python app.py $OUTPUT_SUPPRESSION &"

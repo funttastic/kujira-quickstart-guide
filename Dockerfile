@@ -364,14 +364,6 @@ EOF
 RUN <<-EOF
 	set -ex
 
-	filebrowser -p $FILEBROWSER_PORT -r /root/shared
-
-	set +ex
-EOF
-
-RUN <<-EOF
-	set -ex
-
 	if [ "$LOCK_APT" == "TRUE" ]
 	then
 		apt autoremove -y
