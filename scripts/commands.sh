@@ -176,7 +176,7 @@ wallet() {
    [or type 'back' to return to menu] >>> " mnemonic
 
       if [ "$mnemonic" == 'back' ]; then
-        echo -e "\n\n   ℹ️ Returning to the menu..."
+        echo -e "\n\n      ℹ️  Returning to the menu..."
         echo
         break
       fi
@@ -207,7 +207,7 @@ wallet() {
    [or type 'back' to return to menu] >>> " public_key
 
       if [ "$public_key" == 'back' ]; then
-        echo -e "\n   ℹ️ Returning to the menu..."
+        echo -e "\n      ℹ️  Returning to the menu..."
         echo
         break
       fi
