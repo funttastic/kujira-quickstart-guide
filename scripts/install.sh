@@ -57,6 +57,56 @@ default_values_info () {
   echo
 }
 
+pre_installation_fun_frontend () {
+  echo
+#  clear
+#  echo
+#  echo
+#  echo "   ==============    FUNTTASTIC FRONTEND INSTALLATION SETTINGS    ============="
+#  echo
+#
+#  default_values_info
+#
+#  RESPONSE="$FUN_FRONTEND_PORT"
+#  if [ "$RESPONSE" == "" ]
+#  then
+#    echo
+#    read -rp "   Enter a port to expose the Funttastic Frontend from the instance (default = \"50000\") >>> " RESPONSE
+#  fi
+#
+#  if [ "$RESPONSE" == "" ]
+#  then
+#    FUN_FRONTEND_PORT=50000
+#  else
+#    FUN_FRONTEND_PORT=$RESPONSE
+#  fi
+}
+
+pre_installation_filebrowser () {
+  echo
+#  clear
+#  echo
+#  echo
+#  echo "   ==============    FILEBROWSER INSTALLATION SETTINGS    ============="
+#  echo
+#
+#  default_values_info
+#
+#  RESPONSE="$FILEBROWSER_PORT"
+#  if [ "$RESPONSE" == "" ]
+#  then
+#    echo
+#    read -rp "   Enter a port to expose the FileBrowser from the instance (default = \"50002\") >>> " RESPONSE
+#  fi
+#
+#  if [ "$RESPONSE" == "" ]
+#  then
+#    FILEBROWSER_PORT=50002
+#  else
+#    FILEBROWSER_PORT=$RESPONSE
+#  fi
+}
+
 pre_installation_fun_client () {
   clear
   echo
@@ -407,12 +457,20 @@ fi
 if [ "$CUSTOMIZE" == "--customize" ]
 then
   CHOICE="ALL"
+  pre_installation_fun_frontend
+  pre_installation_filebrowser
   pre_installation_fun_client
   pre_installation_hb_gateway
   pre_installation_hb_client
   pre_installation_lock_apt
 else
   # Default settings to install Funttastic Client, Hummingbot Gateway and Hummingbot Client
+
+  # Funttastic Frontend Settings
+  FUN_FRONTEND_PORT=${FUN_FRONTEND_PORT:-50000}
+
+  # Filebrowser Settings
+  FILEBROWSER_PORT=${FILEBROWSER_PORT:-50002}
 
   # Funttastic Client Settings
   FUN_CLIENT_PORT=${FUN_CLIENT_PORT:-50001}
@@ -436,8 +494,6 @@ else
   IMAGE_NAME="fun-kuji-hb"
   CONTAINER_NAME="$IMAGE_NAME"
   BUILD_CACHE=${BUILD_CACHE:-"--no-cache"}
-  FUN_FRONTEND_PORT=${FUN_FRONTEND_PORT:-50000}=
-  FILEBROWSER_PORT=${FILEBROWSER_PORT:-50002}
   SSH_PUBLIC_KEY="$SSH_PUBLIC_KEY"
   SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY"
   TAG=${TAG:-"latest"}
@@ -472,6 +528,9 @@ if [ -n "$RANDOM_PASSPHRASE" ]; then
 fi
 
 docker_create_image () {
+  FUN_FRONTEND_COMMAND=""
+  FILEBROWSER_COMMAND=""
+
   if [ "$FUN_CLIENT_AUTO_START_EVERY_TIME" == "TRUE" ]; then
     FUN_CLIENT_COMMAND="conda activate funttastic && cd $FUN_CLIENT_APP_PATH_PREFIX && python app.py $OUTPUT_SUPPRESSION &"
   fi
@@ -499,6 +558,8 @@ docker_create_image () {
     --build-arg HB_GATEWAY_REPOSITORY_BRANCH="$HB_GATEWAY_REPOSITORY_BRANCH" \
     --build-arg HOST_USER_GROUP="$GROUP" \
     --build-arg LOCK_APT="$LOCK_APT" \
+    --build-arg FUN_FRONTEND_COMMAND="$FUN_FRONTEND_COMMAND" \
+    --build-arg FILEBROWSER_COMMAND="$FILEBROWSER_COMMAND" \
     --build-arg FUN_CLIENT_COMMAND="$FUN_CLIENT_COMMAND" \
     --build-arg HB_GATEWAY_COMMAND="$HB_GATEWAY_COMMAND" \
     --build-arg HB_CLIENT_COMMAND="$HB_CLIENT_COMMAND" \
@@ -527,6 +588,8 @@ docker_create_container () {
     -e HB_CLIENT_PMM_SCRIPTS_FOLDER="/root/hummingbot/client/pmm_scripts" \
     -e HB_GATEWAY_CONF_FOLDER="/root/hummingbot/gateway/conf" \
     -e HB_GATEWAY_LOGS_FOLDER="/root/hummingbot/gateway/logs" \
+    -e FUN_FRONTEND_PORT="$FUN_FRONTEND_PORT" \
+    -e FILEBROWSER_PORT="$FILEBROWSER_PORT" \
     -e FUN_CLIENT_PORT="$FUN_CLIENT_PORT" \
     -e HB_GATEWAY_PORT="$HB_GATEWAY_PORT" \
     --entrypoint="$ENTRYPOINT" \
