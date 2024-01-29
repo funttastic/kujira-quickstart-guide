@@ -13,6 +13,9 @@ HB_GATEWAY_APP_PATH_PREFIX="/root/hummingbot/gateway"
 HB_CLIENT_APP_PATH_PREFIX="/root/hummingbot/client"
 OUTPUT_SUPPRESSION_MODE="stdout+stderr"
 OUTPUT_SUPPRESSION=""
+UNIFIED_IMAGE_NAME="fun-kuji-hb"
+UNIFIED_IMAGE_NAME="fun-kuji-hb"
+UNIFIED_BUILD_CACHE="--no-cache"
 
 if [ "$OUTPUT_SUPPRESSION_MODE" == "stdout+stderr" ]
   then
@@ -398,7 +401,7 @@ then
   echo
 elif [[ "$RESPONSE" == "back" ]]; then
   clear
-  ./all/install.sh
+  ./install.sh
   exit 0
 else
   CUSTOMIZE="--customize"
@@ -535,7 +538,7 @@ docker_create_container () {
     "$UNIFIED_IMAGE_NAME":$TAG
 }
 
-post_installation_fun_client () {
+post_installation () {
   if [[ "$FUN_CLIENT_AUTO_START" == "TRUE" && "$FUN_CLIENT_AUTO_START_EVERY_TIME" == "FALSE" ]]; then
     docker exec -it "$FUN_CLIENT_CONTAINER_NAME" /bin/bash -lc "conda activate funttastic && cd $FUN_CLIENT_APP_PATH_PREFIX && python app.py $OUTPUT_SUPPRESSION &"
   fi
@@ -552,10 +555,7 @@ post_installation_fun_client () {
 installation () {
   docker_create_image
   docker_create_container
-
-  post_installation_fun_client
-  post_installation_hb_gateway
-  post_installation_hb_client
+  post_installation
 }
 
 execute_installation () {
