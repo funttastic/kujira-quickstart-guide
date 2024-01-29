@@ -116,35 +116,55 @@ pre_installation_fun_client () {
 
   default_values_info
 
-  # Customize the image to be used?
-  RESPONSE=$IMAGE_NAME
-  if [ "$RESPONSE" == "" ]; then
-    echo
-    read -rp "   Enter a name for your new image you want to use (default = \"fun-kuji-hb\") >>> " RESPONSE
-  fi
-  echo
-  if [ "$RESPONSE" == "" ]
-  then
-    IMAGE_NAME="fun-kuji-hb"
-  else
-    IMAGE_NAME="$RESPONSE"
-  fi
-
   # Create a new image?
   RESPONSE="$BUILD_CACHE"
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -rp "   Do you want to use an existing image (\"y/N\") >>> " RESPONSE
+    read -rp "   Do you want to use an image from a previous installation? (\"y/N\") >>> " RESPONSE
   fi
   if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]
   then
     echo
-    echo "      A new image will be created..."
+    echo "      A new image/installation will be done..."
 
     BUILD_CACHE="--no-cache"
+
+    # Customize the new image name?
+    RESPONSE=$IMAGE_NAME
+    if [ "$RESPONSE" == "" ]; then
+      echo
+      read -rp "   Enter a name for your new installation image (default = \"fun-kuji-hb\") >>> " RESPONSE
+    fi
+    echo
+
+    if [ "$RESPONSE" == "" ]
+    then
+      IMAGE_NAME="fun-kuji-hb"
+    else
+      IMAGE_NAME="$RESPONSE"
+    fi
+
+    echo "      The name {$IMAGE_NAME} has been defined for your new image."
   else
     BUILD_CACHE=""
+
+    RESPONSE=$IMAGE_NAME
+    if [ "$RESPONSE" == "" ]; then
+      echo
+      read -rp "   Which image do you want to reuse? (default = \"fun-kuji-hb\") >>> " RESPONSE
+    fi
+
+    if [ "$RESPONSE" == "" ]
+    then
+      IMAGE_NAME="fun-kuji-hb"
+    else
+      IMAGE_NAME="$RESPONSE"
+    fi
+
+    echo
+    echo "      The image {$IMAGE_NAME} will be reused.
+      A new image will not be created, just a new container."
   fi
 
   # Create a new container?
@@ -152,7 +172,7 @@ pre_installation_fun_client () {
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -rp "   Enter a name for your new instance\/container (default = \"fun-kuji-hb\") >>> " RESPONSE
+    read -rp "   Enter a name for your new instance/container (default = \"fun-kuji-hb\") >>> " RESPONSE
   fi
   if [ "$RESPONSE" == "" ]
   then
@@ -161,21 +181,49 @@ pre_installation_fun_client () {
     CONTAINER_NAME=$RESPONSE
   fi
 
+  echo
+  echo "      The name {$CONTAINER_NAME} has been defined for your new instance/container."
+
   # Prompt the user for the passphrase to encrypt the certificates
   while true; do
+    echo
+    read -s -rp "   Enter a passphrase to encrypt the certificates with at least $MIN_PASSPHRASE_LENGTH characters >>> " DEFINED_PASSPHRASE
+    echo
+    if [ -z "$DEFINED_PASSPHRASE" ] || [ ${#DEFINED_PASSPHRASE} -lt "$MIN_PASSPHRASE_LENGTH" ]; then
       echo
-      read -s -rp "   Enter a passphrase to encrypt the certificates with at least $MIN_PASSPHRASE_LENGTH characters >>> " DEFINED_PASSPHRASE
-      if [ -z "$DEFINED_PASSPHRASE" ] || [ ${#DEFINED_PASSPHRASE} -lt "$MIN_PASSPHRASE_LENGTH" ]; then
+      echo "      Weak passphrase, please try again."
+    else
+      while true; do
+        echo
+        echo "   Please, repeat the passphrase. Type \"see-pass\" to see the previously entered passphrase."
+        echo
+        read -s -rp "   >>> " REPEATED_PASSPHRASE
+        if [ "$REPEATED_PASSPHRASE" = "see-pass" ]; then
+          echo "$DEFINED_PASSPHRASE"
+          sleep 3
+          # Move cursor up one line and overwrite with "   >>> "
+          tput cuu 1
+          tput cuu 1
+          tput cuu 1
+          tput cuu 1
+          tput ed
+#          echo -e "\r   >>> $(printf ' %.0s' {1..80})"
+        elif [ "$REPEATED_PASSPHRASE" = "$DEFINED_PASSPHRASE" ]; then
+          tput cuu 1
           echo
-          echo
-          echo "      Weak passphrase, please try again."
-      else
-          echo
+          echo -e "\r      Perfect, the passphrase has been set successfully.$(printf ' %.0s' {1..20})"
           break
-      fi
+        else
+          tput cuu 1
+          echo
+          echo -e "\r      Passphrases do not match, please try again.$(printf ' %.0s' {1..20})"
+        fi
+      done
+      break
+    fi
   done
 
-  # Exposed port?
+  # Expose which port?
   RESPONSE="$FUN_CLIENT_PORT"
   if [ "$RESPONSE" == "" ]
   then
@@ -316,12 +364,14 @@ pre_installation_hb_gateway () {
     echo
     read -rp "   Do you want to expose the Gateway port from the instance?
    The recommended option is \"No\", but if you choose \"No\",
-   you will not be able to make calls directly to the Gateway. (\"y/N\") >>> " RESPONSE
+   you will not be able to make calls directly to the Gateway."
+    echo
+    read -rp  "   (\"y/N\") >>> " RESPONSE
   fi
   if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "No" || "$RESPONSE" == "no" || "$RESPONSE" == "" ]]; then
     echo
-    echo "      The Gateway port will not be exposed from the instance, only Funttastic Client and
-      Hummingbot Client will be able to make calls to it from within the container."
+    echo "   |  The Gateway port will not be exposed from the instance, only Funttastic Client and
+   |  Hummingbot Client will be able to make calls to it from within the container."
     EXPOSE_HB_GATEWAY_PORT="FALSE"
   else
     EXPOSE_HB_GATEWAY_PORT="TRUE"
@@ -726,12 +776,18 @@ if [[ "$CUSTOMIZE" == "--customize" &&  ! "$NOT_IMPLEMENTED" ]]
 then
   clear
 
+  if [ "$BUILD_CACHE" == "--no-cache" ]; then
+      REUSE_IMAGE="No "
+  else
+      REUSE_IMAGE="Yes"
+  fi
+
   echo
   echo "ℹ️  Confirm below if the common settings are correct:"
   echo
   printf "%25s %5s\n" "Image:"              	"$IMAGE_NAME"
   printf "%25s %5s\n" "Instance:"        			"$CONTAINER_NAME"
-  printf "%25s %5s\n" "Reuse image?:"    		  "$BUILD_CACHE"
+  printf "%25s %3s\n" "Reuse image:"    		  "$REUSE_IMAGE"
   printf "%25s %5s\n" "Version:"              "$TAG"
   printf "%25s %5s\n" "Entrypoint:"    				"$ENTRYPOINT"
   echo
@@ -750,18 +806,17 @@ then
   echo
   printf "%25s %5s\n" "Repository url:"       "$HB_CLIENT_REPOSITORY_URL"
   printf "%25s %5s\n" "Repository branch:"    "$HB_CLIENT_REPOSITORY_BRANCH"
-  printf "%25s %5s\n" "Reuse image?:"    		  "$HB_CLIENT_BUILD_CACHE"
   printf "%25s %3s\n" "Autostart:"    		    "$HB_CLIENT_AUTO_START"
   echo
 
   echo
   echo "ℹ️  Confirm below if the Hummingbot Gateway instance and its folders are correct:"
   echo
-  if [ ! "$EXPOSE_HB_GATEWAY_PORT" == "TRUE" ]; then
-    printf "%25s %4s\n" "Exposed port:"		    "$HB_GATEWAY_PORT"
-  fi
   printf "%25s %5s\n" "Repository url:"       "$HB_GATEWAY_REPOSITORY_URL"
   printf "%25s %5s\n" "Repository branch:"    "$HB_GATEWAY_REPOSITORY_BRANCH"
+  if [ "$EXPOSE_HB_GATEWAY_PORT" == "TRUE" ]; then
+    printf "%25s %4s\n" "Exposed port:"					"$HB_GATEWAY_PORT"
+  fi
   printf "%25s %3s\n" "Autostart:"    		    "$HB_GATEWAY_AUTO_START"
   echo
 
