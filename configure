@@ -1,5 +1,11 @@
 #!/bin/bash
 
+more_information(){
+  echo "   For more information about the FUNTTASTIC CLIENT, please visit:"
+  echo
+  echo "      https://www.funttastic.com/partners/kujira"
+}
+
 choose() {
 		clear
     echo
@@ -13,9 +19,7 @@ choose() {
     echo
     echo "   [exit] EXIT"
     echo
-    echo "   For more information about the FUNTTASTIC CLIENT, please visit:"
-    echo
-    echo "         https://www.funttastic.com/partners/kujira"
+    more_information
     echo
 
     read -p "   Enter your choice (1, 2, 3, or exit): " CHOICE
@@ -34,17 +38,18 @@ choose() {
                 ./scripts/commands.sh
                 break
                 ;;
-            "exit")
+              "exit")
+                clear
                 echo
+                echo "      Feel free to come back whenever you want."
                 echo
-                echo "      The script will close automatically in 3 seconds..."
+                more_information
                 echo
-                sleep 3
                 exit 0
                 ;;
             *)
                 echo
-                echo "   [!] Invalid Input. Enter a your choice (1, 2, 3) or type exit."
+                echo "      ❌ Invalid Input. Enter a your choice (1, 2, 3) or type exit."
                 echo
                 read -p "   Enter your choice (1, 2, 3, or exit): " CHOICE
                 ;;
