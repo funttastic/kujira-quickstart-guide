@@ -173,7 +173,7 @@ choose() {
     echo
     echo "   =====================     DOCKER CONTAINERS RESTART     ====================="
     echo
-    echo "   CHOOSE WHICH CONTAINERS AND SERVICES YOU WOULD LIKE TO RESTART:"
+    echo "   CHOOSE WHICH SERVICES YOU WOULD LIKE TO RESTART:"
     echo
     echo "   [1] ALL"
     echo "   [2] FUNTTASTIC CLIENT"
