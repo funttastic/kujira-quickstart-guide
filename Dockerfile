@@ -542,4 +542,4 @@ RUN <<-EOF
 	set +ex
 EOF
 
-CMD ["start"]
+CMD ["/bin/bash", "-c", "start"]
