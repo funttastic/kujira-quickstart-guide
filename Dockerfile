@@ -32,7 +32,8 @@ ENV FILEBROWSER_COMMAND=$FILEBROWSER_COMMAND
 ENV FILEBROWSER_PORT=${FILEBROWSER_PORT:-50002}
 
 EXPOSE $FUN_CLIENT_PORT
-#EXPOSE $HB_GATEWAY_PORT
+EXPOSE $HB_GATEWAY_PORT
+EXPOSE $FILEBROWSER_PORT
 
 WORKDIR /root
 
@@ -481,45 +482,45 @@ source /root/.bashrc
 set +ex
 EOF
 
-#RUN <<-EOF
-#	set -ex
-#
-#	mkdir -p \
-#		shared/common \
-#		shared/funttastic/client \
-#		shared/hummingot/client \
-#		shared/hummingbot/gateway
-#
-#	mv funttastic/client/resources/certificates shared/common/
-#	rm -rf hummingbot/client/certs
-#	rm -rf hummingbot/gateway/certs
-#	ln -s shared/common/certificates funttastic/client/resources/certificates
-#	ln -s shared/common/certificates hummingbot/client/certs
-#	ln -s shared/common/certificates hummingbot/gateway/certs
-#
-#	mv funttastic/client/resources shared/funttastic/client/
-#	ln -s shared/funttastic/client/resources funttastic/client/resources
-#
-#  mv hummingbot/gateway/db shared/hummingbot/gateway/
-#  mv hummingbot/gateway/conf shared/hummingbot/gateway/
-#  mv hummingbot/gateway/logs shared/hummingbot/gateway/
-#  ln -s shared/hummingbot/gateway/db humminbot/gateway/db
-#  ln -s shared/hummingbot/gateway/conf humminbot/gateway/conf
-#  ln -s shared/hummingbot/gateway/logs humminbot/gateway/logs
-#
-#  mv hummingbot/client/conf shared/hummingbot/client/
-#  mv hummingbot/client/logs shared/hummingbot/client/
-#  mv hummingbot/client/data shared/hummingbot/client/
-#  mv hummingbot/client/scripts shared/hummingbot/client/
-#  mv hummingbot/client/pmm_scripts shared/hummingbot/client/
-#  ln -s shared/hummingbot/client/conf hummingbot/client/conf
-#  ln -s shared/hummingbot/client/logs hummingbot/client/logs
-#  ln -s shared/hummingbot/client/data hummingbot/client/data
-#  ln -s shared/hummingbot/client/scripts hummingbot/client/scripts
-#  ln -s shared/hummingbot/client/pmm_scripts hummingbot/client/pmm_scripts
-#
-#	set +ex
-#EOF
+RUN <<-EOF
+	set -ex
+
+	mkdir -p \
+		/root/shared/common \
+		/root/shared/funttastic/client \
+		/root/shared/hummingbot/client \
+		/root/shared/hummingbot/gateway
+
+	mv /root/funttastic/client/resources/certificates /root/shared/common/
+	rm -rf /root/hummingbot/client/certs
+	rm -rf /root/hummingbot/gateway/certs
+	ln -s /root/shared/common/certificates /root/funttastic/client/resources/certificates
+	ln -s /root/shared/common/certificates /root/hummingbot/client/certs
+	ln -s /root/shared/common/certificates /root/hummingbot/gateway/certs
+
+	mv /root/funttastic/client/resources /root/shared/funttastic/client/
+	ln -s /root/shared/funttastic/client/resources /root/funttastic/client/resources
+
+  mv /root/hummingbot/gateway/db /root/shared/hummingbot/gateway/
+  mv /root/hummingbot/gateway/conf /root/shared/hummingbot/gateway/
+  mv /root/hummingbot/gateway/logs /root/shared/hummingbot/gateway/
+  ln -s /root/shared/hummingbot/gateway/db /root/hummingbot/gateway/db
+  ln -s /root/shared/hummingbot/gateway/conf /root/hummingbot/gateway/conf
+  ln -s /root/shared/hummingbot/gateway/logs /root/hummingbot/gateway/logs
+
+  mv /root/hummingbot/client/conf /root/shared/hummingbot/client/
+  mv /root/hummingbot/client/logs /root/shared/hummingbot/client/
+  mv /root/hummingbot/client/data /root/shared/hummingbot/client/
+  mv /root/hummingbot/client/scripts /root/shared/hummingbot/client/
+  mv /root/hummingbot/client/pmm_scripts /root/shared/hummingbot/client/
+  ln -s /root/shared/hummingbot/client/conf /root/hummingbot/client/conf
+  ln -s /root/shared/hummingbot/client/logs /root/hummingbot/client/logs
+  ln -s /root/shared/hummingbot/client/data /root/hummingbot/client/data
+  ln -s /root/shared/hummingbot/client/scripts /root/hummingbot/client/scripts
+  ln -s /root/shared/hummingbot/client/pmm_scripts /root/hummingbot/client/pmm_scripts
+
+	set +ex
+EOF
 
 RUN <<-EOF
 	set -ex
