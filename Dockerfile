@@ -332,7 +332,7 @@ start_fun_client_frontend() {
 }
 
 start_filebrowser() {
-  cd /root && filebrowser -p "\${FILEBROWSER_PORT:-50002}" -r shared > /dev/null 2>&1 &
+  cd /root && filebrowser -p ${FILEBROWSER_PORT:-50002} -r shared > /dev/null 2>&1 &
 }
 
 start_fun_client_api() {
