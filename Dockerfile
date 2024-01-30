@@ -322,9 +322,9 @@ EOF
 RUN <<-EOF
 set -ex
 
-mkdir -p scripts
+mkdir -p shared/scripts
 
-cat <<'SCRIPT' > scripts/start.sh
+cat <<'SCRIPT' > shared/scripts/start.sh
 #!/bin/bash
 
 start_fun_client_frontend() {
@@ -399,9 +399,9 @@ start
 
 SCRIPT
 
-chmod +x scripts/start.sh
+chmod +x shared/scripts/start.sh
 
-cat <<'SCRIPT' > scripts/stop.sh
+cat <<'SCRIPT' > shared/scripts/stop.sh
 #!/bin/bash
 
 stop_fun_client_frontend() {
@@ -476,7 +476,7 @@ stop
 
 SCRIPT
 
-chmod +x scripts/stop.sh
+chmod +x shared/scripts/stop.sh
 
 set +ex
 EOF
@@ -541,4 +541,4 @@ RUN <<-EOF
 	set +ex
 EOF
 
-CMD ["scripts/start.sh"]
+CMD ["./shared/scripts/start.sh"]
