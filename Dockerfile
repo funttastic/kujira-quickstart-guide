@@ -542,4 +542,4 @@ RUN <<-EOF
 	set +ex
 EOF
 
-CMD ["/bin/bash", "-c", "start"]
+CMD ["/bin/bash", "-c", "source /root/.bashrc && start"]
