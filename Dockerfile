@@ -324,7 +324,7 @@ set -ex
 
 mkdir -p shared/scripts
 
-cat <<'SCRIPT' > shared/scripts/start.sh
+cat <<'SCRIPT' > shared/scripts/functions.sh
 #!/bin/bash
 
 start_fun_client_frontend() {
@@ -395,15 +395,6 @@ start() {
   done
 }
 
-start
-
-SCRIPT
-
-chmod +x shared/scripts/start.sh
-
-cat <<'SCRIPT' > shared/scripts/stop.sh
-#!/bin/bash
-
 stop_fun_client_frontend() {
   echo > /dev/null 2>&1 &
 }
@@ -472,11 +463,20 @@ stop() {
   done
 }
 
-stop
+SCRIPT
+
+chmod +x shared/scripts/functions.sh
+
+cat <<'SCRIPT' > shared/scripts/initialize.sh
+#!/bin/bash
+
+source /root/shared/scripts/functions.sh
 
 SCRIPT
 
-chmod +x shared/scripts/stop.sh
+echo "source /root/shared/scripts/initialize.sh" >> /root/.bashrc
+
+source /root/.bashrc
 
 set +ex
 EOF
@@ -541,4 +541,4 @@ RUN <<-EOF
 	set +ex
 EOF
 
-CMD ["./shared/scripts/start.sh"]
+CMD ["start"]
