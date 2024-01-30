@@ -660,7 +660,7 @@ else
   SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY"
   TAG=${TAG:-"latest"}
   ENTRYPOINT=${ENTRYPOINT:-""}
-#  ENTRYPOINT=${ENTRYPOINT:-"--entrypoint=\"$ENTRYPOINT\" \\"}
+#  ENTRYPOINT=${ENTRYPOINT:-"--entrypoint=\"source /root/.bashrc && start\""}
   LOCK_APT=${LOCK_APT:-"FALSE"}
 
 	RANDOM_PASSPHRASE=$(generate_passphrase 32)
@@ -755,7 +755,7 @@ docker_create_container () {
     -e FUN_CLIENT_COMMAND="$FUN_CLIENT_COMMAND" \
     -e HB_GATEWAY_COMMAND="$HB_GATEWAY_COMMAND" \
     -e HB_CLIENT_COMMAND="$HB_CLIENT_COMMAND" \
-    $ENTRYPOINT
+    $ENTRYPOINT \
     "$IMAGE_NAME":$TAG
 }
 
