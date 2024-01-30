@@ -325,7 +325,7 @@ set -ex
 mkdir -p scripts
 
 cat <<'SCRIPT' > scripts/start.sh
-#!/bin/sh
+#!/bin/bash
 
 start_fun_client_frontend() {
   echo > /dev/null 2>&1 &
@@ -367,21 +367,27 @@ start() {
     case "$1" in
       --start_all)
         start_all
+        return
         ;;
       --start_fun_client_frontend)
         start_fun_client_frontend
+        return
         ;;
       --start_filebrowser)
         start_filebrowser
+        return
         ;;
       --start_fun_client_api)
         start_fun_client_api
+        return
         ;;
       --start_hb_gateway)
         start_hb_gateway
+        return
         ;;
       --start_hb_client)
         start_hb_client
+        return
         ;;
       *)
     esac
@@ -389,12 +395,14 @@ start() {
   done
 }
 
+start
+
 SCRIPT
 
 chmod +x scripts/start.sh
 
 cat <<'SCRIPT' > scripts/stop.sh
-#!/bin/sh
+#!/bin/bash
 
 stop_fun_client_frontend() {
   echo > /dev/null 2>&1 &
@@ -436,27 +444,35 @@ stop() {
     case "$1" in
       --stop_all)
         stop_all
+        return
         ;;
       --stop_fun_client_frontend)
         stop_fun_client_frontend
+        return
         ;;
       --stop_filebrowser)
         stop_filebrowser
+        return
         ;;
       --stop_fun_client_api)
         stop_fun_client_api
+        return
         ;;
       --stop_hb_gateway)
         stop_hb_gateway
+        return
         ;;
       --stop_hb_client)
         stop_hb_client
+        return
         ;;
       *)
     esac
     shift
   done
 }
+
+stop
 
 SCRIPT
 
@@ -510,7 +526,7 @@ RUN <<-EOF
 
 	if [ "$LOCK_APT" == "TRUE" ]
 	then
-		apt autoremove -y
+		apt autore:wqmove -y
 
 		apt clean autoclean
 
