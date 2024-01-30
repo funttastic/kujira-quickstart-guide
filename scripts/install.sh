@@ -6,7 +6,7 @@ GROUP=$(id -gn)
 TAG="latest"
 CHOICE=""
 MIN_PASSPHRASE_LENGTH=4
-ENTRYPOINT="/bin/bash"
+ENTRYPOINT=""
 NETWORK="host"
 FUN_CLIENT_APP_PATH_PREFIX="/root/funttastic/client"
 HB_GATEWAY_APP_PATH_PREFIX="/root/hummingbot/gateway"
@@ -659,7 +659,8 @@ else
   SSH_PUBLIC_KEY="$SSH_PUBLIC_KEY"
   SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY"
   TAG=${TAG:-"latest"}
-  ENTRYPOINT=${ENTRYPOINT:-"/bin/bash"}
+  ENTRYPOINT=${ENTRYPOINT:-""}
+#  ENTRYPOINT=${ENTRYPOINT:-"--entrypoint=\"$ENTRYPOINT\" \\"}
   LOCK_APT=${LOCK_APT:-"FALSE"}
 
 	RANDOM_PASSPHRASE=$(generate_passphrase 32)
@@ -754,7 +755,7 @@ docker_create_container () {
     -e FUN_CLIENT_COMMAND="$FUN_CLIENT_COMMAND" \
     -e HB_GATEWAY_COMMAND="$HB_GATEWAY_COMMAND" \
     -e HB_CLIENT_COMMAND="$HB_CLIENT_COMMAND" \
-    --entrypoint="$ENTRYPOINT" \
+    $ENTRYPOINT
     "$IMAGE_NAME":$TAG
 }
 
