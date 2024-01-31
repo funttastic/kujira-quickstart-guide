@@ -93,6 +93,80 @@ default_values_info () {
   echo
 }
 
+pre_installation_define_passphrase () {
+  clear
+  echo
+  echo
+  echo "   ================    PASSWORD & USERNAME SETTING PROCESS    ==============="
+  echo
+  echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+  echo "   |                                                     |"
+  echo "   |   ⚠️  It's important that your data remains secure,  |"
+  echo "   |      we need to set a password and an username.     |"
+  echo "   |                                                     |"
+  echo "   |   This password will be used for:                   |"
+  echo "   |                                                     |"
+  echo "   |      > Funttastic Client UI                         |"
+  echo "   |      > Funttastic Client (SSL Certificates)         |"
+  echo "   |      > FileBrowser                                  |"
+  echo "   |      > Hummingbot Client UI                         |"
+  echo "   |      > Hummingbot Gateway (SSL Certificates)        |"
+  echo "   |                                                     |"
+  echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+  echo
+
+  echo "   Let's get started!"
+
+  RESPONSE=$USER_NAME
+  if [ "$RESPONSE" == "" ]
+  then
+    echo
+    read -rp "   Enter a username you want to use (default = \"admin\") >>> " RESPONSE
+  fi
+  if [ "$RESPONSE" == "" ]
+  then
+    USER_NAME="admin"
+  else
+    USER_NAME="$RESPONSE"
+  fi
+
+  echo
+  echo "      ℹ️  The username was defined to \"$USER_NAME\""
+
+  while true; do
+    echo
+    read -s -rp "   Enter a passphrase with at least $MIN_PASSPHRASE_LENGTH characters >>> " DEFINED_PASSPHRASE
+    echo
+    if [ -z "$DEFINED_PASSPHRASE" ] || [ ${#DEFINED_PASSPHRASE} -lt "$MIN_PASSPHRASE_LENGTH" ]; then
+      echo
+      echo "      ⚠️  Weak passphrase, please try again."
+    else
+      while true; do
+        echo
+        echo "   Please, repeat the passphrase. Type \"see-pass\" to momentarily see the previously entered password."
+        echo
+        read -s -rp "   >>> " REPEATED_PASSPHRASE
+        if [ "$REPEATED_PASSPHRASE" = "see-pass" ]; then
+          echo "$DEFINED_PASSPHRASE"
+          sleep 3
+          tput cuu 4
+          tput ed
+        elif [ "$REPEATED_PASSPHRASE" = "$DEFINED_PASSPHRASE" ]; then
+          tput cuu 1
+          echo
+          echo -e "\r      ✅ Perfect, the passphrase has been set successfully.$(printf ' %.0s' {1..20})"
+          break
+        else
+          tput cuu 1
+          echo
+          echo -e "\r      ❌ Passphrases do not match, please try again.$(printf ' %.0s' {1..20})"
+        fi
+      done
+      break
+    fi
+  done
+}
+
 pre_installation_fun_frontend () {
   echo
 #  clear
@@ -289,45 +363,6 @@ pre_installation_fun_client () {
 
   echo
   echo "      The name {$CONTAINER_NAME} has been defined for your new instance/container."
-
-  # Prompt the user for the passphrase to encrypt the certificates
-  while true; do
-    echo
-    read -s -rp "   Enter a passphrase to encrypt the certificates with at least $MIN_PASSPHRASE_LENGTH characters >>> " DEFINED_PASSPHRASE
-    echo
-    if [ -z "$DEFINED_PASSPHRASE" ] || [ ${#DEFINED_PASSPHRASE} -lt "$MIN_PASSPHRASE_LENGTH" ]; then
-      echo
-      echo "      ⚠️  Weak passphrase, please try again."
-    else
-      while true; do
-        echo
-        echo "   Please, repeat the passphrase. Type \"see-pass\" to see the previously entered passphrase."
-        echo
-        read -s -rp "   >>> " REPEATED_PASSPHRASE
-        if [ "$REPEATED_PASSPHRASE" = "see-pass" ]; then
-          echo "$DEFINED_PASSPHRASE"
-          sleep 3
-          # Move cursor up one line and overwrite with "   >>> "
-          tput cuu 1
-          tput cuu 1
-          tput cuu 1
-          tput cuu 1
-          tput ed
-#          echo -e "\r   >>> $(printf ' %.0s' {1..80})"
-        elif [ "$REPEATED_PASSPHRASE" = "$DEFINED_PASSPHRASE" ]; then
-          tput cuu 1
-          echo
-          echo -e "\r      ✅ Perfect, the passphrase has been set successfully.$(printf ' %.0s' {1..20})"
-          break
-        else
-          tput cuu 1
-          echo
-          echo -e "\r      ❌ Passphrases do not match, please try again.$(printf ' %.0s' {1..20})"
-        fi
-      done
-      break
-    fi
-  done
 
   # Expose which port?
   RESPONSE="$FUN_CLIENT_PORT"
@@ -589,12 +624,13 @@ pre_installation_lock_apt () {
   fi
 }
 
+pre_installation_define_passphrase
+
 clear
 echo
 echo "   ============================     INSTALLATION OPTIONS     ==========================="
 echo
-echo "   Do you want to automate the entire process,
-   including setting a random passphrase? [Y/n]"
+echo "   Do you want to automate the entire process? [Y/n]"
 
 echo
 echo "ℹ️  Enter the value [back] to return to the main menu."
@@ -653,6 +689,7 @@ else
   EXPOSE_HB_GATEWAY_PORT=${EXPOSE_HB_GATEWAY_PORT:-"FALSE"}
 
   # Common Settings
+  USER_NAME=${USER_NAME:-"admin"}
   IMAGE_NAME="fun-kuji-hb"
   CONTAINER_NAME="$IMAGE_NAME"
   BUILD_CACHE=${BUILD_CACHE:-"--no-cache"}
@@ -663,30 +700,24 @@ else
 #  ENTRYPOINT=${ENTRYPOINT:-"--entrypoint=\"source /root/.bashrc && start\""}
   LOCK_APT=${LOCK_APT:-"FALSE"}
 
-	RANDOM_PASSPHRASE=$(generate_passphrase 32)
+#	RANDOM_PASSPHRASE=$(generate_passphrase 32)
 fi
-
-SELECTED_PASSPHRASE=${RANDOM_PASSPHRASE:-$DEFINED_PASSPHRASE}
 
 if [[ "$SSH_PUBLIC_KEY" && "$SSH_PRIVATE_KEY" ]]; then
   FUN_CLIENT_REPOSITORY_URL="git@github.com:funttastic/fun-hb-client.git"
 fi
 
-if [ -n "$RANDOM_PASSPHRASE" ]; then
-  echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-  echo "   |                                                                   |"
-  echo "   |   A new random passphrase will be saved in the file               |"
-  echo "   |                                                                   |"
-  echo "   |      temporary/random_passphrase.txt                              |"
-  echo "   |                                                                   |"
-  echo "   |   To access this file, use the FileBrowser at                     |"
-  echo "   |      https://localhost:50000/                                     |"
-  echo "   |   or                                                              |"
-  echo "   |      https://127.0.0.1:50000/                                     |"
-  echo "   |                                                                   |"
-  echo "   |   ⚠️  Copy the passphrase to a safe location and delete the file.  |"
-  echo "   |                                                                   |"
-  echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+if [ -z "$CUSTOMIZE" ]; then
+  echo "   ++++++++++++++++++++++++++++++++++++++++++++"
+  echo "   |                                          |"
+  echo "   |   To view and edit configuration files,  |"
+  echo "   |   use the FileBrowser at                 |"
+  echo "   |                                          |"
+  echo "   |      https://localhost:50000/            |"
+  echo "   |   or                                     |"
+  echo "   |      https://127.0.0.1:50000/            |"
+  echo "   |                                          |"
+  echo "   ++++++++++++++++++++++++++++++++++++++++++++"
   echo
 fi
 
@@ -696,7 +727,7 @@ docker_create_image () {
     BUILT=$(DOCKER_BUILDKIT=1 docker build \
     --build-arg SSH_PUBLIC_KEY="$SSH_PUBLIC_KEY" \
     --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" \
-    --build-arg HB_GATEWAY_PASSPHRASE="$SELECTED_PASSPHRASE" \
+    --build-arg HB_GATEWAY_PASSPHRASE="$DEFINED_PASSPHRASE" \
     --build-arg RANDOM_PASSPHRASE="$RANDOM_PASSPHRASE" \
     --build-arg FUN_CLIENT_REPOSITORY_URL="$FUN_CLIENT_REPOSITORY_URL" \
     --build-arg FUN_CLIENT_REPOSITORY_BRANCH="$FUN_CLIENT_REPOSITORY_BRANCH" \
@@ -785,7 +816,7 @@ execute_installation () {
         echo
         echo "   Installing:"
         echo
-        echo "     > Funttasstic Client"
+        echo "     > Funttastic Client"
         echo "     > Hummingbot Client"
         echo "     > Hummingbot Gateway"
         echo
