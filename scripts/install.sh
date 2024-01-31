@@ -96,23 +96,17 @@ default_values_info () {
 pre_installation_define_passphrase () {
   clear
   echo
-  echo
   echo "   ================    PASSWORD & USERNAME SETTING PROCESS    ==============="
   echo
-  echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-  echo "   |                                                     |"
-  echo "   |   ⚠️  It's important that your data remains secure,  |"
-  echo "   |      we need to set a password and an username.     |"
-  echo "   |                                                     |"
-  echo "   |   This password will be used for:                   |"
-  echo "   |                                                     |"
-  echo "   |      > Funttastic Client UI                         |"
-  echo "   |      > Funttastic Client (SSL Certificates)         |"
-  echo "   |      > FileBrowser                                  |"
-  echo "   |      > Hummingbot Client UI                         |"
-  echo "   |      > Hummingbot Gateway (SSL Certificates)        |"
-  echo "   |                                                     |"
-  echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+  echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+  echo "   |                                                                 |"
+  echo "   |  ⚠️  It's important that your data remains secure, so we need    |"
+  echo "   |     to set a password and an username.                          |"
+  echo "   |                                                                 |"
+  echo "   |  See the table presented at the end of the password definition  |"
+  echo "   |  process, where the password and username will be used.         |"
+  echo "   |                                                                 |"
+  echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
   echo
 
   echo "   Let's get started!"
@@ -165,6 +159,39 @@ pre_installation_define_passphrase () {
       break
     fi
   done
+
+  clear
+  echo
+  echo "   ================    PASSWORD & USERNAME SETTING PROCESS    ==============="
+  echo
+  echo "   _________________________________________________________________"
+  echo "   | SERVICE OR APPLICATION |  NEEDS PASSWORD  |  NEEDS USERNAME   |"
+  echo "   |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|"
+  echo "   |  Funttastic Client UI  |       Yes        |        Yes        |"
+  echo "   |  FileBrowser           |       Yes        |        Yes        |"
+  echo "   |  Hummingbot Client UI  |       Yes        |        No         |"
+  echo "   |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|"
+  echo "   |                                                               |"
+  echo "   |  This password is also used to create the SSL certificates    |"
+  echo "   |  used by Funttastic Client server, HB Gateway server and      |"
+  echo "   |  the HB Client, this last to communicate with the HB Gateway. |"
+  echo "   |                                                               |"
+  echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+
+
+  echo
+  read -s -n1 -rp "   Alright, I got it! Press any key to continue >>> "
+
+#  while true; do
+#      echo
+#      read -s -n1 -rp "   Alright, I got it! Press any key to continue >>> " RESPONSE
+#      case "$RESPONSE" in
+#          $'\e') ;; # ESC
+#          $'\177') ;; # DELETE
+#          $'\b') ;; # BACKSPACE
+#          *) break ;; # Any other key
+#      esac
+#  done
 }
 
 pre_installation_fun_frontend () {
