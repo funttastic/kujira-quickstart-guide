@@ -170,14 +170,8 @@ pre_installation_define_passphrase () {
   echo "   |  Funttastic Client UI  |       Yes        |        Yes        |"
   echo "   |  FileBrowser           |       Yes        |        Yes        |"
   echo "   |  Hummingbot Client UI  |       Yes        |        No         |"
-  echo "   |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|"
-  echo "   |                                                               |"
-  echo "   |  This password is also used to create the SSL certificates    |"
-  echo "   |  used by Funttastic Client server, HB Gateway server and      |"
-  echo "   |  the HB Client, this last to communicate with the HB Gateway. |"
-  echo "   |                                                               |"
-  echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-
+  echo "   |  SSL Certificates      |       Yes        |        No         |"
+  echo "   |_______________________________________________________________|"
 
   echo
   read -s -n1 -rp "   Alright, I got it! Press any key to continue >>> "
@@ -735,16 +729,14 @@ if [[ "$SSH_PUBLIC_KEY" && "$SSH_PRIVATE_KEY" ]]; then
 fi
 
 if [ -z "$CUSTOMIZE" ]; then
-  echo "   ++++++++++++++++++++++++++++++++++++++++++++"
-  echo "   |                                          |"
+  echo "   |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|"
   echo "   |   To view and edit configuration files,  |"
   echo "   |   use the FileBrowser at                 |"
   echo "   |                                          |"
-  echo "   |      https://localhost:50000/            |"
+  echo "   |      https://localhost:50002/            |"
   echo "   |   or                                     |"
-  echo "   |      https://127.0.0.1:50000/            |"
-  echo "   |                                          |"
-  echo "   ++++++++++++++++++++++++++++++++++++++++++++"
+  echo "   |      https://127.0.0.1:50002/            |"
+  echo "   |__________________________________________|"
   echo
 fi
 
