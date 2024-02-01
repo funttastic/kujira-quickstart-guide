@@ -400,31 +400,33 @@ pre_installation_fun_client () {
     FUN_CLIENT_PORT=$RESPONSE
   fi
 
-  RESPONSE="$FUN_CLIENT_REPOSITORY_URL"
-  if [ "$RESPONSE" == "" ]
-  then
-    echo
-    read -rp "   Enter the url from the repository to be cloned
-   (default = \"https://github.com/funttastic/fun-hb-client.git\") >>> " RESPONSE
-  fi
-  if [ "$RESPONSE" == "" ]
-  then
-    FUN_CLIENT_REPOSITORY_URL="https://github.com/funttastic/fun-hb-client.git"
-  else
-    FUN_CLIENT_REPOSITORY_URL="$RESPONSE"
-  fi
+  if [ "$BUILD_CACHE" == "--no-cache" ]; then
+    RESPONSE="$FUN_CLIENT_REPOSITORY_URL"
+    if [ "$RESPONSE" == "" ]
+    then
+      echo
+      read -rp "   Enter the url from the repository to be cloned
+     (default = \"https://github.com/funttastic/fun-hb-client.git\") >>> " RESPONSE
+    fi
+    if [ "$RESPONSE" == "" ]
+    then
+      FUN_CLIENT_REPOSITORY_URL="https://github.com/funttastic/fun-hb-client.git"
+    else
+      FUN_CLIENT_REPOSITORY_URL="$RESPONSE"
+    fi
 
-  RESPONSE="$FUN_CLIENT_REPOSITORY_BRANCH"
-  if [ "$RESPONSE" == "" ]
-  then
-    echo
-    read -rp "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
-  fi
-  if [ "$RESPONSE" == "" ]
-  then
-    FUN_CLIENT_REPOSITORY_BRANCH="community"
-  else
-    FUN_CLIENT_REPOSITORY_BRANCH="$RESPONSE"
+    RESPONSE="$FUN_CLIENT_REPOSITORY_BRANCH"
+    if [ "$RESPONSE" == "" ]
+    then
+      echo
+      read -rp "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
+    fi
+    if [ "$RESPONSE" == "" ]
+    then
+      FUN_CLIENT_REPOSITORY_BRANCH="community"
+    else
+      FUN_CLIENT_REPOSITORY_BRANCH="$RESPONSE"
+    fi
   fi
 
   RESPONSE="$FUN_CLIENT_AUTO_START"
@@ -469,38 +471,40 @@ pre_installation_hb_client () {
 
   default_values_info
 
-  RESPONSE="$HB_CLIENT_REPOSITORY_URL"
-  if [ "$RESPONSE" == "" ]
-  then
-    echo
-    read -rp "   Enter the url from the repository to be cloned
-   (default = \"https://github.com/Team-Kujira/hummingbot.git\") >>> " RESPONSE
-  fi
-  if [ "$RESPONSE" == "" ]
-  then
-    HB_CLIENT_REPOSITORY_URL="https://github.com/Team-Kujira/hummingbot.git"
-  else
-    HB_CLIENT_REPOSITORY_URL="$RESPONSE"
-  fi
+  if [ "$BUILD_CACHE" == "--no-cache" ]; then
+    RESPONSE="$HB_CLIENT_REPOSITORY_URL"
+    if [ "$RESPONSE" == "" ]
+    then
+      echo
+      read -rp "   Enter the url from the repository to be cloned
+     (default = \"https://github.com/Team-Kujira/hummingbot.git\") >>> " RESPONSE
+    fi
+    if [ "$RESPONSE" == "" ]
+    then
+      HB_CLIENT_REPOSITORY_URL="https://github.com/Team-Kujira/hummingbot.git"
+    else
+      HB_CLIENT_REPOSITORY_URL="$RESPONSE"
+    fi
 
-  RESPONSE="$HB_CLIENT_REPOSITORY_BRANCH"
-  if [ "$RESPONSE" == "" ]
-  then
-    echo
-    read -rp "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
-  fi
-  if [ "$RESPONSE" == "" ]
-  then
-    HB_CLIENT_REPOSITORY_BRANCH="community"
-  else
-    HB_CLIENT_REPOSITORY_BRANCH="$RESPONSE"
+    RESPONSE="$HB_CLIENT_REPOSITORY_BRANCH"
+    if [ "$RESPONSE" == "" ]
+    then
+      echo
+      read -rp "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
+    fi
+    if [ "$RESPONSE" == "" ]
+    then
+      HB_CLIENT_REPOSITORY_BRANCH="community"
+    else
+      HB_CLIENT_REPOSITORY_BRANCH="$RESPONSE"
+    fi
   fi
 
   RESPONSE="$HB_CLIENT_AUTO_START"
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -rp "   Do you want to start the app automatically after installation? (\"Y/n\") >>> " RESPONSE
+    read -rp "   Do you want to start the Hummingbot Client automatically after installation? (\"Y/n\") >>> " RESPONSE
   fi
   if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]
   then
@@ -554,44 +558,46 @@ pre_installation_hb_gateway () {
     fi
   fi
 
-  RESPONSE="$HB_GATEWAY_REPOSITORY_URL"
-  if [ "$RESPONSE" == "" ]
-  then
-    echo
-    read -rp "   Enter the url from the repository to be cloned
-   (default = \"https://github.com/Team-Kujira/gateway.git\") >>> " RESPONSE
-  fi
-  if [ "$RESPONSE" == "" ]
-  then
-    HB_GATEWAY_REPOSITORY_URL="https://github.com/Team-Kujira/gateway.git"
-  else
-    HB_GATEWAY_REPOSITORY_URL="$RESPONSE"
-  fi
+  if [ "$BUILD_CACHE" == "--no-cache" ]; then
+    RESPONSE="$HB_GATEWAY_REPOSITORY_URL"
+    if [ "$RESPONSE" == "" ]
+    then
+      echo
+      read -rp "   Enter the url from the repository to be cloned
+     (default = \"https://github.com/Team-Kujira/gateway.git\") >>> " RESPONSE
+    fi
+    if [ "$RESPONSE" == "" ]
+    then
+      HB_GATEWAY_REPOSITORY_URL="https://github.com/Team-Kujira/gateway.git"
+    else
+      HB_GATEWAY_REPOSITORY_URL="$RESPONSE"
+    fi
 
-  RESPONSE="$HB_GATEWAY_REPOSITORY_BRANCH"
-  if [ "$RESPONSE" == "" ]
-  then
-    echo
-    read -rp "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
-  fi
-  if [ "$RESPONSE" == "" ]
-  then
-    HB_GATEWAY_REPOSITORY_BRANCH="community"
-  else
-    HB_GATEWAY_REPOSITORY_BRANCH="$RESPONSE"
+    RESPONSE="$HB_GATEWAY_REPOSITORY_BRANCH"
+    if [ "$RESPONSE" == "" ]
+    then
+      echo
+      read -rp "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
+    fi
+    if [ "$RESPONSE" == "" ]
+    then
+      HB_GATEWAY_REPOSITORY_BRANCH="community"
+    else
+      HB_GATEWAY_REPOSITORY_BRANCH="$RESPONSE"
+    fi
   fi
 
   RESPONSE="$HB_GATEWAY_AUTO_START"
   if [ "$RESPONSE" == "" ]
   then
     echo
-    read -rp "   Do you want to start the server automatically after installation? (\"Y/n\") >>> " RESPONSE
+    read -rp "   Do you want to start the Gateway server automatically after installation? (\"Y/n\") >>> " RESPONSE
   fi
 
   if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]
   then
     echo
-    echo "      The server will start automatically after installation."
+    echo "      The Gateway server will start automatically after installation."
     HB_GATEWAY_AUTO_START="TRUE"
   else
     HB_GATEWAY_AUTO_START="FALSE"
@@ -616,6 +622,10 @@ pre_installation_hb_gateway () {
 }
 
 pre_installation_lock_apt () {
+  if [ "$BUILD_CACHE" == "" ]; then
+    return
+  fi
+
   clear
   echo
   echo
@@ -945,6 +955,12 @@ then
       REUSE_IMAGE="TRUE"
   fi
 
+  if [ -z "$ENTRYPOINT" ]; then
+      DEFINED_ENTRYPOINT="Default"
+  else
+    DEFINED_ENTRYPOINT="$ENTRYPOINT"
+  fi
+
   echo
   echo "ℹ️  Confirm below if the common settings are correct:"
   echo
@@ -952,14 +968,16 @@ then
   printf "%25s %5s\n" "Instance:"        			"$CONTAINER_NAME"
   printf "%25s %3s\n" "Reuse image:"    		  "$REUSE_IMAGE"
   printf "%25s %5s\n" "Version:"              "$TAG"
-  printf "%25s %5s\n" "Entrypoint:"    				"$ENTRYPOINT"
+  printf "%25s %5s\n" "Entrypoint:"    				"$DEFINED_ENTRYPOINT"
   echo
 
   echo
   echo "ℹ️  Confirm below if the Funttastic Client instance and its folders are correct:"
   echo
-  printf "%25s %5s\n" "Repository url:"       "$FUN_CLIENT_REPOSITORY_URL"
-  printf "%25s %5s\n" "Repository branch:"    "$FUN_CLIENT_REPOSITORY_BRANCH"
+  if [ "$BUILD_CACHE" == "--no-cache" ]; then
+    printf "%25s %5s\n" "Repository url:"       "$FUN_CLIENT_REPOSITORY_URL"
+    printf "%25s %5s\n" "Repository branch:"    "$FUN_CLIENT_REPOSITORY_BRANCH"
+  fi
   printf "%25s %4s\n" "Exposed port:"					"$FUN_CLIENT_PORT"
   printf "%25s %3s\n" "Autostart:"    		    "$FUN_CLIENT_AUTO_START"
   echo
@@ -967,16 +985,20 @@ then
   echo
   echo "ℹ️  Confirm below if the Hummingbot Client instance and its folders are correct:"
   echo
-  printf "%25s %5s\n" "Repository url:"       "$HB_CLIENT_REPOSITORY_URL"
-  printf "%25s %5s\n" "Repository branch:"    "$HB_CLIENT_REPOSITORY_BRANCH"
+  if [ "$BUILD_CACHE" == "--no-cache" ]; then
+    printf "%25s %5s\n" "Repository url:"       "$HB_CLIENT_REPOSITORY_URL"
+    printf "%25s %5s\n" "Repository branch:"    "$HB_CLIENT_REPOSITORY_BRANCH"
+  fi
   printf "%25s %3s\n" "Autostart:"    		    "$HB_CLIENT_AUTO_START"
   echo
 
   echo
   echo "ℹ️  Confirm below if the Hummingbot Gateway instance and its folders are correct:"
   echo
-  printf "%25s %5s\n" "Repository url:"       "$HB_GATEWAY_REPOSITORY_URL"
-  printf "%25s %5s\n" "Repository branch:"    "$HB_GATEWAY_REPOSITORY_BRANCH"
+  if [ "$BUILD_CACHE" == "--no-cache" ]; then
+    printf "%25s %5s\n" "Repository url:"       "$HB_GATEWAY_REPOSITORY_URL"
+    printf "%25s %5s\n" "Repository branch:"    "$HB_GATEWAY_REPOSITORY_BRANCH"
+  fi
   if [ "$EXPOSE_HB_GATEWAY_PORT" == "TRUE" ]; then
     printf "%25s %4s\n" "Exposed port:"					"$HB_GATEWAY_PORT"
   fi
