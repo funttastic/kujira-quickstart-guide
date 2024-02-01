@@ -111,7 +111,7 @@ pre_installation_define_passphrase () {
 
   echo "   Let's get started!"
 
-  RESPONSE=$USER_NAME
+  RESPONSE=$ADMIN_USERNAME
   if [ "$RESPONSE" == "" ]
   then
     echo
@@ -119,19 +119,19 @@ pre_installation_define_passphrase () {
   fi
   if [ "$RESPONSE" == "" ]
   then
-    USER_NAME="admin"
+    ADMIN_USERNAME="admin"
   else
-    USER_NAME="$RESPONSE"
+    ADMIN_USERNAME="$RESPONSE"
   fi
 
   echo
-  echo "      ℹ️  The username was defined to \"$USER_NAME\""
+  echo "      ℹ️  The username was defined to \"$ADMIN_USERNAME\""
 
   while true; do
     echo
-    read -s -rp "   Enter a passphrase with at least $MIN_PASSPHRASE_LENGTH characters >>> " DEFINED_PASSPHRASE
+    read -s -rp "   Enter a passphrase with at least $MIN_PASSPHRASE_LENGTH characters >>> " ADMIN_PASSWORD
     echo
-    if [ -z "$DEFINED_PASSPHRASE" ] || [ ${#DEFINED_PASSPHRASE} -lt "$MIN_PASSPHRASE_LENGTH" ]; then
+    if [ -z "$ADMIN_PASSWORD" ] || [ ${#ADMIN_PASSWORD} -lt "$MIN_PASSPHRASE_LENGTH" ]; then
       echo
       echo "      ⚠️  Weak passphrase, please try again."
     else
@@ -141,11 +141,11 @@ pre_installation_define_passphrase () {
         echo
         read -s -rp "   >>> " REPEATED_PASSPHRASE
         if [ "$REPEATED_PASSPHRASE" = "see-pass" ]; then
-          echo "$DEFINED_PASSPHRASE"
+          echo "$ADMIN_PASSWORD"
           sleep 3
           tput cuu 4
           tput ed
-        elif [ "$REPEATED_PASSPHRASE" = "$DEFINED_PASSPHRASE" ]; then
+        elif [ "$REPEATED_PASSPHRASE" = "$ADMIN_PASSWORD" ]; then
           tput cuu 1
           echo
           echo -e "\r      ✅ Perfect, the passphrase has been set successfully.$(printf ' %.0s' {1..20})"
@@ -167,9 +167,10 @@ pre_installation_define_passphrase () {
   echo "   _________________________________________________________________"
   echo "   | SERVICE OR APPLICATION |  NEEDS PASSWORD  |  NEEDS USERNAME   |"
   echo "   |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|"
-  echo "   |  Funttastic Client UI  |       Yes        |        Yes        |"
+  echo "   |  Funttastic UI         |       Yes        |        Yes        |"
   echo "   |  FileBrowser           |       Yes        |        Yes        |"
-  echo "   |  Hummingbot Client UI  |       Yes        |        No         |"
+  echo "   |  Hummingbot Client     |       Yes        |        No         |"
+  echo "   |  Hummingbot Gateway    |       Yes        |        No         |"
   echo "   |  SSL Certificates      |       Yes        |        No         |"
   echo "   |_______________________________________________________________|"
 
@@ -720,7 +721,7 @@ else
   EXPOSE_HB_GATEWAY_PORT=${EXPOSE_HB_GATEWAY_PORT:-"FALSE"}
 
   # Common Settings
-  USER_NAME=${USER_NAME:-"admin"}
+  ADMIN_USERNAME=${ADMIN_USERNAME:-"admin"}
   IMAGE_NAME="fun-kuji-hb"
   CONTAINER_NAME="$IMAGE_NAME"
   BUILD_CACHE=${BUILD_CACHE:-"--no-cache"}
@@ -730,8 +731,6 @@ else
   ENTRYPOINT=${ENTRYPOINT:-""}
 #  ENTRYPOINT=${ENTRYPOINT:-"--entrypoint=\"source /root/.bashrc && start\""}
   LOCK_APT=${LOCK_APT:-"FALSE"}
-
-#	RANDOM_PASSPHRASE=$(generate_passphrase 32)
 fi
 
 if [[ "$SSH_PUBLIC_KEY" && "$SSH_PRIVATE_KEY" ]]; then
@@ -754,10 +753,11 @@ docker_create_image () {
   if [ ! "$BUILD_CACHE" == "" ]
   then
     BUILT=$(DOCKER_BUILDKIT=1 docker build \
+    --build-arg ADMIN_USERNAME="$ADMIN_USERNAME" \
+    --build-arg ADMIN_PASSWORD="$ADMIN_PASSWORD" \
     --build-arg SSH_PUBLIC_KEY="$SSH_PUBLIC_KEY" \
     --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" \
-    --build-arg HB_GATEWAY_PASSPHRASE="$DEFINED_PASSPHRASE" \
-    --build-arg RANDOM_PASSPHRASE="$RANDOM_PASSPHRASE" \
+    --build-arg HB_GATEWAY_PASSPHRASE="$ADMIN_PASSWORD" \
     --build-arg FUN_CLIENT_REPOSITORY_URL="$FUN_CLIENT_REPOSITORY_URL" \
     --build-arg FUN_CLIENT_REPOSITORY_BRANCH="$FUN_CLIENT_REPOSITORY_BRANCH" \
     --build-arg HB_CLIENT_REPOSITORY_URL="$HB_CLIENT_REPOSITORY_URL" \

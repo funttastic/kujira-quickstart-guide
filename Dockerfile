@@ -4,7 +4,9 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ="Etc/GMT"
 ARG LOCK_APT=${LOCK_AP:-"TRUE"}
 
-ARG RANDOM_PASSPHRASE
+ARG ADMIN_USERNAME
+ARG ADMIN_PASSWORD
+
 ARG SSH_DEPLOY_PUBLIC_KEY
 ARG SSH_DEPLOY_PRIVATE_KEY
 
@@ -20,7 +22,7 @@ ENV HB_GATEWAY_COMMAND=$HB_GATEWAY_COMMAND
 ARG HB_GATEWAY_REPOSITORY_URL=${HB_GATEWAY_REPOSITORY_URL:-https://github.com/Team-Kujira/gateway.git}
 ARG HB_GATEWAY_REPOSITORY_BRANCH=${HB_GATEWAY_REPOSITORY_BRANCH:-community}
 ENV HB_GATEWAY_PORT=${HB_GATEWAY_PORT:-15888}
-ARG HB_GATEWAY_PASSPHRASE
+ARG HB_GATEWAY_PASSPHRASE=${HB_GATEWAY_PASSPHRASE:-$ADMIN_PASSWORD}
 ENV GATEWAY_PORT=$HB_GATEWAY_PORT
 ENV GATEWAY_PASSPHRASE=$HB_GATEWAY_PASSPHRASE
 
@@ -294,28 +296,41 @@ EOF
 RUN <<-EOF
 	set -ex
 
-	echo "export GATEWAY_PASSPHRASE=$HB_GATEWAY_PASSPHRASE" >> /root/.bashrc
 	rm -rf /root/temp
 
 	source /root/.bashrc
 
 	conda activate funttastic
 
-	python funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $HB_GATEWAY_PASSPHRASE --cert-path funttastic/client/resources/certificates
-
 	ln -rfs funttastic/client/resources/certificates/* hummingbot/gateway/certs
 	ln -rfs funttastic/client/resources/certificates/* hummingbot/client/certs
 
 	sed -i -e "/server:/,/port: 5000/ s/port: 5000/port: $FUN_CLIENT_PORT/" funttastic/client/resources/configuration/production.yml
-	sed -i "s/<password>/"$HB_GATEWAY_PASSPHRASE"/g" funttastic/client/resources/configuration/production.yml
 	sed -i -e '/logging:/,/use_telegram: true/ s/use_telegram: true/use_telegram: false/' -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' funttastic/client/resources/configuration/production.yml
 	sed -i -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' funttastic/client/resources/configuration/common.yml
 
-	if [ "$HB_GATEWAY_PASSPHRASE" == "$RANDOM_PASSPHRASE" ]
-	then
-	  mkdir -p shared/temporary
-		echo $RANDOM_PASSPHRASE > shared/temporary/random_passphrase.txt
-	fi
+	set +ex
+EOF
+
+RUN <<-EOF
+	set -e
+	set +x
+
+	# HB Gateway
+  echo "export GATEWAY_PASSPHRASE=$HB_GATEWAY_PASSPHRASE" >> /root/.bashrc
+	source /root/.bashrc
+
+	# HB Client
+	python funttastic/client/resources/scripts/generate_hb_client_password_verification_file.py -p "$GATEWAY_PASSPHRASE" -d hummingbot/client/conf
+
+	# Fun Client
+  sed -i "s/<password>/"$HB_GATEWAY_PASSPHRASE"/g" funttastic/client/resources/configuration/production.yml
+  python funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $HB_GATEWAY_PASSPHRASE --cert-path funttastic/client/resources/certificates
+
+	# Fun Frontend
+
+  # Filebrowser
+  filebrowser users add $ADMIN_USERNAME $ADMIN_PASSWORD --perm.admin
 
 	set +ex
 EOF
