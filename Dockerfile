@@ -109,10 +109,16 @@ RUN <<-EOF
 
 	curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
 	rm -f get.sh
-	mkdir -p filebrowser
+
+	mkdir -p filebrowser/branding/img
 	cd filebrowser
+#	cp <...>/logo.svg branding/img/logo.svg
+#	cp <...>/custom.css branding/custom.css
+
 	filebrowser config init
+	filebrowser config set --branding.name "Funttastic"
 	filebrowser config set --branding.theme "dark"
+	filebrowser config set --branding.files /root/filebrowser/branding
 
 	set +ex
 EOF
