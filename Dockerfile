@@ -112,6 +112,7 @@ RUN <<-EOF
 	mkdir -p filebrowser
 	cd filebrowser
 	filebrowser config init
+	filebrowser config set --branding.theme "dark"
 
 	set +ex
 EOF
