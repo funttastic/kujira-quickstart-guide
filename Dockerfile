@@ -109,6 +109,9 @@ RUN <<-EOF
 
 	curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
 	rm -f get.sh
+	mkdir -p filebrowser
+	cd filebrowser
+	filebrowser config init
 
 	set +ex
 EOF
@@ -316,20 +319,25 @@ RUN <<-EOF
 	set -e
 	set +x
 
+	source /root/.bashrc
+
 	# HB Gateway
   echo "export GATEWAY_PASSPHRASE=$HB_GATEWAY_PASSPHRASE" >> /root/.bashrc
 	source /root/.bashrc
 
 	# HB Client
+	conda activate hummingbot
 	python funttastic/client/resources/scripts/generate_hb_client_password_verification_file.py -p "$GATEWAY_PASSPHRASE" -d hummingbot/client/conf
 
 	# Fun Client
+	conda activate funttastic
   sed -i "s/<password>/"$HB_GATEWAY_PASSPHRASE"/g" funttastic/client/resources/configuration/production.yml
   python funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $HB_GATEWAY_PASSPHRASE --cert-path funttastic/client/resources/certificates
 
 	# Fun Frontend
 
   # Filebrowser
+  cd filebrowser
   filebrowser users add $ADMIN_USERNAME $ADMIN_PASSWORD --perm.admin
 
 	set +ex
@@ -348,7 +356,7 @@ start_fun_client_frontend() {
 }
 
 start_filebrowser() {
-  cd /root && filebrowser -p ${FILEBROWSER_PORT:-50002} -r shared > /dev/null 2>&1 &
+  cd /root/filebrowser && filebrowser -p ${FILEBROWSER_PORT:-50002} -r ../shared > /dev/null 2>&1 &
 }
 
 start_fun_client_api() {
