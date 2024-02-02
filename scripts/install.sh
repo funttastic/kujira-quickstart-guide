@@ -738,16 +738,19 @@ if [[ "$SSH_PUBLIC_KEY" && "$SSH_PRIVATE_KEY" ]]; then
 fi
 
 if [ -z "$CUSTOMIZE" ]; then
-  echo "   |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|"
-  echo "   |   To view and edit configuration files,  |"
-  echo "   |   use the FileBrowser at                 |"
-  echo "   |                                          |"
-  echo "   |      https://localhost:50002/            |"
-  echo "   |   or                                     |"
-  echo "   |      https://127.0.0.1:50002/            |"
-  echo "   |__________________________________________|"
+  echo "   |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|"
+  echo "   |   ℹ️  After Installation,           |"
+  echo "   |                                    |"
+  echo "   |   to view and edit configuration   |"
+  echo "   |   files, use the FileBrowser at    |"
+  echo "   |                                    |"
+  echo "   |      https://localhost:50002/      |"
+  echo "   |   or                               |"
+  echo "   |      https://127.0.0.1:50002/      |"
+  echo "   |____________________________________|"
   echo
 fi
+
 
 docker_create_image () {
   if [ ! "$BUILD_CACHE" == "" ]
@@ -848,6 +851,7 @@ execute_installation () {
         echo "     > Funttastic Client"
         echo "     > Hummingbot Client"
         echo "     > Hummingbot Gateway"
+        echo "     > FileBrowser"
         echo
         echo "     ℹ️  All in just one container."
         echo
