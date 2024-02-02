@@ -112,13 +112,19 @@ RUN <<-EOF
 
 	mkdir -p filebrowser/branding/img
 	cd filebrowser
-#	cp <...>/logo.svg branding/img/logo.svg
-#	cp <...>/custom.css branding/custom.css
 
 	filebrowser config init
 	filebrowser config set --branding.name "Funttastic"
 	filebrowser config set --branding.theme "dark"
 	filebrowser config set --branding.files /root/filebrowser/branding
+
+	#	cp /root/funttastic/frontend/resources/assets/funttastic/logo/logo.svg branding/img/logo.svg
+
+  cat <<'CSS' > branding/custom.css
+html {
+    scrollbar-width: none;
+}
+CSS
 
 	set +ex
 EOF
