@@ -52,6 +52,7 @@ RUN <<-EOF
 		git \
 		gcc \
 		vim \
+		less \
 		tree \
 		curl \
 		psmisc \
@@ -352,7 +353,7 @@ RUN <<-EOF
   # Filebrowser
   cd filebrowser
   filebrowser users add $ADMIN_USERNAME $ADMIN_PASSWORD --perm.admin
-  filebrowser users update $ADMIN_USERNAME --commands="ls,rm,mkdir,pwd,cp,mv,cat,less,find,grep,touch,chmod,chown,df,du,top,ps,kill,ifconfig,netstat"
+  filebrowser users update $ADMIN_USERNAME --commands="ls,rm,mkdir,pwd,cp,mv,cat,less,find,touch,echo,chmod,chown,df,du,ps,kill"
 
 	set +ex
 EOF
