@@ -8,6 +8,7 @@ CHOICE=""
 MIN_PASSPHRASE_LENGTH=4
 ENTRYPOINT=""
 NETWORK="host"
+LOCAL_HOST_URL_PREFIX="https://localhost"
 FUN_CLIENT_APP_PATH_PREFIX="/root/funttastic/client"
 HB_GATEWAY_APP_PATH_PREFIX="/root/hummingbot/gateway"
 HB_CLIENT_APP_PATH_PREFIX="/root/hummingbot/client"
@@ -74,6 +75,24 @@ image_exists() {
         if [ "$name" = "$image_name" ]; then
             IMAGE_EXISTS="TRUE"
             break
+        fi
+    done
+}
+
+invoke_frontend() {
+    urls=("$@")
+
+    for url in "${urls[@]}"; do
+        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            xdg-open "$url"
+        elif [[ "$OSTYPE" == "darwin"* ]]; then
+            open "$url"
+        elif [[ "$OSTYPE" == "cygwin" ]]; then
+            cmd.exe /c start "$url"
+        elif [[ "$OSTYPE" == "msys" ]]; then
+            cmd.exe /c start "$url"
+        elif [[ "$OSTYPE" == "win32" ]]; then
+            cmd.exe /c start "$url"
         fi
     done
 }
@@ -694,6 +713,7 @@ else
 
   # Funttastic Frontend Settings
   FUN_FRONTEND_PORT=${FUN_FRONTEND_PORT:-50000}
+  FUN_FRONTEND_URL=${LOCAL_HOST_URL_PREFIX}:${FUN_FRONTEND_PORT}
 
   # Filebrowser Settings
   FILEBROWSER_PORT=${FILEBROWSER_PORT:-50002}
@@ -818,11 +838,13 @@ docker_create_container () {
     -e FUN_CLIENT_COMMAND="$FUN_CLIENT_COMMAND" \
     -e HB_GATEWAY_COMMAND="$HB_GATEWAY_COMMAND" \
     -e HB_CLIENT_COMMAND="$HB_CLIENT_COMMAND" \
-    $ENTRYPOINT \
+    "$ENTRYPOINT" \
     "$IMAGE_NAME":$TAG
 }
 
 post_installation () {
+  invoke_frontend "$FUN_FRONTEND_URL"
+
   if [[ "$FUN_CLIENT_AUTO_START" == "TRUE" && "$FUN_CLIENT_AUTO_START_EVERY_TIME" == "FALSE" ]]; then
     docker exec -it "$CONTAINER_NAME" /bin/bash -lc "conda activate funttastic && cd $FUN_CLIENT_APP_PATH_PREFIX && python app.py $OUTPUT_SUPPRESSION &"
   fi
@@ -848,7 +870,8 @@ execute_installation () {
         echo
         echo "   Installing:"
         echo
-        echo "     > Funttastic Client"
+        echo "     > Funttastic Client Server"
+        echo "     > Funttastic Client Frontend"
         echo "     > Hummingbot Client"
         echo "     > Hummingbot Gateway"
         echo "     > FileBrowser"
