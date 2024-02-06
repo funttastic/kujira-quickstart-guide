@@ -10,6 +10,8 @@ ARG ADMIN_PASSWORD
 ARG SSH_DEPLOY_PUBLIC_KEY
 ARG SSH_DEPLOY_PRIVATE_KEY
 
+ARG FUN_FRONTEND_REPOSITORY_URL="${FUN_FRONTEND_REPOSITORY_URL:-https://github.com/funttastic/fun-hb-frontend.git}"
+ARG FUN_FRONTEND_REPOSITORY_BRANCH="${FUN_FRONTEND_REPOSITORY_BRANCH:-development}"
 ENV FUN_FRONTEND_COMMAND=$FUN_FRONTEND_COMMAND
 ENV FUN_FRONTEND_PORT=${FUN_FRONTEND_PORT:-50000}
 
@@ -206,8 +208,7 @@ RUN <<-EOF
 	export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
 	[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
 
-	nvm install 16.3.0
-	nvm use 16.3.0
+	nvm install --lts
 	nvm cache clear
 
 #	if [ ! "$ARCHITECTURE" == "aarch64" ]
@@ -240,6 +241,21 @@ RUN <<-EOF
 	mkdir -p resources/certificates
 	cp resources/configuration/production.example.yml resources/configuration/production.yml
 	cp -a resources/strategies/templates/. resources/strategies
+
+	set +ex
+EOF
+
+RUN <<-EOF
+	set -ex
+
+	source /root/.bashrc
+
+	mkdir -p funttastic/frontend
+  cd funttastic/frontend
+
+  git clone -b $FUN_FRONTEND_REPOSITORY_BRANCH $FUN_FRONTEND_REPOSITORY_URL .
+
+  yarn install
 
 	set +ex
 EOF
@@ -349,11 +365,13 @@ RUN <<-EOF
   python funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $HB_GATEWAY_PASSPHRASE --cert-path funttastic/client/resources/certificates
 
 	# Fun Frontend
+	sed -i "s/password: '.*'/password: '$HB_GATEWAY_PASSPHRASE'/" funttastic/frontend/src/mock/data/authData.ts
+	sed -i "s/accountUserName: '.*'/accountUserName: '$ADMIN_USERNAME'/" funttastic/frontend/src/mock/data/authData.ts
 
   # Filebrowser
   cd filebrowser
   filebrowser users add $ADMIN_USERNAME $ADMIN_PASSWORD --perm.admin
-  filebrowser users update $ADMIN_USERNAME --commands="ls,rm,mkdir,pwd,cp,mv,cat,less,find,touch,echo,chmod,chown,df,du,ps,kill"
+  filebrowser users update $ADMIN_USERNAME --commands="ls,git,tree,curl,rm,mkdir,pwd,cp,mv,cat,less,find,touch,echo,chmod,chown,df,du,ps,kill"
 
 	set +ex
 EOF
@@ -366,8 +384,8 @@ mkdir -p shared/scripts
 cat <<'SCRIPT' > shared/scripts/functions.sh
 #!/bin/bash
 
-start_fun_client_frontend() {
-  echo > /dev/null 2>&1 &
+start_fun_frontend() {
+  cd /root/funttastic/frontend && yarn start > /dev/null 2>&1 &
 }
 
 start_filebrowser() {
@@ -387,7 +405,7 @@ start_hb_client() {
 }
 
 start_all() {
-  start_fun_client_frontend
+  start_fun_frontend
   start_filebrowser
   start_fun_client_api
   start_hb_gateway
@@ -408,8 +426,8 @@ start() {
         start_all
         return
         ;;
-      --start_fun_client_frontend)
-        start_fun_client_frontend
+      --start_fun_frontend)
+        start_fun_frontend
         return
         ;;
       --start_filebrowser)
@@ -434,7 +452,7 @@ start() {
   done
 }
 
-stop_fun_client_frontend() {
+stop_fun_frontend() {
   echo > /dev/null 2>&1 &
 }
 
@@ -455,7 +473,7 @@ stop_hb_client() {
 }
 
 stop_all() {
-  stop_fun_client_frontend
+  stop_fun_frontend
   stop_filebrowser
   stop_fun_client_api
   stop_hb_gateway
@@ -476,8 +494,8 @@ stop() {
         stop_all
         return
         ;;
-      --stop_fun_client_frontend)
-        stop_fun_client_frontend
+      --stop_fun_frontend)
+        stop_fun_frontend
         return
         ;;
       --stop_filebrowser)
