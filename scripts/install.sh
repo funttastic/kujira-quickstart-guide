@@ -12,20 +12,6 @@ LOCAL_HOST_URL_PREFIX="https://localhost"
 FUN_CLIENT_APP_PATH_PREFIX="/root/funttastic/client"
 HB_GATEWAY_APP_PATH_PREFIX="/root/hummingbot/gateway"
 HB_CLIENT_APP_PATH_PREFIX="/root/hummingbot/client"
-OUTPUT_SUPPRESSION_MODE="stdout+stderr"
-OUTPUT_SUPPRESSION=""
-
-if [ "$OUTPUT_SUPPRESSION_MODE" == "stdout+stderr" ]
-  then
-#  OUTPUT_SUPPRESSION="&> /dev/null"
-  OUTPUT_SUPPRESSION="> /dev/null 2>&1"
-elif [ "$OUTPUT_SUPPRESSION_MODE" == "stdout" ]
-  then
-  OUTPUT_SUPPRESSION="> /dev/null"
-elif [ "$OUTPUT_SUPPRESSION_MODE" == "stderr" ]
-  then
-  OUTPUT_SUPPRESSION="2> /dev/null"
-fi
 
 generate_passphrase() {
     local length=$1
@@ -79,20 +65,20 @@ image_exists() {
     done
 }
 
-invoke_frontend() {
+open_in_web_navigator() {
     urls=("$@")
 
     for url in "${urls[@]}"; do
         if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-            xdg-open "$url"
+            xdg-open "$url" &> /dev/null &
         elif [[ "$OSTYPE" == "darwin"* ]]; then
-            open "$url"
+            open "$url" &> /dev/null &
         elif [[ "$OSTYPE" == "cygwin" ]]; then
-            cmd.exe /c start "$url"
+            cmd.exe /c start "$url" &> /dev/null &
         elif [[ "$OSTYPE" == "msys" ]]; then
-            cmd.exe /c start "$url"
+            cmd.exe /c start "$url" &> /dev/null &
         elif [[ "$OSTYPE" == "win32" ]]; then
-            cmd.exe /c start "$url"
+            cmd.exe /c start "$url" &> /dev/null &
         fi
     done
 }
@@ -183,15 +169,15 @@ pre_installation_define_passphrase () {
   echo
   echo "   ================    PASSWORD & USERNAME SETTING PROCESS    ==============="
   echo
-  echo "   _________________________________________________________________"
-  echo "   | SERVICE OR APPLICATION |  NEEDS PASSWORD  |  NEEDS USERNAME   |"
-  echo "   |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|"
-  echo "   |  Funttastic UI         |       Yes        |        Yes        |"
-  echo "   |  FileBrowser           |       Yes        |        Yes        |"
-  echo "   |  Hummingbot Client     |       Yes        |        No         |"
-  echo "   |  Hummingbot Gateway    |       Yes        |        No         |"
-  echo "   |  SSL Certificates      |       Yes        |        No         |"
-  echo "   |_______________________________________________________________|"
+  echo "   ________________________________________________________________"
+  echo "   | SERVICE OR APPLICATION |  NEEDS USERNAME  |  NEEDS PASSWORD  |"
+  echo "   |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|"
+  echo "   |  Funttastic UI         |       Yes        |        Yes       |"
+  echo "   |  FileBrowser           |       Yes        |        Yes       |"
+  echo "   |  Hummingbot Client     |        No        |        Yes       |"
+  echo "   |  Hummingbot Gateway    |        No        |        Yes       |"
+  echo "   |  SSL Certificates      |        No        |        Yes       |"
+  echo "   |______________________________________________________________|"
 
   echo
   read -s -n1 -rp "   Alright, I got it! Press any key to continue >>> "
@@ -272,13 +258,13 @@ pre_installation_fun_client () {
     local image_name=${1:-$IMAGE_NAME}
 
     # Stop all containers that are using the image
-    docker stop "$(docker ps -a -q --filter ancestor="$image_name")" "$OUTPUT_SUPPRESSION"
+    docker stop "$(docker ps -a -q --filter ancestor="$image_name")" > /dev/null 2>&1
 
     # Remove all containers that are using the image
-    docker rm "$(docker ps -a -q --filter ancestor="$image_name")" "$OUTPUT_SUPPRESSION"
+    docker rm "$(docker ps -a -q --filter ancestor="$image_name")" > /dev/null 2>&1
 
     # Remove the image
-    docker rmi "$image_name" "$OUTPUT_SUPPRESSION"
+    docker rmi "$image_name" > /dev/null 2>&1
   }
 
   customize_image_name () {
@@ -350,7 +336,7 @@ pre_installation_fun_client () {
                   break
                   ;;
               3)
-                  ./scripts/utils/destroy-all-containers-and-images.sh "$OUTPUT_SUPPRESSION" &
+                  ./scripts/utils/destroy-all-containers-and-images.sh > /dev/null 2>&1 &
                   NO_CONFLICT="TRUE"
                   break
                   ;;
@@ -717,6 +703,7 @@ else
 
   # Filebrowser Settings
   FILEBROWSER_PORT=${FILEBROWSER_PORT:-50002}
+  FILEBROWSER_URL=${LOCAL_HOST_URL_PREFIX}:${FILEBROWSER_PORT}
 
   # Funttastic Client Settings
   FUN_CLIENT_PORT=${FUN_CLIENT_PORT:-50001}
@@ -794,15 +781,15 @@ docker_create_image () {
 }
 
 docker_create_container () {
-  FUN_FRONTEND_COMMAND="echo $OUTPUT_SUPPRESSION &"
-  FILEBROWSER_COMMAND="cd /root && filebrowser -p $FILEBROWSER_PORT -r shared $OUTPUT_SUPPRESSION &"
+  FUN_FRONTEND_COMMAND="echo > /dev/null 2>&1 &"
+  FILEBROWSER_COMMAND="cd /root && filebrowser -p $FILEBROWSER_PORT -r shared > /dev/null 2>&1 &"
 
   if [ "$FUN_CLIENT_AUTO_START_EVERY_TIME" == "TRUE" ]; then
-    FUN_CLIENT_COMMAND="conda activate funttastic && cd $FUN_CLIENT_APP_PATH_PREFIX && python app.py $OUTPUT_SUPPRESSION &"
+    FUN_CLIENT_COMMAND="conda activate funttastic && cd $FUN_CLIENT_APP_PATH_PREFIX && python app.py > /dev/null 2>&1 &"
   fi
 
   if [ "$HB_GATEWAY_AUTO_START_EVERY_TIME" == "TRUE" ]; then
-    HB_GATEWAY_COMMAND="cd $HB_GATEWAY_APP_PATH_PREFIX && yarn start $OUTPUT_SUPPRESSION &"
+    HB_GATEWAY_COMMAND="cd $HB_GATEWAY_APP_PATH_PREFIX && yarn start > /dev/null 2>&1 &"
   fi
 
   if [ "$HB_CLIENT_AUTO_START_EVERY_TIME" == "TRUE" ]; then
@@ -843,14 +830,14 @@ docker_create_container () {
 }
 
 post_installation () {
-  invoke_frontend "$FUN_FRONTEND_URL"
+  open_in_web_navigator "$FUN_FRONTEND_URL" "$FILEBROWSER_URL"
 
   if [[ "$FUN_CLIENT_AUTO_START" == "TRUE" && "$FUN_CLIENT_AUTO_START_EVERY_TIME" == "FALSE" ]]; then
-    docker exec -it "$CONTAINER_NAME" /bin/bash -lc "conda activate funttastic && cd $FUN_CLIENT_APP_PATH_PREFIX && python app.py $OUTPUT_SUPPRESSION &"
+    docker exec -it "$CONTAINER_NAME" /bin/bash -lc "conda activate funttastic && cd $FUN_CLIENT_APP_PATH_PREFIX && python app.py > /dev/null 2>&1 &"
   fi
 
   if [[ "$HB_GATEWAY_AUTO_START" == "TRUE" && "$HB_GATEWAY_AUTO_START_EVERY_TIME" == "FALSE" ]]; then
-    docker exec -it "$CONTAINER_NAME" /bin/bash -lc "cd $HB_GATEWAY_APP_PATH_PREFIX && yarn start $OUTPUT_SUPPRESSION &"
+    docker exec -it "$CONTAINER_NAME" /bin/bash -lc "cd $HB_GATEWAY_APP_PATH_PREFIX && yarn start > /dev/null 2>&1 &"
   fi
 
   if [ "$HB_CLIENT_AUTO_START" == "TRUE" ]; then
