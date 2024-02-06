@@ -838,7 +838,7 @@ docker_create_container () {
     -e FUN_CLIENT_COMMAND="$FUN_CLIENT_COMMAND" \
     -e HB_GATEWAY_COMMAND="$HB_GATEWAY_COMMAND" \
     -e HB_CLIENT_COMMAND="$HB_CLIENT_COMMAND" \
-    "$ENTRYPOINT" \
+    $ENTRYPOINT \
     "$IMAGE_NAME":$TAG
 }
 
