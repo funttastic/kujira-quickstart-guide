@@ -760,6 +760,10 @@ fi
 
 
 docker_create_image () {
+  if [ "$EXPOSE_HB_GATEWAY_PORT" == "TRUE" ]; then
+    sed -i "s/#EXPOSE $HB_GATEWAY_PORT/EXPOSE $HB_GATEWAY_PORT/g" Dockerfile
+  fi
+
   if [ ! "$BUILD_CACHE" == "" ]
   then
     BUILT=$(DOCKER_BUILDKIT=1 docker build \
@@ -776,30 +780,20 @@ docker_create_image () {
     --build-arg HB_GATEWAY_REPOSITORY_BRANCH="$HB_GATEWAY_REPOSITORY_BRANCH" \
     --build-arg HOST_USER_GROUP="$GROUP" \
     --build-arg LOCK_APT="$LOCK_APT" \
+    --build-arg FUN_FRONTEND_PORT="$FUN_FRONTEND_PORT" \
+    --build-arg FILEBROWSER_PORT="$FILEBROWSER_PORT" \
+    --build-arg FUN_CLIENT_PORT="$FUN_CLIENT_PORT" \
+    --build-arg HB_GATEWAY_PORT="$HB_GATEWAY_PORT" \
+    --build-arg FUN_FRONTEND_COMMAND="$FUN_FRONTEND_COMMAND" \
+    --build-arg FILEBROWSER_COMMAND="$FILEBROWSER_COMMAND" \
+    --build-arg FUN_CLIENT_COMMAND="$FUN_CLIENT_COMMAND" \
+    --build-arg HB_GATEWAY_COMMAND="$HB_GATEWAY_COMMAND" \
+    --build-arg HB_CLIENT_COMMAND="$HB_CLIENT_COMMAND" \
     -t "$IMAGE_NAME" -f ./Dockerfile .)
   fi
 }
 
 docker_create_container () {
-  FUN_FRONTEND_COMMAND="echo > /dev/null 2>&1 &"
-  FILEBROWSER_COMMAND="cd /root && filebrowser -p $FILEBROWSER_PORT -r shared > /dev/null 2>&1 &"
-
-  if [ "$FUN_CLIENT_AUTO_START_EVERY_TIME" == "TRUE" ]; then
-    FUN_CLIENT_COMMAND="conda activate funttastic && cd $FUN_CLIENT_APP_PATH_PREFIX && python app.py > /dev/null 2>&1 &"
-  fi
-
-  if [ "$HB_GATEWAY_AUTO_START_EVERY_TIME" == "TRUE" ]; then
-    HB_GATEWAY_COMMAND="cd $HB_GATEWAY_APP_PATH_PREFIX && yarn start > /dev/null 2>&1 &"
-  fi
-
-  if [ "$HB_CLIENT_AUTO_START_EVERY_TIME" == "TRUE" ]; then
-    HB_CLIENT_COMMAND="conda activate hummingbot && cd $HB_CLIENT_APP_PATH_PREFIX && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log"
-  fi
-
-  if [ "$EXPOSE_HB_GATEWAY_PORT" == "TRUE" ]; then
-    sed -i "s/#EXPOSE $HB_GATEWAY_PORT/EXPOSE $HB_GATEWAY_PORT/g" Dockerfile
-  fi
-
   $BUILT \
   && docker run \
     -dit \
@@ -816,33 +810,12 @@ docker_create_container () {
     -e HB_CLIENT_PMM_SCRIPTS_FOLDER="/root/hummingbot/client/pmm_scripts" \
     -e HB_GATEWAY_CONF_FOLDER="/root/hummingbot/gateway/conf" \
     -e HB_GATEWAY_LOGS_FOLDER="/root/hummingbot/gateway/logs" \
-    -e FUN_FRONTEND_PORT="$FUN_FRONTEND_PORT" \
-    -e FILEBROWSER_PORT="$FILEBROWSER_PORT" \
-    -e FUN_CLIENT_PORT="$FUN_CLIENT_PORT" \
-    -e HB_GATEWAY_PORT="$HB_GATEWAY_PORT" \
-    -e FUN_FRONTEND_COMMAND="$FUN_FRONTEND_COMMAND" \
-    -e FILEBROWSER_COMMAND="$FILEBROWSER_COMMAND" \
-    -e FUN_CLIENT_COMMAND="$FUN_CLIENT_COMMAND" \
-    -e HB_GATEWAY_COMMAND="$HB_GATEWAY_COMMAND" \
-    -e HB_CLIENT_COMMAND="$HB_CLIENT_COMMAND" \
     $ENTRYPOINT \
     "$IMAGE_NAME":$TAG
 }
 
 post_installation () {
-  open_in_web_navigator "$FUN_FRONTEND_URL" "$FILEBROWSER_URL"
-
-  if [[ "$FUN_CLIENT_AUTO_START" == "TRUE" && "$FUN_CLIENT_AUTO_START_EVERY_TIME" == "FALSE" ]]; then
-    docker exec -it "$CONTAINER_NAME" /bin/bash -lc "conda activate funttastic && cd $FUN_CLIENT_APP_PATH_PREFIX && python app.py > /dev/null 2>&1 &"
-  fi
-
-  if [[ "$HB_GATEWAY_AUTO_START" == "TRUE" && "$HB_GATEWAY_AUTO_START_EVERY_TIME" == "FALSE" ]]; then
-    docker exec -it "$CONTAINER_NAME" /bin/bash -lc "cd $HB_GATEWAY_APP_PATH_PREFIX && yarn start > /dev/null 2>&1 &"
-  fi
-
-  if [ "$HB_CLIENT_AUTO_START" == "TRUE" ]; then
-    docker exec -it "$CONTAINER_NAME" /bin/bash -lc "conda activate hummingbot && cd $HB_CLIENT_APP_PATH_PREFIX && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log"
-  fi
+  open_in_web_navigator "$FILEBROWSER_URL" "$FUN_FRONTEND_URL"
 }
 
 installation () {

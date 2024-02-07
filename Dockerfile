@@ -12,28 +12,27 @@ ARG SSH_DEPLOY_PRIVATE_KEY
 
 ARG FUN_FRONTEND_REPOSITORY_URL="${FUN_FRONTEND_REPOSITORY_URL:-https://github.com/funttastic/fun-hb-frontend.git}"
 ARG FUN_FRONTEND_REPOSITORY_BRANCH="${FUN_FRONTEND_REPOSITORY_BRANCH:-development}"
-ENV FUN_FRONTEND_COMMAND=$FUN_FRONTEND_COMMAND
-ENV FUN_FRONTEND_PORT=${FUN_FRONTEND_PORT:-50000}
+ARG FUN_FRONTEND_COMMAND
+ARG FUN_FRONTEND_PORT
 
-ENV FUN_CLIENT_COMMAND=$FUN_CLIENT_COMMAND
 ARG FUN_CLIENT_REPOSITORY_URL="${FUN_CLIENT_REPOSITORY_URL:-https://github.com/funttastic/fun-hb-client.git}"
 ARG FUN_CLIENT_REPOSITORY_BRANCH="${FUN_CLIENT_REPOSITORY_BRANCH:-community}"
-ENV FUN_CLIENT_PORT=${FUN_CLIENT_PORT:-50001}
+ARG FUN_CLIENT_COMMAND
+ARG FUN_CLIENT_PORT
 
-ENV HB_GATEWAY_COMMAND=$HB_GATEWAY_COMMAND
 ARG HB_GATEWAY_REPOSITORY_URL=${HB_GATEWAY_REPOSITORY_URL:-https://github.com/Team-Kujira/gateway.git}
 ARG HB_GATEWAY_REPOSITORY_BRANCH=${HB_GATEWAY_REPOSITORY_BRANCH:-community}
-ENV HB_GATEWAY_PORT=${HB_GATEWAY_PORT:-15888}
-ARG HB_GATEWAY_PASSPHRASE=${HB_GATEWAY_PASSPHRASE:-$ADMIN_PASSWORD}
-ENV GATEWAY_PORT=$HB_GATEWAY_PORT
-ENV GATEWAY_PASSPHRASE=$HB_GATEWAY_PASSPHRASE
+ARG HB_GATEWAY_COMMAND
+ARG HB_GATEWAY_PORT
+ARG HB_GATEWAY_PASSPHRASE=${ADMIN_PASSWORD}
+ARG GATEWAY_PASSPHRASE=$HB_GATEWAY_PASSPHRASE
 
-ENV HB_CLIENT_COMMAND=$HB_CLIENT_COMMAND
 ARG HB_CLIENT_REPOSITORY_URL=${HB_CLIENT_REPOSITORY_URL:-https://github.com/Team-Kujira/hummingbot.git}
 ARG HB_CLIENT_REPOSITORY_BRANCH=${HB_CLIENT_REPOSITORY_BRANCH:-community}
+ARG HB_CLIENT_COMMAND
 
-ENV FILEBROWSER_COMMAND=$FILEBROWSER_COMMAND
-ENV FILEBROWSER_PORT=${FILEBROWSER_PORT:-50002}
+ARG FILEBROWSER_COMMAND
+ARG FILEBROWSER_PORT
 
 EXPOSE $FUN_CLIENT_PORT
 #EXPOSE $HB_GATEWAY_PORT
@@ -69,6 +68,89 @@ RUN <<-EOF
 		build-essential \
 		ca-certificates \
 		postgresql-server-dev-all
+
+	set +ex
+EOF
+
+RUN <<-EOF
+	set -ex
+
+	echo -e "\n" >> ~/.bashrc
+
+	# Funttastic Client Frontend environment variables
+
+  if [ -z "$FRONTEND_PORT" ]
+  then
+    echo 'export FRONTEND_PORT=50000' >> ~/.bashrc
+  else
+    echo "export FRONTEND_PORT=$FRONTEND_PORT" >> ~/.bashrc
+  fi
+
+  if [ -z "$FUN_FRONTEND_COMMAND" ]
+  then
+    echo "export FUN_FRONTEND_COMMAND=\"cd /root/funttastic/frontend && yarn start > /dev/null 2>&1 &\"" >> ~/.bashrc
+  else
+    echo "export FUN_FRONTEND_COMMAND=$FUN_FRONTEND_COMMAND" >> ~/.bashrc
+  fi
+
+  # Funttastic Client server environment variables
+
+  if [ -z "$FUN_CLIENT_PORT" ]
+  then
+    echo 'export FUN_CLIENT_PORT=50001' >> ~/.bashrc
+  else
+    echo "export FUN_CLIENT_PORT=$FUN_CLIENT_PORT" >> ~/.bashrc
+  fi
+
+  if [ -z "$FUN_CLIENT_COMMAND" ]
+  then
+    echo "export FUN_CLIENT_COMMAND=\"conda activate funttastic && cd /root/funttastic/client && python app.py > /dev/null 2>&1 &\"" >> ~/.bashrc
+  else
+    echo "export FUN_CLIENT_COMMAND=$FUN_CLIENT_COMMAND" >> ~/.bashrc
+  fi
+
+  # HB Gateway environment variables
+
+  if [ -z "$HB_GATEWAY_PORT" ]
+  then
+    echo 'export HB_GATEWAY_PORT=15888' >> ~/.bashrc
+  else
+    echo "export HB_GATEWAY_PORT=$HB_GATEWAY_PORT" >> ~/.bashrc
+  fi
+
+  if [ -z "$HB_GATEWAY_COMMAND" ]
+  then
+    echo "export HB_GATEWAY_COMMAND=\"cd /root/hummingbot/gateway && yarn start > /dev/null 2>&1 &\"" >> ~/.bashrc
+  else
+    echo "export HB_GATEWAY_COMMAND=$HB_GATEWAY_COMMAND" >> ~/.bashrc
+  fi
+
+  # HB Client environment variables
+
+  if [ -z "$HB_CLIENT_COMMAND" ]
+  then
+    echo "export HB_CLIENT_COMMAND=\"conda activate hummingbot && cd /root/hummingbot/client && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log\"" >> ~/.bashrc
+  else
+    echo "export HB_CLIENT_COMMAND=$HB_CLIENT_COMMAND" >> ~/.bashrc
+  fi
+
+  # FileBrowser environment variables
+
+  if [ -z "$FILEBROWSER_PORT" ]
+  then
+    echo 'export FILEBROWSER_PORT=50002' >> ~/.bashrc
+  else
+    echo "export FILEBROWSER_PORT=$FILEBROWSER_PORT" >> ~/.bashrc
+  fi
+
+  if [ -z "$FILEBROWSER_COMMAND" ]
+  then
+    echo "export FILEBROWSER_COMMAND=\"cd /root/filebrowser && filebrowser -p \$FILEBROWSER_PORT -r ../shared > /dev/null 2>&1 &\"" >> ~/.bashrc
+  else
+    echo "export FILEBROWSER_COMMAND=$FILEBROWSER_COMMAND" >> ~/.bashrc
+  fi
+
+  echo -e "\n" >> ~/.bashrc
 
 	set +ex
 EOF
@@ -385,23 +467,23 @@ cat <<'SCRIPT' > shared/scripts/functions.sh
 #!/bin/bash
 
 start_fun_frontend() {
-  cd /root/funttastic/frontend && yarn start > /dev/null 2>&1 &
+  eval $FUN_FRONTEND_COMMAND
 }
 
 start_filebrowser() {
-  cd /root/filebrowser && filebrowser -p ${FILEBROWSER_PORT:-50002} -r ../shared > /dev/null 2>&1 &
+  eval $FILEBROWSER_COMMAND
 }
 
 start_fun_client_api() {
-  conda activate funttastic && cd /root/funttastic/client && python app.py > /dev/null 2>&1 &
+  eval $FUN_CLIENT_COMMAND
 }
 
 start_hb_gateway() {
-  cd /root/hummingbot/gateway && yarn start > /dev/null 2>&1 &
+  eval $HB_GATEWAY_COMMAND
 }
 
 start_hb_client() {
-  conda activate hummingbot && cd /root/hummingbot/client && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log
+  eval $HB_CLIENT_COMMAND
 }
 
 start_all() {
