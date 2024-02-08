@@ -9,9 +9,6 @@ MIN_PASSPHRASE_LENGTH=4
 ENTRYPOINT=""
 NETWORK="host"
 LOCAL_HOST_URL_PREFIX="http://localhost"
-FUN_CLIENT_APP_PATH_PREFIX="/root/funttastic/client"
-HB_GATEWAY_APP_PATH_PREFIX="/root/hummingbot/gateway"
-HB_CLIENT_APP_PATH_PREFIX="/root/hummingbot/client"
 
 generate_passphrase() {
     local length=$1
@@ -816,6 +813,10 @@ docker_create_container () {
 
 post_installation () {
   open_in_web_navigator "$FILEBROWSER_URL" "$FUN_FRONTEND_URL"
+
+  if [ "$HB_CLIENT_AUTO_START" == "TRUE" ]; then
+    docker attach "$CONTAINER_NAME"
+  fi
 }
 
 installation () {
