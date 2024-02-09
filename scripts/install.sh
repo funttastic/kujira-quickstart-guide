@@ -97,7 +97,7 @@ default_values_info () {
 pre_installation_define_passphrase () {
   clear
   echo
-  echo "   ================    PASSWORD & USERNAME SETTING PROCESS    ==============="
+  echo "   ======================   PASSWORD & USERNAME SETTING PROCESS   ======================"
   echo
   echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
   echo "   |                                                                 |"
@@ -160,7 +160,7 @@ pre_installation_define_passphrase () {
 
   clear
   echo
-  echo "   ================    PASSWORD & USERNAME SETTING PROCESS    ==============="
+  echo "   ======================   PASSWORD & USERNAME SETTING PROCESS   ======================"
   echo
   echo "   ________________________________________________________________"
   echo "   | SERVICE OR APPLICATION |  NEEDS USERNAME  |  NEEDS PASSWORD  |"
@@ -189,51 +189,57 @@ pre_installation_define_passphrase () {
 
 pre_installation_fun_frontend () {
   echo
-#  clear
-#  echo
-#  echo
-#  echo "   ==============    FUNTTASTIC FRONTEND INSTALLATION SETTINGS    ============="
-#  echo
-#
-#  default_values_info
-#
-#  echo
-#  read -rp "   Enter a port to expose the Funttastic Frontend from the instance (default = \"50000\") >>> " RESPONSE
-#
-#  if [ "$RESPONSE" == "" ]
-#  then
-#    FUN_FRONTEND_PORT=50000
-#  else
-#    FUN_FRONTEND_PORT=$RESPONSE
-#  fi
+  clear
+  echo
+  echo
+  echo "   ===================   FUNTTASTIC FRONTEND INSTALLATION SETTINGS   ==================="
+  echo
+
+  default_values_info
+
+  echo
+  read -rp "   Enter a port to expose the Funttastic Frontend from the instance (default = \"50000\") >>> " RESPONSE
+
+  if [ "$RESPONSE" == "" ]
+  then
+    FUN_FRONTEND_PORT=50000
+  else
+    FUN_FRONTEND_PORT=$RESPONSE
+  fi
+
+  FUN_FRONTEND_URL=${LOCAL_HOST_URL_PREFIX}:${FUN_FRONTEND_PORT}
+  FUN_FRONTEND_REPOSITORY_URL="https://github.com/funttastic/fun-hb-frontend.git"
+  FUN_FRONTEND_REPOSITORY_BRANCH="development"
 }
 
 pre_installation_filebrowser () {
   echo
-#  clear
-#  echo
-#  echo
-#  echo "   ==============    FILEBROWSER INSTALLATION SETTINGS    ============="
-#  echo
-#
-#  default_values_info
-#
-#  echo
-#  read -rp "   Enter a port to expose the FileBrowser from the instance (default = \"50002\") >>> " RESPONSE
-#
-#  if [ "$RESPONSE" == "" ]
-#  then
-#    FILEBROWSER_PORT=50002
-#  else
-#    FILEBROWSER_PORT=$RESPONSE
-#  fi
+  clear
+  echo
+  echo
+  echo "   =======================   FILEBROWSER INSTALLATION SETTINGS   ======================="
+  echo
+
+  default_values_info
+
+  echo
+  read -rp "   Enter a port to expose the FileBrowser from the instance (default = \"50002\") >>> " RESPONSE
+
+  if [ "$RESPONSE" == "" ]
+  then
+    FILEBROWSER_PORT=50002
+  else
+    FILEBROWSER_PORT=$RESPONSE
+  fi
+
+  FILEBROWSER_URL=${LOCAL_HOST_URL_PREFIX}:${FILEBROWSER_PORT}
 }
 
 pre_installation_fun_client () {
   clear
   echo
   echo
-  echo "   ==============    FUNTTASTIC CLIENT INSTALLATION SETTINGS    ============="
+  echo "   ====================   FUNTTASTIC CLIENT INSTALLATION SETTINGS   ===================="
   echo
 
   default_values_info
@@ -405,7 +411,7 @@ pre_installation_hb_client () {
   clear
   echo
   echo
-  echo "   ==============   HUMMINGBOT CLIENT INSTALLATION SETTINGS   ============="
+  echo "   ====================   HUMMINGBOT CLIENT INSTALLATION SETTINGS   ===================="
   echo
 
   default_values_info
@@ -438,7 +444,7 @@ pre_installation_hb_gateway () {
   clear
   echo
   echo
-  echo "   ==============   HUMMINGBOT GATEWAY INSTALLATION SETTINGS   ============="
+  echo "   ===================   HUMMINGBOT GATEWAY INSTALLATION SETTINGS   ===================="
   echo
 
   default_values_info
@@ -498,7 +504,7 @@ pre_installation_launch_apps_after_installation () {
 #  clear
 #  echo
 #  echo
-#  echo "   ==============   FUNTTASTIC CLIENT INITIALIZATION SETTING  =============="
+#  echo "   ====================   FUNTTASTIC CLIENT INITIALIZATION SETTING   ==================="
 #  echo
 #
 #  default_values_info
@@ -534,7 +540,7 @@ pre_installation_launch_apps_after_installation () {
 #  clear
 #  echo
 #  echo
-#  echo "   ==============  HUMMINGBOT GATEWAY INITIALIZATION SETTING  =============="
+#  echo "   ===================   HUMMINGBOT GATEWAY INITIALIZATION SETTING   ==================="
 #  echo
 #
 #  default_values_info
@@ -570,7 +576,7 @@ pre_installation_launch_apps_after_installation () {
   clear
   echo
   echo
-  echo "   ==============  HUMMINGBOT CLIENT INITIALIZATION SETTING  ==============="
+  echo "   ====================   HUMMINGBOT CLIENT INITIALIZATION SETTING   ==================="
   echo
 
   default_values_info
@@ -592,7 +598,7 @@ pre_installation_change_post_installation_commands () {
   clear
   echo
   echo
-  echo "   ===============  CUSTOMIZING POST-INSTALLATION COMMANDS  ================"
+  echo "   ====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
   echo
 
   default_values_info
@@ -602,11 +608,15 @@ pre_installation_change_post_installation_commands () {
 
   if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" ]]
   then
-    clear
-    echo
-    echo
-    echo "   ===============  CUSTOMIZING POST-INSTALLATION COMMANDS  ================"
-    echo
+    show_title () {
+      clear
+      echo
+      echo
+      echo "   ===============  CUSTOMIZING POST-INSTALLATION COMMANDS  ================"
+      echo
+    }
+
+    show_title
     echo "   CHOOSE WHICH SERVICE WHOSE COMMAND YOU WOULD LIKE TO CHANGE:"
     echo
     echo "   [1] CHANGE ALL APPS COMMANDS"
@@ -639,6 +649,7 @@ pre_installation_change_post_installation_commands () {
         echo "      $default_command"
         echo
         echo "   Enter the new command for the $app_name (or press ENTER to maintain default):"
+        echo
         read -rp "   >>> " RESPONSE
       fi
 
@@ -660,43 +671,114 @@ pre_installation_change_post_installation_commands () {
     while true; do
         case $APP_COMMAND in
             1)
+                clear
+                show_title
                 default_fun_client_server_command="conda activate funttastic && cd /root/funttastic/client && python app.py > /dev/null 2>&1 &"
-                set_app_post_installation_command "$default_fun_client_server_command" "Funttastic Client Server" "FUN_CLIENT_COMMAND" 0
+                set_app_post_installation_command "$default_fun_client_server_command" "Funttastic Client Server" "FUN_CLIENT_COMMAND"
 
+                clear
+                show_title
                 default_fun_client_frontend_command="cd /root/funttastic/frontend && yarn start > /dev/null 2>&1 &"
-                set_app_post_installation_command "$default_fun_client_frontend_command" "Funttastic Client Frontend" "FUN_FRONTEND_COMMAND" 0
+                set_app_post_installation_command "$default_fun_client_frontend_command" "Funttastic Client Frontend" "FUN_FRONTEND_COMMAND"
 
+                clear
+                show_title
                 default_hummingbot_client_command="conda activate hummingbot && cd /root/hummingbot/client && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log"
-                set_app_post_installation_command "$default_hummingbot_client_command" "Hummingbot Client" "HB_CLIENT_COMMAND" 0
+                set_app_post_installation_command "$default_hummingbot_client_command" "Hummingbot Client" "HB_CLIENT_COMMAND"
 
+                clear
+                show_title
                 default_hummingbot_gateway_command="cd /root/hummingbot/gateway && yarn start > /dev/null 2>&1 &"
-                set_app_post_installation_command "$default_hummingbot_gateway_command" "Hummingbot Gateway" "HB_GATEWAY_COMMAND" 0
+                set_app_post_installation_command "$default_hummingbot_gateway_command" "Hummingbot Gateway" "HB_GATEWAY_COMMAND"
 
+                clear
+                show_title
                 default_filebrowser_command="cd /root/filebrowser && filebrowser -p \$FILEBROWSER_PORT -r ../shared > /dev/null 2>&1 &"
-                set_app_post_installation_command "$default_filebrowser_command" "FileBrowser" "FILEBROWSER_COMMAND" 3
+                set_app_post_installation_command "$default_filebrowser_command" "FileBrowser" "FILEBROWSER_COMMAND"
+
+                clear
+                show_title
+                echo "   See below the modified commands:"
+                echo
+
+                if [ -n "$FUN_CLIENT_COMMAND" ]; then
+                  echo "      Funttastic Client Server: $FUN_CLIENT_COMMAND"
+                  echo
+                fi
+                if [ -n "$FUN_FRONTEND_COMMAND" ]; then
+                  echo "      Funttastic Client Frontend: $FUN_FRONTEND_COMMAND"
+                  echo
+                fi
+                if [ -n "$HB_GATEWAY_COMMAND" ]; then
+                  echo "      Hummingbot Gateway Command: $HB_GATEWAY_COMMAND"
+                  echo
+                fi
+                if [ -n "$HB_CLIENT_COMMAND" ]; then
+                  echo "      Hummingbot Client Command: $HB_CLIENT_COMMAND"
+                  echo
+                fi
+                if [ -n "$FILEBROWSER_COMMAND" ]; then
+                  echo "      FileBrowser Command: $FILEBROWSER_COMMAND"
+                  echo
+                fi
+
+                if [[ -n "$FUN_CLIENT_COMMAND" || -n "$FUN_FRONTEND_COMMAND" || -n "$HB_GATEWAY_COMMAND" || -n "$HB_CLIENT_COMMAND" || -n "$FILEBROWSER_COMMAND" ]]; then
+                  echo
+                  echo "   Waiting a few seconds for your inspection:"
+                  echo
+                  echo "      >> Waiting 1-5 seconds"
+                  sleep 1
+                  tput cuu 1
+                  tput ed
+                  echo "      >> Waiting 2-5 seconds"
+                  sleep 1
+                  tput cuu 1
+                  tput ed
+                  echo "      >> Waiting 3-5 seconds"
+                  sleep 1
+                  tput cuu 1
+                  tput ed
+                  echo "      >> Waiting 4-5 seconds"
+                  sleep 1
+                  tput cuu 1
+                  tput ed
+                  echo "      >> Waiting 4-5 seconds"
+                  sleep 1
+                fi
+
                 break
                 ;;
             2)
+                clear
+                show_title
                 default_fun_client_server_command="conda activate funttastic && cd /root/funttastic/client && python app.py > /dev/null 2>&1 &"
                 set_app_post_installation_command "$default_fun_client_server_command" "Funttastic Client Server" "FUN_CLIENT_COMMAND" 3
                 break
                 ;;
             3)
+                clear
+                show_title
                 default_fun_client_frontend_command="cd /root/funttastic/frontend && yarn start > /dev/null 2>&1 &"
                 set_app_post_installation_command "$default_fun_client_frontend_command" "Funttastic Client Frontend" "FUN_FRONTEND_COMMAND" 3
                 break
                 ;;
             4)
+                clear
+                show_title
                 default_hummingbot_client_command="conda activate hummingbot && cd /root/hummingbot/client && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log"
                 set_app_post_installation_command "$default_hummingbot_client_command" "Hummingbot Client" "HB_CLIENT_COMMAND" 3
                 break
                 ;;
             5)
+                clear
+                show_title
                 default_hummingbot_gateway_command="cd /root/hummingbot/gateway && yarn start > /dev/null 2>&1 &"
                 set_app_post_installation_command "$default_hummingbot_gateway_command" "Hummingbot Gateway" "HB_GATEWAY_COMMAND" 3
                 break
                 ;;
             6)
+                clear
+                show_title
                 default_filebrowser_command="cd /root/filebrowser && filebrowser -p \$FILEBROWSER_PORT -r ../shared > /dev/null 2>&1 &"
                 set_app_post_installation_command "$default_filebrowser_command" "FileBrowser" "FILEBROWSER_COMMAND" 3
                 break
@@ -720,7 +802,7 @@ pre_installation_lock_apt () {
   clear
   echo
   echo
-  echo "   ======================  LOCK ADDING NEW PACKAGES   ======================"
+  echo "   ===========================   LOCK ADDING NEW PACKAGES   ============================"
   echo
 
   default_values_info
@@ -732,7 +814,7 @@ pre_installation_lock_apt () {
   if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]
   then
     echo
-    echo "      You have chosen to block the addition of new packages."
+    echo "   ℹ️  You have chosen to block the addition of new packages."
     LOCK_APT="TRUE"
     sleep 3
   else
@@ -747,7 +829,7 @@ pre_installation_define_passphrase
 
 clear
 echo
-echo "   ============================     INSTALLATION OPTIONS     ==========================="
+echo "   =============================   INSTALLATION OPTIONS   =============================="
 echo
 echo "   Do you want to automate the entire process? [Y/n]"
 
@@ -784,6 +866,8 @@ else
   # Funttastic Frontend Settings
   FUN_FRONTEND_PORT=${FUN_FRONTEND_PORT:-50000}
   FUN_FRONTEND_URL=${LOCAL_HOST_URL_PREFIX}:${FUN_FRONTEND_PORT}
+  FUN_FRONTEND_REPOSITORY_URL=${FUN_FRONTEND_REPOSITORY_URL:-"https://github.com/funttastic/fun-hb-frontend.git"}
+  FUN_FRONTEND_REPOSITORY_BRANCH=${FUN_FRONTEND_REPOSITORY_BRANCH:-"development"}
 
   # Filebrowser Settings
   FILEBROWSER_PORT=${FILEBROWSER_PORT:-50002}
@@ -799,7 +883,6 @@ else
   HB_CLIENT_REPOSITORY_URL=${HB_CLIENT_REPOSITORY_URL:-"https://github.com/Team-Kujira/hummingbot.git"}
   HB_CLIENT_REPOSITORY_BRANCH=${HB_CLIENT_REPOSITORY_BRANCH:-"community"}
   HB_CLIENT_ATTACH=${HB_CLIENT_ATTACH:-"TRUE"}
-
 
   # Hummingbot Gateway Settings
   HB_GATEWAY_PORT=${HB_GATEWAY_PORT:-15888}
@@ -819,7 +902,7 @@ else
   TAG=${TAG:-"latest"}
   ENTRYPOINT=${ENTRYPOINT:-""}
 #  ENTRYPOINT=${ENTRYPOINT:-"--entrypoint=\"source /root/.bashrc && start\""}
-  LOCK_APT=${LOCK_APT:-"FALSE"}
+  LOCK_APT=${LOCK_APT:-"TRUE"}
 fi
 
 if [[ "$SSH_PUBLIC_KEY" && "$SSH_PRIVATE_KEY" ]]; then
@@ -1046,7 +1129,7 @@ then
   echo
 
   echo
-  echo "   ℹ️  Confirm below if the Funttastic Client instance and its folders are correct:"
+  echo "   ℹ️  Confirm below if the Funttastic Client Server settings are correct:"
   echo
   if [ "$BUILD_CACHE" == "--no-cache" ]; then
     printf "%25s %5s\n" "Repository url:"       "$FUN_CLIENT_REPOSITORY_URL"
@@ -1056,7 +1139,18 @@ then
   echo
 
   echo
-  echo "   ℹ️  Confirm below if the Hummingbot Client instance and its folders are correct:"
+  echo "   ℹ️  Confirm below if the Funttastic Client Fronted settings are correct:"
+  echo
+  if [ "$BUILD_CACHE" == "--no-cache" ]; then
+    printf "%25s %5s\n" "Repository url:"       "$FUN_FRONTEND_REPOSITORY_URL"
+    printf "%25s %5s\n" "Repository branch:"    "$FUN_FRONTEND_REPOSITORY_BRANCH"
+  fi
+  printf "%25s %4s\n" "Exposed port:"					"$FUN_FRONTEND_PORT"
+  printf "%25s %4s\n" "Access URL:"					  "$FUN_FRONTEND_URL"
+  echo
+
+  echo
+  echo "   ℹ️  Confirm below if the Hummingbot Client settings are correct:"
   echo
   if [ "$BUILD_CACHE" == "--no-cache" ]; then
     printf "%25s %5s\n" "Repository url:"       "$HB_CLIENT_REPOSITORY_URL"
@@ -1066,7 +1160,7 @@ then
   echo
 
   echo
-  echo "   ℹ️  Confirm below if the Hummingbot Gateway instance and its folders are correct:"
+  echo "   ℹ️  Confirm below if the Hummingbot Gateway settings are correct:"
   echo
   if [ "$BUILD_CACHE" == "--no-cache" ]; then
     printf "%25s %5s\n" "Repository url:"       "$HB_GATEWAY_REPOSITORY_URL"
@@ -1075,6 +1169,13 @@ then
   if [ "$EXPOSE_HB_GATEWAY_PORT" == "TRUE" ]; then
     printf "%25s %4s\n" "Exposed port:"					"$HB_GATEWAY_PORT"
   fi
+  echo
+
+  echo
+  echo "   ℹ️  Confirm below if the FileBrowser settings are correct:"
+  echo
+  printf "%25s %4s\n" "Exposed port:"					"$FILEBROWSER_PORT"
+  printf "%25s %4s\n" "Access URL:"					  "$FILEBROWSER_URL"
   echo
 
   if [[ -n "$FUN_CLIENT_COMMAND" || -n "$FUN_FRONTEND_COMMAND" || -n "$HB_GATEWAY_COMMAND" || -n "$HB_CLIENT_COMMAND" || -n "$FILEBROWSER_COMMAND" ]]; then
@@ -1098,6 +1199,7 @@ then
       printf "%42s %s\n" "FileBrowser Command:" "$FILEBROWSER_COMMAND"
     fi
 
+    echo
     echo
   fi
 
