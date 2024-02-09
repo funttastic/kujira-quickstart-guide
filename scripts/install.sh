@@ -617,7 +617,7 @@ pre_installation_change_post_installation_commands () {
     echo "   [6] FILEBROWSER COMMAND"
     echo
 
-    read -rp "   Enter your choice (1, 2, 3, 4, 5 or 6): " CHOICE
+    read -rp "   Enter your choice (1, 2, 3, 4, 5 or 6): " APP_COMMAND
 
     tput cuu 10
     tput ed
@@ -658,7 +658,7 @@ pre_installation_change_post_installation_commands () {
     }
 
     while true; do
-        case $CHOICE in
+        case $APP_COMMAND in
             1)
                 default_fun_client_server_command="conda activate funttastic && cd /root/funttastic/client && python app.py > /dev/null 2>&1 &"
                 set_app_post_installation_command "$default_fun_client_server_command" "Funttastic Client Server" "FUN_CLIENT_COMMAND" 0
@@ -705,7 +705,7 @@ pre_installation_change_post_installation_commands () {
                 echo
                 echo "      ❌ Invalid Input. Enter a your choice (1, 2, 3, 4, 5 or 6)."
                 echo
-                read -rp "   Enter your choice (1, 2, 3, 4, 5 or 6): " CHOICE
+                read -rp "   Enter your choice (1, 2, 3, 4, 5 or 6): " APP_COMMAND
                 ;;
         esac
     done
