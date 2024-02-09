@@ -81,7 +81,6 @@ open_in_web_navigator() {
 }
 
 prompt_proceed () {
-  RESPONSE=""
   read -rp "   Do you want to proceed? [Y/n] >>> " RESPONSE
   if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "" ]]
   then
@@ -91,7 +90,7 @@ prompt_proceed () {
 
 default_values_info () {
   echo
-  echo "ℹ️  Press [ENTER] for default values:"
+  echo "   ℹ️  Press [ENTER] for default values:"
   echo
 }
 
@@ -113,12 +112,9 @@ pre_installation_define_passphrase () {
 
   echo "   Let's get started!"
 
-  RESPONSE=$ADMIN_USERNAME
-  if [ "$RESPONSE" == "" ]
-  then
-    echo
-    read -rp "   Enter a username you want to use (default = \"admin\") >>> " RESPONSE
-  fi
+  echo
+  read -rp "   Enter a username you want to use (default = \"admin\") >>> " RESPONSE
+
   if [ "$RESPONSE" == "" ]
   then
     ADMIN_USERNAME="admin"
@@ -201,12 +197,8 @@ pre_installation_fun_frontend () {
 #
 #  default_values_info
 #
-#  RESPONSE="$FUN_FRONTEND_PORT"
-#  if [ "$RESPONSE" == "" ]
-#  then
-#    echo
-#    read -rp "   Enter a port to expose the Funttastic Frontend from the instance (default = \"50000\") >>> " RESPONSE
-#  fi
+#  echo
+#  read -rp "   Enter a port to expose the Funttastic Frontend from the instance (default = \"50000\") >>> " RESPONSE
 #
 #  if [ "$RESPONSE" == "" ]
 #  then
@@ -226,12 +218,8 @@ pre_installation_filebrowser () {
 #
 #  default_values_info
 #
-#  RESPONSE="$FILEBROWSER_PORT"
-#  if [ "$RESPONSE" == "" ]
-#  then
-#    echo
-#    read -rp "   Enter a port to expose the FileBrowser from the instance (default = \"50002\") >>> " RESPONSE
-#  fi
+#  echo
+#  read -rp "   Enter a port to expose the FileBrowser from the instance (default = \"50002\") >>> " RESPONSE
 #
 #  if [ "$RESPONSE" == "" ]
 #  then
@@ -266,11 +254,9 @@ pre_installation_fun_client () {
 
   customize_image_name () {
     # Customize the new image name?
-    RESPONSE=$IMAGE_NAME
-    if [ "$RESPONSE" == "" ]; then
-      echo
-      read -rp "   Enter a name for your new installation image (default = \"fun-kuji-hb\") >>> " RESPONSE
-    fi
+    echo
+    read -rp "   Enter a name for your new installation image (default = \"fun-kuji-hb\") >>> " RESPONSE
+
     echo
 
     if [ "$RESPONSE" == "" ]
@@ -282,12 +268,9 @@ pre_installation_fun_client () {
   }
 
   # Create a new image?
-  RESPONSE="$BUILD_CACHE"
-  if [ "$RESPONSE" == "" ]
-  then
-    echo
-    read -rp "   Do you want to use an image from a previous installation? (\"y/N\") >>> " RESPONSE
-  fi
+  echo
+  read -rp "   Do you want to use an image from a previous installation? (\"y/N\") >>> " RESPONSE
+
   if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]
   then
     echo
@@ -353,11 +336,8 @@ pre_installation_fun_client () {
   else
     BUILD_CACHE=""
 
-    RESPONSE=$IMAGE_NAME
-    if [ "$RESPONSE" == "" ]; then
-      echo
-      read -rp "   Which image do you want to reuse? (default = \"fun-kuji-hb\") >>> " RESPONSE
-    fi
+    echo
+    read -rp "   Which image do you want to reuse? (default = \"fun-kuji-hb\") >>> " RESPONSE
 
     if [ "$RESPONSE" == "" ]
     then
@@ -373,11 +353,9 @@ pre_installation_fun_client () {
 
   # Create a new container?
   RESPONSE="$CONTAINER_NAME"
-  if [ "$RESPONSE" == "" ]
-  then
-    echo
-    read -rp "   Enter a name for your new instance/container (default = \"fun-kuji-hb\") >>> " RESPONSE
-  fi
+  echo
+  read -rp "   Enter a name for your new instance/container (default = \"fun-kuji-hb\") >>> " RESPONSE
+
   if [ "$RESPONSE" == "" ]
   then
     CONTAINER_NAME="fun-kuji-hb"
@@ -389,12 +367,8 @@ pre_installation_fun_client () {
   echo "      The name {$CONTAINER_NAME} has been defined for your new instance/container."
 
   # Expose which port?
-  RESPONSE="$FUN_CLIENT_PORT"
-  if [ "$RESPONSE" == "" ]
-  then
-    echo
-    read -rp "   Enter a port to expose the Funttastic Client from the instance (default = \"50001\") >>> " RESPONSE
-  fi
+  echo
+  read -rp "   Enter a port to expose the Funttastic Client from the instance (default = \"50001\") >>> " RESPONSE
 
   if [ "$RESPONSE" == "" ]
   then
@@ -404,13 +378,10 @@ pre_installation_fun_client () {
   fi
 
   if [ "$BUILD_CACHE" == "--no-cache" ]; then
-    RESPONSE="$FUN_CLIENT_REPOSITORY_URL"
-    if [ "$RESPONSE" == "" ]
-    then
-      echo
-      read -rp "   Enter the url from the repository to be cloned
-     (default = \"https://github.com/funttastic/fun-hb-client.git\") >>> " RESPONSE
-    fi
+    echo
+    read -rp "   Enter the url from the repository to be cloned
+   (default = \"https://github.com/funttastic/fun-hb-client.git\") >>> " RESPONSE
+
     if [ "$RESPONSE" == "" ]
     then
       FUN_CLIENT_REPOSITORY_URL="https://github.com/funttastic/fun-hb-client.git"
@@ -418,49 +389,14 @@ pre_installation_fun_client () {
       FUN_CLIENT_REPOSITORY_URL="$RESPONSE"
     fi
 
-    RESPONSE="$FUN_CLIENT_REPOSITORY_BRANCH"
-    if [ "$RESPONSE" == "" ]
-    then
-      echo
-      read -rp "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
-    fi
+    echo
+    read -rp "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
+
     if [ "$RESPONSE" == "" ]
     then
       FUN_CLIENT_REPOSITORY_BRANCH="community"
     else
       FUN_CLIENT_REPOSITORY_BRANCH="$RESPONSE"
-    fi
-  fi
-
-  RESPONSE="$FUN_CLIENT_AUTO_START"
-  if [ "$RESPONSE" == "" ]
-  then
-    echo
-    read -rp "   Do you want to start the server automatically after installation? (\"Y/n\") >>> " RESPONSE
-  fi
-  if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]
-  then
-    echo
-    echo "      The server will start automatically after installation."
-    FUN_CLIENT_AUTO_START="TRUE"
-  else
-    FUN_CLIENT_AUTO_START="FALSE"
-  fi
-
-  RESPONSE="$FUN_CLIENT_AUTO_START_EVERY_TIME"
-  if [[ "$FUN_CLIENT_AUTO_START" == "TRUE" && "$FUN_CLIENT_AUTO_START_EVERY_TIME" == "" ]]; then
-    echo
-    echo "   Should the Funttastic Client server start automatically every time the container starts?
-   If you choose \"No\", you will need to start it manually every time the container starts."
-    echo
-    read -rp "   (\"Y/n\") >>> " RESPONSE
-
-    if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]; then
-      echo
-      echo "      The Funttastic Client server will start automatically every time the container starts."
-      FUN_CLIENT_AUTO_START_EVERY_TIME="TRUE"
-    else
-      FUN_CLIENT_AUTO_START_EVERY_TIME="FALSE"
     fi
   fi
 }
@@ -475,13 +411,10 @@ pre_installation_hb_client () {
   default_values_info
 
   if [ "$BUILD_CACHE" == "--no-cache" ]; then
-    RESPONSE="$HB_CLIENT_REPOSITORY_URL"
-    if [ "$RESPONSE" == "" ]
-    then
-      echo
-      read -rp "   Enter the url from the repository to be cloned
-     (default = \"https://github.com/Team-Kujira/hummingbot.git\") >>> " RESPONSE
-    fi
+    echo
+    read -rp "   Enter the url from the repository to be cloned
+   (default = \"https://github.com/Team-Kujira/hummingbot.git\") >>> " RESPONSE
+
     if [ "$RESPONSE" == "" ]
     then
       HB_CLIENT_REPOSITORY_URL="https://github.com/Team-Kujira/hummingbot.git"
@@ -489,33 +422,15 @@ pre_installation_hb_client () {
       HB_CLIENT_REPOSITORY_URL="$RESPONSE"
     fi
 
-    RESPONSE="$HB_CLIENT_REPOSITORY_BRANCH"
-    if [ "$RESPONSE" == "" ]
-    then
-      echo
-      read -rp "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
-    fi
+    echo
+    read -rp "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
+
     if [ "$RESPONSE" == "" ]
     then
       HB_CLIENT_REPOSITORY_BRANCH="community"
     else
       HB_CLIENT_REPOSITORY_BRANCH="$RESPONSE"
     fi
-  fi
-
-  RESPONSE="$HB_CLIENT_AUTO_START"
-  if [ "$RESPONSE" == "" ]
-  then
-    echo
-    read -rp "   Do you want to start the Hummingbot Client automatically after installation? (\"Y/n\") >>> " RESPONSE
-  fi
-  if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]
-  then
-    echo
-    echo "      The app will start automatically after installation."
-    HB_CLIENT_AUTO_START="TRUE"
-  else
-    HB_CLIENT_AUTO_START="FALSE"
   fi
 }
 
@@ -529,16 +444,13 @@ pre_installation_hb_gateway () {
   default_values_info
 
   # Exposed port?
-  RESPONSE="$EXPOSE_HB_GATEWAY_PORT"
-  if [ "$RESPONSE" == "" ]
-  then
-    echo
-    echo "   Do you want to expose the Gateway port from the instance?
+  echo
+  echo "   Do you want to expose the Gateway port from the instance?
    The recommended option is \"No\", but if you choose \"No\",
    you will not be able to make calls directly to the Gateway."
-    echo
-    read -rp  "   (\"y/N\") >>> " RESPONSE
-  fi
+  echo
+  read -rp  "   (\"y/N\") >>> " RESPONSE
+
   if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "No" || "$RESPONSE" == "no" || "$RESPONSE" == "" ]]; then
     echo
     echo "   ℹ️  The Gateway port will not be exposed from the instance, only Funttastic Client and
@@ -547,12 +459,9 @@ pre_installation_hb_gateway () {
   else
     EXPOSE_HB_GATEWAY_PORT="TRUE"
 
-    RESPONSE="$HB_GATEWAY_PORT"
-    if [ "$RESPONSE" == "" ]
-    then
-      echo
-      read -rp "   Enter a port to expose the Hummingbot Gateway from the instance (default = \"15888\") >>> " RESPONSE
-    fi
+    echo
+    read -rp "   Enter a port to expose the Hummingbot Gateway from the instance (default = \"15888\") >>> " RESPONSE
+
     if [ "$RESPONSE" == "" ]
     then
       HB_GATEWAY_PORT=15888
@@ -562,13 +471,10 @@ pre_installation_hb_gateway () {
   fi
 
   if [ "$BUILD_CACHE" == "--no-cache" ]; then
-    RESPONSE="$HB_GATEWAY_REPOSITORY_URL"
-    if [ "$RESPONSE" == "" ]
-    then
-      echo
-      read -rp "   Enter the url from the repository to be cloned
-     (default = \"https://github.com/Team-Kujira/gateway.git\") >>> " RESPONSE
-    fi
+    echo
+    read -rp "   Enter the url from the repository to be cloned
+       (default = \"https://github.com/Team-Kujira/gateway.git\") >>> " RESPONSE
+
     if [ "$RESPONSE" == "" ]
     then
       HB_GATEWAY_REPOSITORY_URL="https://github.com/Team-Kujira/gateway.git"
@@ -576,12 +482,9 @@ pre_installation_hb_gateway () {
       HB_GATEWAY_REPOSITORY_URL="$RESPONSE"
     fi
 
-    RESPONSE="$HB_GATEWAY_REPOSITORY_BRANCH"
-    if [ "$RESPONSE" == "" ]
-    then
-      echo
-      read -rp "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
-    fi
+    echo
+    read -rp "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
+
     if [ "$RESPONSE" == "" ]
     then
       HB_GATEWAY_REPOSITORY_BRANCH="community"
@@ -589,38 +492,223 @@ pre_installation_hb_gateway () {
       HB_GATEWAY_REPOSITORY_BRANCH="$RESPONSE"
     fi
   fi
+}
 
-  RESPONSE="$HB_GATEWAY_AUTO_START"
-  if [ "$RESPONSE" == "" ]
-  then
-    echo
-    read -rp "   Do you want to start the Gateway server automatically after installation? (\"Y/n\") >>> " RESPONSE
-  fi
+pre_installation_launch_apps_after_installation () {
+#  clear
+#  echo
+#  echo
+#  echo "   ==============   FUNTTASTIC CLIENT INITIALIZATION SETTING  =============="
+#  echo
+#
+#  default_values_info
+#
+#  echo
+#  read -rp "   Do you want to start the server automatically after installation? (\"Y/n\") >>> " RESPONSE
+#
+#  if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]
+#  then
+#    echo
+#    echo "      The server will start automatically after installation."
+#    FUN_CLIENT_AUTO_START="TRUE"
+#  else
+#    FUN_CLIENT_AUTO_START="FALSE"
+#  fi
+#
+#  if [[ "$FUN_CLIENT_AUTO_START" == "TRUE" && "$FUN_CLIENT_AUTO_START_EVERY_TIME" == "" ]]; then
+#    echo
+#    echo "   Should the Funttastic Client server start automatically every time the container starts?
+#   If you choose \"No\", you will need to start it manually every time the container starts."
+#    echo
+#    read -rp "   (\"Y/n\") >>> " RESPONSE
+#
+#    if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]; then
+#      echo
+#      echo "      The Funttastic Client server will start automatically every time the container starts."
+#      FUN_CLIENT_AUTO_START_EVERY_TIME="TRUE"
+#    else
+#      FUN_CLIENT_AUTO_START_EVERY_TIME="FALSE"
+#    fi
+#  fi
+#
+#  clear
+#  echo
+#  echo
+#  echo "   ==============  HUMMINGBOT GATEWAY INITIALIZATION SETTING  =============="
+#  echo
+#
+#  default_values_info
+#
+#  echo
+#  read -rp "   Do you want to start the Gateway server automatically after installation? (\"Y/n\") >>> " RESPONSE
+#
+#  if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]
+#  then
+#    echo
+#    echo "      The Gateway server will start automatically after installation."
+#    HB_GATEWAY_AUTO_START="TRUE"
+#  else
+#    HB_GATEWAY_AUTO_START="FALSE"
+#  fi
+#
+#  if [[ "$HB_GATEWAY_AUTO_START" == "TRUE" && "$HB_GATEWAY_AUTO_START_EVERY_TIME" == "" ]]
+#  then
+#    echo
+#    read -rp "   Should the Gateway server start automatically every time the container starts?
+#   If you choose \"No\", you will need to start it manually every time the container starts. (\"Y/n\") >>> " RESPONSE
+#
+#    if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]
+#  then
+#    echo
+#    echo "      The Gateway server will start automatically every time the container starts."
+#    HB_GATEWAY_AUTO_START_EVERY_TIME="TRUE"
+#  else
+#    HB_GATEWAY_AUTO_START_EVERY_TIME="FALSE"
+#  fi
+#  fi
+
+  clear
+  echo
+  echo
+  echo "   ==============  HUMMINGBOT CLIENT INITIALIZATION SETTING  ==============="
+  echo
+
+  default_values_info
+
+  echo
+  read -rp "   Do you want to open the Hummingbot Client UI automatically after installation? (\"Y/n\") >>> " RESPONSE
 
   if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]
   then
     echo
-    echo "      The Gateway server will start automatically after installation."
-    HB_GATEWAY_AUTO_START="TRUE"
+    echo "      The app will start automatically after installation."
+    HB_CLIENT_ATTACH="TRUE"
   else
-    HB_GATEWAY_AUTO_START="FALSE"
+    HB_CLIENT_ATTACH="FALSE"
   fi
+}
 
-  RESPONSE="$HB_GATEWAY_AUTO_START_EVERY_TIME"
-  if [[ "$HB_GATEWAY_AUTO_START" == "TRUE" && "$HB_GATEWAY_AUTO_START_EVERY_TIME" == "" ]]
-  then
-    echo
-    read -rp "   Should the Gateway server start automatically every time the container starts?
-   If you choose \"No\", you will need to start it manually every time the container starts. (\"Y/n\") >>> " RESPONSE
+pre_installation_change_post_installation_commands () {
+  clear
+  echo
+  echo
+  echo "   ===============  CUSTOMIZING POST-INSTALLATION COMMANDS  ================"
+  echo
 
-    if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]
+  default_values_info
+
+  echo
+  read -rp "   Do you want to customize any app launch commands? (\"y/N\") >>> " RESPONSE
+
+  if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" ]]
   then
+    clear
     echo
-    echo "      The Gateway server will start automatically every time the container starts."
-    HB_GATEWAY_AUTO_START_EVERY_TIME="TRUE"
-  else
-    HB_GATEWAY_AUTO_START_EVERY_TIME="FALSE"
-  fi
+    echo
+    echo "   ===============  CUSTOMIZING POST-INSTALLATION COMMANDS  ================"
+    echo
+    echo "   CHOOSE WHICH SERVICE WHOSE COMMAND YOU WOULD LIKE TO CHANGE:"
+    echo
+    echo "   [1] CHANGE ALL APPS COMMANDS"
+    echo "   [2] FUNTTASTIC CLIENT SERVER COMMAND"
+    echo "   [3] FUNTTASTIC CLIENT FRONTEND COMMAND"
+    echo "   [4] HUMMINGBOT CLIENT COMMAND"
+    echo "   [5] HUMMINGBOT GATEWAY COMMAND"
+    echo "   [6] FILEBROWSER COMMAND"
+    echo
+
+    read -rp "   Enter your choice (1, 2, 3, 4, 5 or 6): " CHOICE
+
+    tput cuu 10
+    tput ed
+
+    set_app_post_installation_command () {
+      local default_command="$1"
+      local app_name="$2"
+      local target_app_command_var_name="$3" # This is the name of the variable we want to set
+      local sleep_time="${4:-0}"
+
+      # First, we check if the target variable already has a value (using variable indirection)
+      local RESPONSE="${!target_app_command_var_name}"
+      if [ -z "$RESPONSE" ]; then
+        echo
+        echo "   ℹ️  Let's change $app_name command."
+        echo
+        echo "   The $app_name default command is:"
+        echo
+        echo "      $default_command"
+        echo
+        echo "   Enter the new command for the $app_name (or press ENTER to maintain default):"
+        read -rp "   >>> " RESPONSE
+      fi
+
+      if [ ! -z "$RESPONSE" ]; then
+        # Here we use eval to assign the value of RESPONSE to the variable named by target_app_command_var_name
+        eval "${target_app_command_var_name}='${RESPONSE}'"
+        echo
+        echo "      The new command for $app_name was defined as:"
+        # To display the value, we need variable indirection again
+        echo "         ${!target_app_command_var_name}"
+        sleep "$sleep_time"
+      else
+        echo
+        echo "      The default command was maintained for $app_name."
+        sleep "$sleep_time"
+      fi
+    }
+
+    while true; do
+        case $CHOICE in
+            1)
+                default_fun_client_server_command="conda activate funttastic && cd /root/funttastic/client && python app.py > /dev/null 2>&1 &"
+                set_app_post_installation_command "$default_fun_client_server_command" "Funttastic Client Server" "FUN_CLIENT_COMMAND" 0
+
+                default_fun_client_frontend_command="cd /root/funttastic/frontend && yarn start > /dev/null 2>&1 &"
+                set_app_post_installation_command "$default_fun_client_frontend_command" "Funttastic Client Frontend" "FUN_FRONTEND_COMMAND" 0
+
+                default_hummingbot_client_command="conda activate hummingbot && cd /root/hummingbot/client && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log"
+                set_app_post_installation_command "$default_hummingbot_client_command" "Hummingbot Client" "HB_CLIENT_COMMAND" 0
+
+                default_hummingbot_gateway_command="cd /root/hummingbot/gateway && yarn start > /dev/null 2>&1 &"
+                set_app_post_installation_command "$default_hummingbot_gateway_command" "Hummingbot Gateway" "HB_GATEWAY_COMMAND" 0
+
+                default_filebrowser_command="cd /root/filebrowser && filebrowser -p \$FILEBROWSER_PORT -r ../shared > /dev/null 2>&1 &"
+                set_app_post_installation_command "$default_filebrowser_command" "FileBrowser" "FILEBROWSER_COMMAND" 3
+                break
+                ;;
+            2)
+                default_fun_client_server_command="conda activate funttastic && cd /root/funttastic/client && python app.py > /dev/null 2>&1 &"
+                set_app_post_installation_command "$default_fun_client_server_command" "Funttastic Client Server" "FUN_CLIENT_COMMAND" 3
+                break
+                ;;
+            3)
+                default_fun_client_frontend_command="cd /root/funttastic/frontend && yarn start > /dev/null 2>&1 &"
+                set_app_post_installation_command "$default_fun_client_frontend_command" "Funttastic Client Frontend" "FUN_FRONTEND_COMMAND" 3
+                break
+                ;;
+            4)
+                default_hummingbot_client_command="conda activate hummingbot && cd /root/hummingbot/client && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log"
+                set_app_post_installation_command "$default_hummingbot_client_command" "Hummingbot Client" "HB_CLIENT_COMMAND" 3
+                break
+                ;;
+            5)
+                default_hummingbot_gateway_command="cd /root/hummingbot/gateway && yarn start > /dev/null 2>&1 &"
+                set_app_post_installation_command "$default_hummingbot_gateway_command" "Hummingbot Gateway" "HB_GATEWAY_COMMAND" 3
+                break
+                ;;
+            6)
+                default_filebrowser_command="cd /root/filebrowser && filebrowser -p \$FILEBROWSER_PORT -r ../shared > /dev/null 2>&1 &"
+                set_app_post_installation_command "$default_filebrowser_command" "FileBrowser" "FILEBROWSER_COMMAND" 3
+                break
+                ;;
+            *)
+                echo
+                echo "      ❌ Invalid Input. Enter a your choice (1, 2, 3, 4, 5 or 6)."
+                echo
+                read -rp "   Enter your choice (1, 2, 3, 4, 5 or 6): " CHOICE
+                ;;
+        esac
+    done
   fi
 }
 
@@ -637,23 +725,20 @@ pre_installation_lock_apt () {
 
   default_values_info
 
-  RESPONSE="$LOCK_APT"
-  if [ "$RESPONSE" == "" ]
+  echo
+  read -rp "   Do you want to eliminate the possibility of installing new packages inside the
+   container after its creation? (\"Y/n\") >>> " RESPONSE
+
+  if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]
   then
-    echo
-    read -rp "   Do you want to eliminate the possibility of installing new packages inside the
-   container after its creation? (\"y/N\") >>> " RESPONSE
-  fi
-  if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "No" || "$RESPONSE" == "no" || "$RESPONSE" == "" ]]
-  then
-    echo
-    echo "      The installation of new packages will be allowed."
-    LOCK_APT="FALSE"
-    sleep 3
-  else
     echo
     echo "      You have chosen to block the addition of new packages."
     LOCK_APT="TRUE"
+    sleep 3
+  else
+    echo
+    echo "      The installation of new packages will be allowed."
+    LOCK_APT="FALSE"
     sleep 3
   fi
 }
@@ -667,7 +752,7 @@ echo
 echo "   Do you want to automate the entire process? [Y/n]"
 
 echo
-echo "ℹ️  Enter the value [back] to return to the main menu."
+echo "   ℹ️  Enter the value [back] to return to the main menu."
 echo
 
 read -rp "   [Y/n/back] >>> " RESPONSE
@@ -690,6 +775,8 @@ then
   pre_installation_fun_client
   pre_installation_hb_gateway
   pre_installation_hb_client
+  pre_installation_launch_apps_after_installation
+  pre_installation_change_post_installation_commands
   pre_installation_lock_apt
 else
   # Default settings to install Funttastic Client, Hummingbot Gateway and Hummingbot Client
@@ -707,13 +794,11 @@ else
   FUN_CLIENT_REPOSITORY_URL=${FUN_CLIENT_REPOSITORY_URL:-"https://github.com/funttastic/fun-hb-client.git"}
   FUN_CLIENT_REPOSITORY_BRANCH=${FUN_CLIENT_REPOSITORY_BRANCH:-"community"}
   FUN_CLIENT_AUTO_START=${FUN_CLIENT_AUTO_START:-"TRUE"}
-  FUN_CLIENT_AUTO_START_EVERY_TIME=${FUN_CLIENT_AUTO_START_EVERY_TIME:-"TRUE"}
 
   # Hummingbot Client Settings
   HB_CLIENT_REPOSITORY_URL=${HB_CLIENT_REPOSITORY_URL:-"https://github.com/Team-Kujira/hummingbot.git"}
   HB_CLIENT_REPOSITORY_BRANCH=${HB_CLIENT_REPOSITORY_BRANCH:-"community"}
-  HB_CLIENT_AUTO_START=${HB_CLIENT_AUTO_START:-"TRUE"}
-  HB_CLIENT_AUTO_START_EVERY_TIME=${HB_CLIENT_AUTO_START_EVERY_TIME:-"TRUE"}
+  HB_CLIENT_ATTACH=${HB_CLIENT_ATTACH:-"TRUE"}
 
 
   # Hummingbot Gateway Settings
@@ -814,7 +899,7 @@ docker_create_container () {
 post_installation () {
   open_in_web_navigator "$FILEBROWSER_URL" "$FUN_FRONTEND_URL"
 
-  if [ "$HB_CLIENT_AUTO_START" == "TRUE" ]; then
+  if [ "$HB_CLIENT_ATTACH" == "TRUE" ]; then
     docker attach "$CONTAINER_NAME"
   fi
 }
@@ -950,38 +1035,38 @@ then
   fi
 
   echo
-  echo "ℹ️  Confirm below if the common settings are correct:"
+  echo "   ℹ️  Confirm below if the common settings are correct:"
   echo
   printf "%25s %5s\n" "Image:"              	"$IMAGE_NAME"
   printf "%25s %5s\n" "Instance:"        			"$CONTAINER_NAME"
   printf "%25s %3s\n" "Reuse image:"    		  "$REUSE_IMAGE"
   printf "%25s %5s\n" "Version:"              "$TAG"
   printf "%25s %5s\n" "Entrypoint:"    				"$DEFINED_ENTRYPOINT"
+  printf "%25s %3s\n" "Lock APT:"    				  "$LOCK_APT"
   echo
 
   echo
-  echo "ℹ️  Confirm below if the Funttastic Client instance and its folders are correct:"
+  echo "   ℹ️  Confirm below if the Funttastic Client instance and its folders are correct:"
   echo
   if [ "$BUILD_CACHE" == "--no-cache" ]; then
     printf "%25s %5s\n" "Repository url:"       "$FUN_CLIENT_REPOSITORY_URL"
     printf "%25s %5s\n" "Repository branch:"    "$FUN_CLIENT_REPOSITORY_BRANCH"
   fi
   printf "%25s %4s\n" "Exposed port:"					"$FUN_CLIENT_PORT"
-  printf "%25s %3s\n" "Autostart:"    		    "$FUN_CLIENT_AUTO_START"
   echo
 
   echo
-  echo "ℹ️  Confirm below if the Hummingbot Client instance and its folders are correct:"
+  echo "   ℹ️  Confirm below if the Hummingbot Client instance and its folders are correct:"
   echo
   if [ "$BUILD_CACHE" == "--no-cache" ]; then
     printf "%25s %5s\n" "Repository url:"       "$HB_CLIENT_REPOSITORY_URL"
     printf "%25s %5s\n" "Repository branch:"    "$HB_CLIENT_REPOSITORY_BRANCH"
   fi
-  printf "%25s %3s\n" "Autostart:"    		    "$HB_CLIENT_AUTO_START"
+  printf "%25s %3s\n" "See UI On Finish:"    		    "$HB_CLIENT_ATTACH"
   echo
 
   echo
-  echo "ℹ️  Confirm below if the Hummingbot Gateway instance and its folders are correct:"
+  echo "   ℹ️  Confirm below if the Hummingbot Gateway instance and its folders are correct:"
   echo
   if [ "$BUILD_CACHE" == "--no-cache" ]; then
     printf "%25s %5s\n" "Repository url:"       "$HB_GATEWAY_REPOSITORY_URL"
@@ -990,8 +1075,31 @@ then
   if [ "$EXPOSE_HB_GATEWAY_PORT" == "TRUE" ]; then
     printf "%25s %4s\n" "Exposed port:"					"$HB_GATEWAY_PORT"
   fi
-  printf "%25s %3s\n" "Autostart:"    		    "$HB_GATEWAY_AUTO_START"
   echo
+
+  if [[ -n "$FUN_CLIENT_COMMAND" || -n "$FUN_FRONTEND_COMMAND" || -n "$HB_GATEWAY_COMMAND" || -n "$HB_CLIENT_COMMAND" || -n "$FILEBROWSER_COMMAND" ]]; then
+    echo
+    echo "   ℹ️  Confirm below if the personalized apps post installation commands are correct:"
+    echo
+
+    if [ -n "$FUN_CLIENT_COMMAND" ]; then
+      printf "%42s %s\n" "Funttastic Client Server Command:" "$FUN_CLIENT_COMMAND"
+    fi
+    if [ -n "$FUN_FRONTEND_COMMAND" ]; then
+      printf "%42s %s\n" "Funttastic Client Frontend Command:" "$FUN_FRONTEND_COMMAND"
+    fi
+    if [ -n "$HB_GATEWAY_COMMAND" ]; then
+      printf "%42s %s\n" "Hummingbot Gateway Command:" "$HB_GATEWAY_COMMAND"
+    fi
+    if [ -n "$HB_CLIENT_COMMAND" ]; then
+      printf "%42s %s\n" "Hummingbot Client Command:" "$HB_CLIENT_COMMAND"
+    fi
+    if [ -n "$FILEBROWSER_COMMAND" ]; then
+      printf "%42s %s\n" "FileBrowser Command:" "$FILEBROWSER_COMMAND"
+    fi
+
+    echo
+  fi
 
   prompt_proceed
 

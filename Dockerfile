@@ -90,7 +90,7 @@ RUN <<-EOF
   then
     echo "export FUN_FRONTEND_COMMAND=\"cd /root/funttastic/frontend && yarn start > /dev/null 2>&1 &\"" >> ~/.bashrc
   else
-    echo "export FUN_FRONTEND_COMMAND=$FUN_FRONTEND_COMMAND" >> ~/.bashrc
+    echo "export FUN_FRONTEND_COMMAND=\"$FUN_FRONTEND_COMMAND\"" >> ~/.bashrc
   fi
 
   # Funttastic Client server environment variables
@@ -106,7 +106,7 @@ RUN <<-EOF
   then
     echo "export FUN_CLIENT_COMMAND=\"conda activate funttastic && cd /root/funttastic/client && python app.py > /dev/null 2>&1 &\"" >> ~/.bashrc
   else
-    echo "export FUN_CLIENT_COMMAND=$FUN_CLIENT_COMMAND" >> ~/.bashrc
+    echo "export FUN_CLIENT_COMMAND=\"$FUN_CLIENT_COMMAND\"" >> ~/.bashrc
   fi
 
   # HB Gateway environment variables
@@ -122,7 +122,7 @@ RUN <<-EOF
   then
     echo "export HB_GATEWAY_COMMAND=\"cd /root/hummingbot/gateway && yarn start > /dev/null 2>&1 &\"" >> ~/.bashrc
   else
-    echo "export HB_GATEWAY_COMMAND=$HB_GATEWAY_COMMAND" >> ~/.bashrc
+    echo "export HB_GATEWAY_COMMAND=\"$HB_GATEWAY_COMMAND\"" >> ~/.bashrc
   fi
 
   # HB Client environment variables
@@ -131,7 +131,7 @@ RUN <<-EOF
   then
     echo "export HB_CLIENT_COMMAND=\"conda activate hummingbot && cd /root/hummingbot/client && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log\"" >> ~/.bashrc
   else
-    echo "export HB_CLIENT_COMMAND=$HB_CLIENT_COMMAND" >> ~/.bashrc
+    echo "export HB_CLIENT_COMMAND=\"$HB_CLIENT_COMMAND\"" >> ~/.bashrc
   fi
 
   # FileBrowser environment variables
@@ -147,7 +147,7 @@ RUN <<-EOF
   then
     echo "export FILEBROWSER_COMMAND=\"cd /root/filebrowser && filebrowser -p \$FILEBROWSER_PORT -r ../shared > /dev/null 2>&1 &\"" >> ~/.bashrc
   else
-    echo "export FILEBROWSER_COMMAND=$FILEBROWSER_COMMAND" >> ~/.bashrc
+    echo "export FILEBROWSER_COMMAND=\"$FILEBROWSER_COMMAND\"" >> ~/.bashrc
   fi
 
   echo -e "\n" >> ~/.bashrc
