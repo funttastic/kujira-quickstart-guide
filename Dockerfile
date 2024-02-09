@@ -665,7 +665,7 @@ RUN <<-EOF
 
 	if [ "$LOCK_APT" == "TRUE" ]
 	then
-		apt autore:wqmove -y
+		apt autoremove -y
 
 		apt clean autoclean
 
