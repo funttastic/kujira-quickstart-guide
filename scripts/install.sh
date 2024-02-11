@@ -9,6 +9,7 @@ MIN_PASSPHRASE_LENGTH=4
 ENTRYPOINT=""
 NETWORK="host"
 LOCAL_HOST_URL_PREFIX="http://localhost"
+DEFAULT_WAITING_TIME=3
 
 generate_passphrase() {
     local length=$1
@@ -92,6 +93,10 @@ default_values_info () {
   echo
   echo "   ℹ️  Press [ENTER] for default values:"
   echo
+}
+
+pre_installation_waiting () {
+  sleep $DEFAULT_WAITING_TIME
 }
 
 pre_installation_define_passphrase () {
@@ -501,78 +506,6 @@ pre_installation_hb_gateway () {
 }
 
 pre_installation_launch_apps_after_installation () {
-#  clear
-#  echo
-#  echo
-#  echo "   ====================   FUNTTASTIC CLIENT INITIALIZATION SETTING   ==================="
-#  echo
-#
-#  default_values_info
-#
-#  echo
-#  read -rp "   Do you want to start the server automatically after installation? (\"Y/n\") >>> " RESPONSE
-#
-#  if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]
-#  then
-#    echo
-#    echo "      The server will start automatically after installation."
-#    FUN_CLIENT_AUTO_START="TRUE"
-#  else
-#    FUN_CLIENT_AUTO_START="FALSE"
-#  fi
-#
-#  if [[ "$FUN_CLIENT_AUTO_START" == "TRUE" && "$FUN_CLIENT_AUTO_START_EVERY_TIME" == "" ]]; then
-#    echo
-#    echo "   Should the Funttastic Client server start automatically every time the container starts?
-#   If you choose \"No\", you will need to start it manually every time the container starts."
-#    echo
-#    read -rp "   (\"Y/n\") >>> " RESPONSE
-#
-#    if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]; then
-#      echo
-#      echo "      The Funttastic Client server will start automatically every time the container starts."
-#      FUN_CLIENT_AUTO_START_EVERY_TIME="TRUE"
-#    else
-#      FUN_CLIENT_AUTO_START_EVERY_TIME="FALSE"
-#    fi
-#  fi
-#
-#  clear
-#  echo
-#  echo
-#  echo "   ===================   HUMMINGBOT GATEWAY INITIALIZATION SETTING   ==================="
-#  echo
-#
-#  default_values_info
-#
-#  echo
-#  read -rp "   Do you want to start the Gateway server automatically after installation? (\"Y/n\") >>> " RESPONSE
-#
-#  if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]
-#  then
-#    echo
-#    echo "      The Gateway server will start automatically after installation."
-#    HB_GATEWAY_AUTO_START="TRUE"
-#  else
-#    HB_GATEWAY_AUTO_START="FALSE"
-#  fi
-#
-#  if [[ "$HB_GATEWAY_AUTO_START" == "TRUE" && "$HB_GATEWAY_AUTO_START_EVERY_TIME" == "" ]]
-#  then
-#    echo
-#    read -rp "   Should the Gateway server start automatically every time the container starts?
-#   If you choose \"No\", you will need to start it manually every time the container starts. (\"Y/n\") >>> " RESPONSE
-#
-#    if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]
-#  then
-#    echo
-#    echo "      The Gateway server will start automatically every time the container starts."
-#    HB_GATEWAY_AUTO_START_EVERY_TIME="TRUE"
-#  else
-#    HB_GATEWAY_AUTO_START_EVERY_TIME="FALSE"
-#  fi
-#  fi
-
   clear
   echo
   echo
@@ -726,24 +659,16 @@ pre_installation_change_post_installation_commands () {
                   echo
                   echo "   Waiting a few seconds for your inspection:"
                   echo
-                  echo "      >> Waiting 1-5 seconds"
-                  sleep 1
-                  tput cuu 1
-                  tput ed
-                  echo "      >> Waiting 2-5 seconds"
-                  sleep 1
-                  tput cuu 1
-                  tput ed
-                  echo "      >> Waiting 3-5 seconds"
-                  sleep 1
-                  tput cuu 1
-                  tput ed
-                  echo "      >> Waiting 4-5 seconds"
-                  sleep 1
-                  tput cuu 1
-                  tput ed
-                  echo "      >> Waiting 4-5 seconds"
-                  sleep 1
+
+                  max_waiting_time=5
+
+                  for i in $(seq 1 $max_waiting_time)
+                  do
+                      echo "      >> Waiting $i-$max_waiting_time seconds"
+                      sleep 1
+                      tput cuu 1
+                      tput ed
+                  done
                 fi
 
                 break
@@ -858,10 +783,6 @@ pre_installation_lock_apt () {
   fi
 }
 
-pre_installation_waiting () {
-  sleep 3
-}
-
 pre_installation_define_passphrase
 
 clear
@@ -897,6 +818,7 @@ then
   pre_installation_launch_apps_after_installation
   pre_installation_change_post_installation_commands
   pre_installation_open_apps_in_browser
+  pre_installation_waiting
   pre_installation_lock_apt
   pre_installation_waiting
 else
