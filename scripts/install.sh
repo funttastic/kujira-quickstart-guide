@@ -749,7 +749,7 @@ pre_installation_open_apps_in_browser () {
     OPEN_IN_BROWSER="TRUE"
   else
     echo
-    echo "      The installation of new packages will be allowed."
+    echo "   ℹ️  You chose 'No'. Applications will NOT open in the browser after installation."
     OPEN_IN_BROWSER="FALSE"
   fi
 }
