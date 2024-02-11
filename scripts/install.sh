@@ -794,6 +794,41 @@ pre_installation_change_post_installation_commands () {
   fi
 }
 
+pre_installation_open_apps_in_browser () {
+  if [ "$BUILD_CACHE" == "" ]; then
+    return
+  fi
+
+  clear
+  echo
+  echo
+  echo "   ===========================   OPEN APPS IN THE BROWSER   ============================"
+  echo
+
+  default_values_info
+
+  echo
+  echo "   Do you want to open the management apps in the browser after the installation is complete?"
+  echo
+  echo "   Applications to open:"
+  echo
+  echo "      > FUNTTASTIC CLIENT FRONTEND [$FUN_FRONTEND_URL]"
+  echo "      > FILEBROWSER [$FILEBROWSER_URL]"
+  echo
+  read -rp "   [\"Y/n\"] >>> " RESPONSE
+
+  if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]
+  then
+    echo
+    echo "   ℹ️  You chose 'Yes'. Applications will open in the browser after installation."
+    OPEN_IN_BROWSER="TRUE"
+  else
+    echo
+    echo "      The installation of new packages will be allowed."
+    OPEN_IN_BROWSER="FALSE"
+  fi
+}
+
 pre_installation_lock_apt () {
   if [ "$BUILD_CACHE" == "" ]; then
     return
@@ -816,13 +851,15 @@ pre_installation_lock_apt () {
     echo
     echo "   ℹ️  You have chosen to block the addition of new packages."
     LOCK_APT="TRUE"
-    sleep 3
   else
     echo
     echo "      The installation of new packages will be allowed."
     LOCK_APT="FALSE"
-    sleep 3
   fi
+}
+
+pre_installation_waiting () {
+  sleep 3
 }
 
 pre_installation_define_passphrase
@@ -859,7 +896,9 @@ then
   pre_installation_hb_client
   pre_installation_launch_apps_after_installation
   pre_installation_change_post_installation_commands
+  pre_installation_open_apps_in_browser
   pre_installation_lock_apt
+  pre_installation_waiting
 else
   # Default settings to install Funttastic Client, Hummingbot Gateway and Hummingbot Client
 
@@ -902,6 +941,7 @@ else
   TAG=${TAG:-"latest"}
   ENTRYPOINT=${ENTRYPOINT:-""}
 #  ENTRYPOINT=${ENTRYPOINT:-"--entrypoint=\"source /root/.bashrc && start\""}
+  OPEN_IN_BROWSER=${OPEN_IN_BROWSER:-"TRUE"}
   LOCK_APT=${LOCK_APT:-"TRUE"}
 fi
 
@@ -980,7 +1020,9 @@ docker_create_container () {
 }
 
 post_installation () {
-  open_in_web_navigator "$FILEBROWSER_URL" "$FUN_FRONTEND_URL"
+  if [ "$OPEN_IN_BROWSER" == "TRUE" ]; then
+    open_in_web_navigator "$FILEBROWSER_URL" "$FUN_FRONTEND_URL"
+  fi
 
   if [ "$HB_CLIENT_ATTACH" == "TRUE" ]; then
     docker attach "$CONTAINER_NAME"
@@ -1126,6 +1168,7 @@ then
   printf "%25s %5s\n" "Version:"              "$TAG"
   printf "%25s %5s\n" "Entrypoint:"    				"$DEFINED_ENTRYPOINT"
   printf "%25s %3s\n" "Lock APT:"    				  "$LOCK_APT"
+  printf "%25s %3s\n" "Open Management Apps:" "$OPEN_IN_BROWSER"
   echo
 
   echo
