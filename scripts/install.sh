@@ -240,11 +240,11 @@ pre_installation_filebrowser () {
   FILEBROWSER_URL=${LOCAL_HOST_URL_PREFIX}:${FILEBROWSER_PORT}
 }
 
-pre_installation_fun_client () {
+pre_installation_image_and_container () {
   clear
   echo
   echo
-  echo "   ====================   FUNTTASTIC CLIENT INSTALLATION SETTINGS   ===================="
+  echo "   ======================   DOCKER IMAGE AND CONTAINER SETTINGS   ======================"
   echo
 
   default_values_info
@@ -376,6 +376,16 @@ pre_installation_fun_client () {
 
   echo
   echo "      The name {$CONTAINER_NAME} has been defined for your new instance/container."
+}
+
+pre_installation_fun_client () {
+  clear
+  echo
+  echo
+  echo "   ====================   FUNTTASTIC CLIENT INSTALLATION SETTINGS   ===================="
+  echo
+
+  default_values_info
 
   # Expose which port?
   echo
@@ -810,10 +820,11 @@ fi
 if [ "$CUSTOMIZE" == "--customize" ]
 then
   CHOICE="ALL"
-  pre_installation_fun_frontend
-  pre_installation_filebrowser
+  pre_installation_image_and_container
   pre_installation_fun_client
+  pre_installation_fun_frontend
   pre_installation_hb_gateway
+  pre_installation_filebrowser
   pre_installation_hb_client
   pre_installation_launch_apps_after_installation
   pre_installation_change_post_installation_commands
