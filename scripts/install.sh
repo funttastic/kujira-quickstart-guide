@@ -27,42 +27,6 @@ generate_passphrase() {
     echo "$passphrase"
 }
 
-container_exists() {
-    # Use the provided container name or the global variable CONTAINER_NAME
-    local container_name="${1:-$CONTAINER_NAME}"
-
-    # Getting the list of containers
-    local containers
-    containers=$(docker ps -a --format "{{.Names}}")
-
-    # Checking if the container exists
-    CONTAINER_EXISTS="FALSE"
-    for name in $containers; do
-        if [ "$name" = "$container_name" ]; then
-            CONTAINER_EXISTS="TRUE"
-            break
-        fi
-    done
-}
-
-image_exists() {
-    # Use the provided image name or the global variable IMAGE_NAME
-    local image_name="${1:-$IMAGE_NAME}"
-
-    # Getting the list of images
-    local images
-    images=$(docker images --format "{{.Repository}}")
-
-    # Checking if the image exists
-    IMAGE_EXISTS="FALSE"
-    for name in $images; do
-        if [ "$name" = "$image_name" ]; then
-            IMAGE_EXISTS="TRUE"
-            break
-        fi
-    done
-}
-
 open_in_web_navigator() {
     urls=("$@")
 
@@ -245,6 +209,33 @@ pre_installation_image_and_container() {
 
     default_values_info
 
+    container_exists() {
+        # Accepts a container name as the first argument, defaults to CONTAINER_NAME if not provided
+        local container_name="${1:-$CONTAINER_NAME}"
+
+        # Checks if the specified container exists using docker ps and grep, returns true (0) if found
+        docker ps -a --format "{{.Names}}" | grep -wq "$container_name"
+        return $?
+    }
+
+    image_exists() {
+        # Use the provided image name or the global variable IMAGE_NAME
+        local image_name="${1:-$IMAGE_NAME}"
+
+        # Getting the list of images
+        local images
+        images=$(docker images --format "{{.Repository}}")
+
+        # Checking if the image exists
+        IMAGE_EXISTS="FALSE"
+        for name in $images; do
+            if [ "$name" = "$image_name" ]; then
+                IMAGE_EXISTS="TRUE"
+                break
+            fi
+        done
+    }
+
     remove_docker_image() {
         # Docker image name
         local image_name=${1:-$IMAGE_NAME}
@@ -257,6 +248,28 @@ pre_installation_image_and_container() {
 
         # Remove the image
         docker rmi "$image_name" >/dev/null 2>&1
+    }
+
+    remove_docker_container() {
+        # Docker container name or ID
+        local container_name_or_id=${1:-$CONTAINER_NAME}
+
+        # Stops the specified container if it's running
+        docker stop "$container_name_or_id" >/dev/null 2>&1
+
+        # Removes the specified container
+        docker rm "$container_name_or_id" >/dev/null 2>&1
+    }
+
+    should_prune_docker() {
+        echo
+        read -rp "   Are you sure you want to remove all Docker images and containers? (\"y/N\") >>> " RESPONSE
+
+        if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]; then
+            return 1
+        else
+            return 0
+        fi
     }
 
     customize_image_name() {
@@ -316,6 +329,14 @@ pre_installation_image_and_container() {
                     break
                     ;;
                 2)
+                    echo
+                    read -rp "   Are you sure you want to remove the image \"$image_name\"? (\"y/N\") >>> " RESPONSE
+
+                    if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]; then
+                        echo "NOT IMPLEMENTED"
+                        return
+                    fi
+
                     remove_docker_image "$IMAGE_NAME"
                     NO_CONFLICT="TRUE"
                     break
@@ -355,19 +376,83 @@ pre_installation_image_and_container() {
       A new image will not be created, just a new container."
     fi
 
-    # Create a new container?
-    RESPONSE="$CONTAINER_NAME"
-    echo
-    read -rp "   Enter a name for your new instance/container (default = \"fun-kuji-hb\") >>> " RESPONSE
+    customize_container_name() {
+        # Create a new container?
+        RESPONSE="$CONTAINER_NAME"
+        echo
+        read -rp "   Enter a name for your new instance/container (default = \"fun-kuji-hb\") >>> " RESPONSE
 
-    if [ "$RESPONSE" == "" ]; then
-        CONTAINER_NAME="fun-kuji-hb"
+        if [ "$RESPONSE" == "" ]; then
+            CONTAINER_NAME="fun-kuji-hb"
+        else
+            CONTAINER_NAME=$RESPONSE
+        fi
+    }
+
+    handle_container_name_conflict() {
+        echo
+        echo "      ⚠️  An container with the name \"$CONTAINER_NAME\", which you defined, already exists!"
+        echo
+        echo "      To ensure that no crashes occur while creating this new container, choose one
+      of the options below."
+        echo
+        echo "      [1] SET A DIFFERENT NAME"
+        echo "      [2] REMOVE EXISTING CONTAINER"
+        echo "      [3] REMOVE ALL IMAGES & CONTAINERS [USE WITH CARE]"
+        echo
+
+        read -rp "      Enter your choice (1, 2 or 3): " OPTION
+
+        case $OPTION in
+        1)
+            while true; do
+                customize_container_name
+                if container_exists "$CONTAINER_NAME"; then
+                    echo
+                    echo "      ⚠️  The name \"$CONTAINER_NAME\" is already in use. Please choose a different name."
+                else
+                    break
+                fi
+            done
+            ;;
+        2)
+            echo
+            read -rp "   Are you sure you want to remove the container \"$container_name_or_id\"? (\"y/N\") >>> " RESPONSE
+
+            if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]; then
+                tput cuu 13
+                tput ed
+
+                handle_container_name_conflict
+            else
+                remove_docker_container "$CONTAINER_NAME"
+            fi
+            ;;
+        3)
+            if should_prune_docker; then
+                ./scripts/utils/destroy-all-containers-and-images.sh >/dev/null 2>&1 &
+            else
+                tput cuu 13
+                tput ed
+
+                handle_container_name_conflict
+            fi
+            ;;
+        *)
+            echo "      ❌ Invalid Input. Restart the script and try again."
+            exit 1
+            ;;
+        esac
+    }
+
+    customize_container_name
+
+    if container_exists "$CONTAINER_NAME"; then
+        handle_container_name_conflict
     else
-        CONTAINER_NAME=$RESPONSE
+        echo
+        echo "      ✅ The name \"$CONTAINER_NAME\" is set for your new instance/container."
     fi
-
-    echo
-    echo "      The name {$CONTAINER_NAME} has been defined for your new instance/container."
 }
 
 pre_installation_fun_client() {
