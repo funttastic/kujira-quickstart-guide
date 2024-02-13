@@ -105,6 +105,7 @@ pre_installation_define_passphrase() {
                 echo "   Please, repeat the passphrase. Type \"see-pass\" to momentarily see the previously entered password."
                 echo
                 read -s -rp "   >>> " REPEATED_PASSPHRASE
+
                 if [ "$REPEATED_PASSPHRASE" = "see-pass" ]; then
                     echo "$ADMIN_PASSWORD"
                     sleep 3
@@ -219,21 +220,12 @@ pre_installation_image_and_container() {
     }
 
     image_exists() {
-        # Use the provided image name or the global variable IMAGE_NAME
+        # Accepts an image name as the first argument, defaults to IMAGE_NAME if not provided
         local image_name="${1:-$IMAGE_NAME}"
 
-        # Getting the list of images
-        local images
-        images=$(docker images --format "{{.Repository}}")
-
-        # Checking if the image exists
-        IMAGE_EXISTS="FALSE"
-        for name in $images; do
-            if [ "$name" = "$image_name" ]; then
-                IMAGE_EXISTS="TRUE"
-                break
-            fi
-        done
+        # Checks if the specified image exists using docker images and grep, returns true (0) if found
+        docker images --format "{{.Repository}}" | grep -wq "$image_name"
+        return $?
     }
 
     remove_docker_image() {
@@ -272,108 +264,116 @@ pre_installation_image_and_container() {
         fi
     }
 
-    customize_image_name() {
-        # Customize the new image name?
-        echo
-        read -rp "   Enter a name for your new installation image (default = \"fun-kuji-hb\") >>> " RESPONSE
+		customize_image_name() {
+				# Customize the new image name?
+				echo
+				read -rp "   Enter a name for your new installation image (default = \"fun-kuji-hb\") >>> " RESPONSE
 
-        echo
+				echo
 
-        if [ "$RESPONSE" == "" ]; then
-            IMAGE_NAME="fun-kuji-hb"
+				if [ -z "$RESPONSE" ]; then
+						IMAGE_NAME="fun-kuji-hb"
+				else
+						IMAGE_NAME="$RESPONSE"
+				fi
+		}
+
+    should_reuse_image () {
+        echo
+        read -rp "   Do you want to use an image from a previous installation? (\"y/N\") >>> " RESPONSE
+
+        if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]; then
+            return 1
         else
-            IMAGE_NAME="$RESPONSE"
+            return 0
         fi
     }
 
-    # Create a new image?
-    echo
-    read -rp "   Do you want to use an image from a previous installation? (\"y/N\") >>> " RESPONSE
-
-    if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]; then
-        echo
-        echo "      A new image/installation will be done..."
-
-        BUILD_CACHE="--no-cache"
-
-        customize_image_name
-
-        image_exists "$IMAGE_NAME"
-
-        if [ "$IMAGE_EXISTS" == "TRUE" ]; then
-            NO_CONFLICT="FALSE"
-
-            echo "      ⚠️  An installation image with the name \"$IMAGE_NAME\", which you defined
-         for this new installation, already exists!"
-            echo
-            echo "      To ensure that no crashes occur while creating this new image, choose one
-      of the options below."
-            echo
-            echo "      [1] SET A DIFFERENT NAME"
-            echo "      [2] REMOVE EXISTING IMAGE"
-            echo "      [3] REMOVE ALL IMAGES & CONTAINERS"
-            echo
-
-            read -rp "      Enter your choice (1, 2 or 3): " OPTION
-
-            while true; do
-                case $OPTION in
-                1)
-                    customize_image_name
-                    image_exists "$IMAGE_NAME"
-
-                    if [ "$IMAGE_EXISTS" == "FALSE" ]; then
-                        NO_CONFLICT="TRUE"
-                    fi
-
-                    break
-                    ;;
-                2)
-                    echo
-                    read -rp "   Are you sure you want to remove the image \"$image_name\"? (\"y/N\") >>> " RESPONSE
-
-                    if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]; then
-                        echo "NOT IMPLEMENTED"
-                        return
-                    fi
-
-                    remove_docker_image "$IMAGE_NAME"
-                    NO_CONFLICT="TRUE"
-                    break
-                    ;;
-                3)
-                    ./scripts/utils/destroy-all-containers-and-images.sh >/dev/null 2>&1 &
-                    NO_CONFLICT="TRUE"
-                    break
-                    ;;
-                *)
-                    echo
-                    echo "      ❌ Invalid Input. Enter a your choice (1, 2 or 3)"
-                    echo
-                    read -rp "      Enter your choice (1, 2 or 3): " OPTION
-                    ;;
-                esac
-            done
-        fi
-
-        if [[ "$NO_CONFLICT" == "TRUE" || "$IMAGE_EXISTS" == "FALSE" ]]; then
-            echo "      The name {$IMAGE_NAME} has been defined for your new image."
-        fi
-    else
-        BUILD_CACHE=""
-
+    if should_reuse_image; then
         echo
         read -rp "   Which image do you want to reuse? (default = \"fun-kuji-hb\") >>> " RESPONSE
 
-        if [ "$RESPONSE" == "" ]; then
-            IMAGE_NAME="fun-kuji-hb"
+        if [ "$RESPONSE" == "" ]
+        then
+          IMAGE_NAME="fun-kuji-hb"
         else
-            IMAGE_NAME="$RESPONSE"
+          IMAGE_NAME="$RESPONSE"
         fi
 
         echo
         echo "      The image {$IMAGE_NAME} will be reused.
       A new image will not be created, just a new container."
+    else
+        echo
+        echo "      A new image/installation will be done..."
+
+        BUILD_CACHE="--no-cache"
+
+        handle_image_name_conflict() {
+          echo "   ⚠️  An installation image with the name \"$IMAGE_NAME\", which you defined"
+      	  echo "      for this new installation, already exists!"
+          echo
+          echo "      To ensure that no crashes occur while creating this new image, choose one"
+      		echo "      of the options below."
+          echo
+          echo "      [1] SET A DIFFERENT NAME"
+          echo "      [2] REMOVE EXISTING IMAGE"
+          echo "      [3] REMOVE ALL IMAGES & CONTAINERS"
+          echo
+
+          read -rp "      Enter your choice (1, 2 or 3): " OPTION
+
+          case $OPTION in
+            1)
+              while true; do
+                customize_image_name
+
+                if image_exists "$IMAGE_NAME"; then
+                  echo "      ⚠️  The name \"$IMAGE_NAME\" is already in use. Please choose a different name."
+                else
+									echo "      ✅ The name {$IMAGE_NAME} has been defined for your new image."
+                  break
+                fi
+              done
+              ;;
+            2)
+                echo
+                read -rp "   Are you sure you want to remove the image \"$IMAGE_NAME\"? (\"y/N\") >>> " RESPONSE
+
+                if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]; then
+                    tput cuu 13
+                    tput ed
+
+                    handle_image_name_conflict
+                else
+                    remove_docker_image "$IMAGE_NAME"
+                fi
+              ;;
+            3)
+              if should_prune_docker; then
+                ./scripts/utils/destroy-all-containers-and-images.sh > /dev/null 2>&1 &
+              else
+                tput cuu 13
+                tput ed
+
+                handle_image_name_conflict
+              fi
+              ;;
+            *)
+              echo "      ❌ Invalid Input. Restart the script and try again."
+              exit 1
+              ;;
+          esac
+        }
+
+        customize_image_name
+
+        if image_exists "$IMAGE_NAME"; then
+          handle_image_name_conflict
+        else
+          echo
+          echo "      The name {$IMAGE_NAME} has been defined for your new image."
+        fi
     fi
 
     customize_container_name() {
@@ -411,13 +411,16 @@ pre_installation_image_and_container() {
                     echo
                     echo "      ⚠️  The name \"$CONTAINER_NAME\" is already in use. Please choose a different name."
                 else
+                		echo
+                    echo "      ✅ The name \"$CONTAINER_NAME\" is set for your new instance/container."
+
                     break
                 fi
             done
             ;;
         2)
             echo
-            read -rp "   Are you sure you want to remove the container \"$container_name_or_id\"? (\"y/N\") >>> " RESPONSE
+            read -rp "   Are you sure you want to remove the container \"$CONTAINER_NAME\"? (\"y/N\") >>> " RESPONSE
 
             if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]; then
                 tput cuu 13
