@@ -102,7 +102,7 @@ pre_installation_define_passphrase() {
         else
             while true; do
                 echo
-                echo "   Please, repeat the passphrase. Type \"see-pass\" to momentarily see the previously entered password."
+                echo "   Please, repeat the passphrase. ℹ️  Enter \"see-pass\" to momentarily see the previously entered password."
                 echo
                 read -s -rp "   >>> " REPEATED_PASSPHRASE
 
@@ -371,8 +371,7 @@ pre_installation_image_and_container() {
         if image_exists "$IMAGE_NAME"; then
           handle_image_name_conflict
         else
-          echo
-          echo "      The name {$IMAGE_NAME} has been defined for your new image."
+          echo "      ✅ The name {$IMAGE_NAME} has been defined for your new image."
         fi
     fi
 
@@ -452,9 +451,9 @@ pre_installation_image_and_container() {
 
     if container_exists "$CONTAINER_NAME"; then
         handle_container_name_conflict
-    else
-        echo
-        echo "      ✅ The name \"$CONTAINER_NAME\" is set for your new instance/container."
+#    else
+#        echo
+#        echo "      ✅ The name \"$CONTAINER_NAME\" is set for your new instance/container."
     fi
 }
 
@@ -541,9 +540,10 @@ pre_installation_hb_gateway() {
 
     # Exposed port?
     echo
-    echo "   Do you want to expose the Gateway port from the instance?
-   The recommended option is \"No\", but if you choose \"No\",
-   you will not be able to make calls directly to the Gateway."
+    echo "   Do you want to expose the Gateway port from the instance?"
+    echo
+		echo "   The recommended option is \"No\", but if you choose \"No\""
+		echo "   you will not be able to make calls directly to the Gateway."
     echo
     read -rp "   (\"y/N\") >>> " RESPONSE
 
@@ -567,8 +567,8 @@ pre_installation_hb_gateway() {
 
     if [ "$BUILD_CACHE" == "--no-cache" ]; then
         echo
-        read -rp "   Enter the url from the repository to be cloned
-       (default = \"https://github.com/Team-Kujira/gateway.git\") >>> " RESPONSE
+        echo "   Enter the url from the repository to be cloned"
+   			read -rp "   (default = \"https://github.com/Team-Kujira/gateway.git\") >>> " RESPONSE
 
         if [ "$RESPONSE" == "" ]; then
             HB_GATEWAY_REPOSITORY_URL="https://github.com/Team-Kujira/gateway.git"
@@ -674,10 +674,10 @@ pre_installation_change_post_installation_commands() {
                 # To display the value, we need variable indirection again
                 echo "         ${!target_app_command_var_name}"
                 sleep "$sleep_time"
-            else
-                echo
-                echo "      The default command was maintained for $app_name."
-                sleep "$sleep_time"
+#            else
+#                echo
+#                echo "      The default command was maintained for $app_name."
+#                sleep "$sleep_time"
             fi
         }
 
@@ -822,12 +822,12 @@ pre_installation_open_apps_in_browser() {
     read -rp "   [\"Y/n\"] >>> " RESPONSE
 
     if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]; then
-        echo
-        echo "   ℹ️  You chose 'Yes'. Applications will open in the browser after installation."
+#        echo
+#        echo "   ℹ️  You chose 'Yes'. Applications will open in the browser after installation."
         OPEN_IN_BROWSER="TRUE"
     else
-        echo
-        echo "   ℹ️  You chose 'No'. Applications will NOT open in the browser after installation."
+#        echo
+#        echo "   ℹ️  You chose 'No'. Applications will NOT open in the browser after installation."
         OPEN_IN_BROWSER="FALSE"
     fi
 }
@@ -894,9 +894,7 @@ if [ "$CUSTOMIZE" == "--customize" ]; then
     pre_installation_launch_apps_after_installation
     pre_installation_change_post_installation_commands
     pre_installation_open_apps_in_browser
-    pre_installation_waiting
     pre_installation_lock_apt
-    pre_installation_waiting
 else
     # Default settings to install Funttastic Client, Hummingbot Gateway and Hummingbot Client
 
