@@ -123,7 +123,7 @@ choose() {
     more_information
     echo
 
-    read -rp "   Enter your choice (1, 2, 3, 4, back or exit): " CHOICE
+    read -rp "   Enter your choice (1, back or exit): " CHOICE
 
     clear
 
