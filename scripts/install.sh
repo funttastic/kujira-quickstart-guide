@@ -45,6 +45,75 @@ open_in_web_navigator() {
     done
 }
 
+image_exists() {
+		# Accepts an image name as the first argument, defaults to IMAGE_NAME if not provided
+		local image_name="${1:-$IMAGE_NAME}"
+
+		# Checks if the specified image exists using docker images and grep, returns true (0) if found
+		docker images --format "{{.Repository}}" | grep -wq "$image_name"
+		return $?
+}
+
+remove_docker_image() {
+    # Docker image name
+    local image_name=${1:-$IMAGE_NAME}
+
+    # Stop all containers that are using the image
+    docker stop "$(docker ps -a -q --filter ancestor="$image_name")" >/dev/null 2>&1
+
+    # Remove all containers that are using the image
+    docker rm "$(docker ps -a -q --filter ancestor="$image_name")" >/dev/null 2>&1
+
+    # Remove the image without -f option
+    docker rmi "$image_name" >/dev/null 2>&1
+
+    # Check if the image is still present
+    if docker images -q "$image_name" >/dev/null 2>&1; then
+        # If the image still exists, try removing it with -f option
+        docker rmi -f "$image_name" >/dev/null 2>&1
+    fi
+}
+
+docker_prune_selectively() {
+    local target_image_name="${1:-$IMAGE_NAME}"
+    local target_image_id
+
+    target_image_id=$(docker images | grep "$target_image_name" | awk '{print $3}')
+
+    local temp_containers=()
+    local image_ids
+
+    image_ids=$(docker images -q)
+
+    for image_id in $image_ids; do
+        if [ ! "$image_id" == "$target_image_id" ]; then
+            container=$(docker create "$image_id")
+            temp_containers+=("$container")
+        else
+            container_ids=$(docker ps -a --filter "ancestor=$image_id" -q)
+            for container_id in $container_ids; do
+                docker stop "$container_id" &>/dev/null
+                docker rm -f "$container_id" &>/dev/null
+            done
+
+            docker rmi -f "$target_image_id" &>/dev/null
+        fi
+    done
+
+    local all_stopped_containers
+
+		all_stopped_containers=$(docker ps -a --filter "status=exited" -q)
+		for container_id in $all_stopped_containers; do
+				docker start "$container_id" &>/dev/null &
+		done
+
+		docker system prune -a -f --volumes &>/dev/null
+
+    for container in "${temp_containers[@]}"; do
+        docker rm -f "$container" &>/dev/null
+    done
+}
+
 prompt_proceed() {
     read -rp "   Do you want to proceed? [Y/n] >>> " RESPONSE
     if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "" ]]; then
@@ -219,29 +288,6 @@ pre_installation_image_and_container() {
         return $?
     }
 
-    image_exists() {
-        # Accepts an image name as the first argument, defaults to IMAGE_NAME if not provided
-        local image_name="${1:-$IMAGE_NAME}"
-
-        # Checks if the specified image exists using docker images and grep, returns true (0) if found
-        docker images --format "{{.Repository}}" | grep -wq "$image_name"
-        return $?
-    }
-
-    remove_docker_image() {
-        # Docker image name
-        local image_name=${1:-$IMAGE_NAME}
-
-        # Stop all containers that are using the image
-        docker stop "$(docker ps -a -q --filter ancestor="$image_name")" >/dev/null 2>&1
-
-        # Remove all containers that are using the image
-        docker rm "$(docker ps -a -q --filter ancestor="$image_name")" >/dev/null 2>&1
-
-        # Remove the image
-        docker rmi "$image_name" >/dev/null 2>&1
-    }
-
     remove_docker_container() {
         # Docker container name or ID
         local container_name_or_id=${1:-$CONTAINER_NAME}
@@ -346,7 +392,7 @@ pre_installation_image_and_container() {
 
                     handle_image_name_conflict
                 else
-                    remove_docker_image "$IMAGE_NAME"
+                		docker_prune_selectively "$IMAGE_NAME"
                 fi
               ;;
             3)
@@ -939,6 +985,10 @@ else
     #  ENTRYPOINT=${ENTRYPOINT:-"--entrypoint=\"source /root/.bashrc && start\""}
     OPEN_IN_BROWSER=${OPEN_IN_BROWSER:-"TRUE"}
     LOCK_APT=${LOCK_APT:-"TRUE"}
+
+		if image_exists "$IMAGE_NAME"; then
+			docker_prune_selectively "$IMAGE_NAME"
+		fi
 fi
 
 if [[ "$SSH_PUBLIC_KEY" && "$SSH_PRIVATE_KEY" ]]; then
