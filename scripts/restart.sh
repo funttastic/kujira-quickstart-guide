@@ -20,7 +20,7 @@ filter_containers() {
 }
 
 container_exists() {
-    if docker ps -a --format '{{.Names}}' | grep -q "^$1$"; then
+		if docker ps -a --format '{{.Names}}' | grep -q "^$1$"; then
         return 0
     else
     		# When the container does not exist
@@ -52,11 +52,20 @@ get_container_name() {
 
 				if [ "$input_name" == "$skip_keyword" ]; then
 						CONTAINER_NAME="$skip_keyword"
+						echo
+						echo "   ⚠️  Skipping restarting..."
             return 1
 				elif [ -z "$input_name" ]; then
 				    return 0
 				else
+						if ! container_exists "$input_name"; then
+								echo
+								echo "   ⚠️  Container not found! Skipping restarting..."
+								return 1
+						fi
+
 						CONTAINER_NAME="$input_name"
+
 						return 0
 				fi
     done
@@ -70,12 +79,6 @@ restart_container() {
         return 0
     fi
 
-		if ! container_exists "$CONTAINER_NAME"; then
-				echo
-				echo "   ⚠️  Container not found! Skipping restarting..."
-				return 1
-		fi
-
     echo
     echo "      Stopping: $({
             docker stop -t 1 "$container_name" && sleep 1 && \
@@ -87,15 +90,16 @@ restart_container() {
     echo
     echo "      Starting: $(docker start "$container_name" 2>&1)"
 
-    if [ -z "$exec_command" ]; then
+    if [ -n "$exec_command" ]; then
     		docker exec "$container_name" /bin/bash -c "$exec_command" > /dev/null 2>&1 &
     fi
 
 }
 
 restart() {
-    get_container_name
-		restart_container "$CONTAINER_NAME" "docker attach"
+    if get_container_name; then
+				restart_container "$CONTAINER_NAME" "docker attach"
+    fi
 }
 
 more_information(){
@@ -107,7 +111,7 @@ more_information(){
 choose() {
     clear
     echo
-    echo "   =====================     DOCKER CONTAINERS RESTART     ====================="
+    echo "   ===========================   DOCKER CONTAINERS RESTART   ==========================="
     echo
     echo "   CHOOSE WHICH SERVICES YOU WOULD LIKE TO RESTART:"
     echo
