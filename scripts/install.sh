@@ -114,6 +114,26 @@ docker_prune_selectively() {
     done
 }
 
+container_exists() {
+		# Accepts a container name as the first argument, defaults to CONTAINER_NAME if not provided
+		local container_name="${1:-$CONTAINER_NAME}"
+
+		# Checks if the specified container exists using docker ps and grep, returns true (0) if found
+		docker ps -a --format "{{.Names}}" | grep -wq "$container_name"
+		return $?
+}
+
+remove_docker_container() {
+		# Docker container name or ID
+		local container_name_or_id=${1:-$CONTAINER_NAME}
+
+		# Stops the specified container if it's running
+		docker stop "$container_name_or_id" >/dev/null 2>&1
+
+		# Removes the specified container
+		docker rm "$container_name_or_id" >/dev/null 2>&1
+}
+
 prompt_proceed() {
     read -rp "   Do you want to proceed? [Y/n] >>> " RESPONSE
     if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "" ]]; then
@@ -278,26 +298,6 @@ pre_installation_image_and_container() {
     echo
 
     default_values_info
-
-    container_exists() {
-        # Accepts a container name as the first argument, defaults to CONTAINER_NAME if not provided
-        local container_name="${1:-$CONTAINER_NAME}"
-
-        # Checks if the specified container exists using docker ps and grep, returns true (0) if found
-        docker ps -a --format "{{.Names}}" | grep -wq "$container_name"
-        return $?
-    }
-
-    remove_docker_container() {
-        # Docker container name or ID
-        local container_name_or_id=${1:-$CONTAINER_NAME}
-
-        # Stops the specified container if it's running
-        docker stop "$container_name_or_id" >/dev/null 2>&1
-
-        # Removes the specified container
-        docker rm "$container_name_or_id" >/dev/null 2>&1
-    }
 
     should_prune_docker() {
         echo
@@ -987,7 +987,12 @@ else
     LOCK_APT=${LOCK_APT:-"TRUE"}
 
 		if image_exists "$IMAGE_NAME"; then
-			docker_prune_selectively "$IMAGE_NAME"
+				docker_prune_selectively "$IMAGE_NAME"
+		fi
+
+		# If there is a conflicting container of a non-conflicting image
+		if container_exists "$CONTAINER_NAME"; then
+				remove_docker_container "$CONTAINER_NAME"
 		fi
 fi
 
