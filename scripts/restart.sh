@@ -117,7 +117,7 @@ get_container_name() {
 
 restart_container() {
     local container_name=${1:-$CONTAINER_NAME}
-    local exec_command=$2
+    local post_restart_command=$2
 
     if [ "$container_name" == "skip" ]; then
         return 0
@@ -134,15 +134,14 @@ restart_container() {
     echo
     echo "      Starting: $(docker start "$container_name" 2>&1)"
 
-    if [ -n "$exec_command" ]; then
-    		docker exec "$container_name" /bin/bash -c "$exec_command" > /dev/null 2>&1 &
+    if [ -n "$post_restart_command" ]; then
+    		eval "$post_restart_command"
     fi
-
 }
 
 restart() {
     if get_container_name; then
-				restart_container "$CONTAINER_NAME" "docker attach"
+				restart_container "$CONTAINER_NAME" "docker attach $CONTAINER_NAME"
     fi
 }
 
