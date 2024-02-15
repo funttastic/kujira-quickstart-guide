@@ -4,6 +4,13 @@ SCRIPT_DIR=$(dirname "$0")
 SCRIPT_NAME="$(basename "$0")"
 SCRIPT_PATH="$SCRIPT_DIR/$SCRIPT_NAME"
 
+show_title() {
+		clear
+		echo
+		echo "   ===========================   DOCKER CONTAINERS RESTART   ==========================="
+		echo
+}
+
 filter_containers() {
     # Getting the list of containers
     local containers
@@ -30,23 +37,22 @@ container_exists() {
 
 get_container_name() {
     local skip_keyword="skip"
-    local word
 
     filter_containers
 
-    if [ -z "$CONTAINER_NAME" ]; then
-				CONTAINER_NAME="fun-kuji-hb"
-				word="default"
-		else
-				word="found"
-    fi
+    show_title
 
     while true; do
-        echo
-        echo "   Enter the container name ($word = \"$CONTAINER_NAME\")"
-        echo
-        echo "   [Press Enter to use '$CONTAINER_NAME' or enter '$skip_keyword' to bypass]"
-        echo
+        if [ -n "$CONTAINER_NAME" ]; then
+        		echo "   Enter the container name (was found: \"$CONTAINER_NAME\")"
+
+						echo
+						echo "   [Press Enter to use '$CONTAINER_NAME' or enter '$skip_keyword' to bypass]"
+						echo
+        else
+        		echo "   Enter the container name (example: \"fun-kuji-hb\"):"
+        		echo
+        fi
 
         read -rp "   >>> " input_name
 
@@ -54,20 +60,58 @@ get_container_name() {
 						CONTAINER_NAME="$skip_keyword"
 						echo
 						echo "   ⚠️  Skipping restarting..."
-            return 1
-				elif [ -z "$input_name" ]; then
-				    return 0
-				else
-						if ! container_exists "$input_name"; then
-								echo
-								echo "   ⚠️  Container not found! Skipping restarting..."
-								return 1
-						fi
+						return 1
+				elif [ -n "$CONTAINER_NAME" ]; then
+            while true; do
+                if [ -z "$input_name" ]; then
+                		# In this case, the name of the container defined in the CONTAINER_NAME variable will be used.
+                    # A valid container name was found by the 'filter_containers' function and added to this variable CONTAINER_NAME
+                    return 0
+                else
+                    if container_exists "$input_name"; then
+                        CONTAINER_NAME="$input_name"
+                        return 0
+                    else
+                        echo
+                        echo "   ⚠️  Container not found! Please enter a valid container name or 'back' to exit."
+                        echo
+                    fi
+                fi
 
-						CONTAINER_NAME="$input_name"
+                read -rp "   >>> " input_name
 
-						return 0
-				fi
+                if [ "$input_name" == "back" ]; then
+                    echo
+                    echo "   ⚠️  Returning to the previous menu..."
+                    return 1
+                fi
+            done
+        elif [ -z "$CONTAINER_NAME" ]; then
+            while true; do
+                if [ -z "$input_name" ]; then
+                    echo
+                    echo "   ⚠️  Please enter a container name or 'back' to return to previous menu."
+                    echo
+                else
+                    if container_exists "$input_name"; then
+                        CONTAINER_NAME="$input_name"
+                        return 0
+                    else
+                        echo
+                        echo "   ⚠️  Container not found! Please enter a valid container name or 'back' to return to previous menu."
+                        echo
+                    fi
+                fi
+
+                read -rp "   >>> " input_name
+
+                if [ "$input_name" == "back" ]; then
+                    echo
+                    echo "   ⚠️  Returning to the previous menu..."
+                    return 1
+                fi
+            done
+        fi
     done
 }
 
@@ -109,10 +153,8 @@ more_information(){
 }
 
 choose() {
-    clear
-    echo
-    echo "   ===========================   DOCKER CONTAINERS RESTART   ==========================="
-    echo
+		show_title
+
     echo "   CHOOSE WHICH SERVICES YOU WOULD LIKE TO RESTART:"
     echo
     echo "   [1] ALL SERVICES"
@@ -141,6 +183,7 @@ choose() {
                 break
                 ;;
             "exit")
+            		clear
                 echo
                 echo "      Feel free to come back whenever you want."
                 echo
@@ -149,8 +192,8 @@ choose() {
                 exit 0
                 ;;
             *)
-                echo
-                echo "      ❌ Invalid Input. Enter the choice [1] or back or exit."
+            		show_title
+                echo "   ❌ Invalid Input. Enter the choice [1] or back or exit."
                 echo
                 read -rp "   Enter your choice (1, back or exit): " CHOICE
                 ;;
