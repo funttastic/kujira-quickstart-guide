@@ -16,6 +16,120 @@ ID="default"
 # Inside the container
 CERTIFICATES_FOLDER="/root/shared/common/certificates"
 
+show_title() {
+		clear
+		echo
+		echo "   =========================   BOT CONTROL & WALLET MANAGING   ========================="
+		echo
+}
+
+filter_containers() {
+    # Getting the list of containers
+    local containers
+
+    containers=$(docker ps -a --format "{{.Names}}")
+
+    # Filtering the containers
+    for name in $containers; do
+        # Checking if the name contains 'fun', 'kuji' and 'hb'
+        if [[ $name =~ fun ]] && [[ $name =~ kuji ]] && [[ $name =~ hb ]] && [ -z "$CONTAINER_NAME" ]; then
+            declare -g CONTAINER_NAME=$name
+        fi
+    done
+}
+
+container_exists() {
+		if docker ps -a --format '{{.Names}}' | grep -q "^$1$"; then
+        return 0
+    else
+    		# When the container does not exist
+        return 1
+    fi
+}
+
+get_container_name() {
+    local skip_keyword="skip"
+
+    filter_containers
+
+    show_title
+
+		echo "   ℹ️  Before you can send commands, we need to choose the destination container."
+		echo
+
+    while true; do
+        if [ -n "$CONTAINER_NAME" ]; then
+        		echo "   Enter the container name (was found: \"$CONTAINER_NAME\")"
+
+						echo
+						echo "   [Press Enter to use '$CONTAINER_NAME' or enter '$skip_keyword' to bypass]"
+						echo
+        else
+        		echo "   Enter the container name (example: \"fun-kuji-hb\"):"
+        		echo
+        fi
+
+        read -rp "   >>> " input_name
+
+				if [ "$input_name" == "$skip_keyword" ]; then
+						CONTAINER_NAME="$skip_keyword"
+						echo
+						echo "   ⚠️  Skipping restarting..."
+						return 1
+				elif [ -n "$CONTAINER_NAME" ]; then
+            while true; do
+                if [ -z "$input_name" ]; then
+                		# In this case, the name of the container defined in the CONTAINER_NAME variable will be used.
+                    # A valid container name was found by the 'filter_containers' function and added to this variable CONTAINER_NAME
+                    return 0
+                else
+                    if container_exists "$input_name"; then
+                        CONTAINER_NAME="$input_name"
+                        return 0
+                    else
+                        echo
+                        echo "   ⚠️  Container not found! Please enter a valid container name or 'back' to exit."
+                        echo
+                    fi
+                fi
+
+                read -rp "   >>> " input_name
+
+                if [ "$input_name" == "back" ]; then
+                    echo
+                    echo "   ⚠️  Returning to the previous menu..."
+                    return 1
+                fi
+            done
+        elif [ -z "$CONTAINER_NAME" ]; then
+            while true; do
+                if [ -z "$input_name" ]; then
+                    echo
+                    echo "   ⚠️  Please enter a container name or 'back' to return to previous menu."
+                    echo
+                else
+                    if container_exists "$input_name"; then
+                        CONTAINER_NAME="$input_name"
+                        return 0
+                    else
+                        echo
+                        echo "   ⚠️  Container not found! Please enter a valid container name or 'back' to return to previous menu."
+                        echo
+                    fi
+                fi
+
+                read -rp "   >>> " input_name
+
+                if [ "$input_name" == "back" ]; then
+                    echo
+                    echo "   ⚠️  Returning to the previous menu..."
+                    return 1
+                fi
+            done
+        fi
+    done
+}
+
 send_request() {
 	local method=""
 	local host=""
@@ -51,7 +165,7 @@ send_request() {
     -d \"$payload\" \
     \"$host:$port$url\""
 
-  docker exec -e method -e certificates_folder -e payload -e host -e port -e url $CONTAINER_NAME /bin/bash -c "$COMMAND"
+  docker exec -e method -e certificates_folder -e payload -e host -e port -e url "$CONTAINER_NAME" /bin/bash -c "source /root/.bashrc && $COMMAND"
 
 	echo
 }
@@ -244,10 +358,8 @@ more_information(){
 }
 
 choose() {
-    clear
-    echo
-    echo "   ==========      BOT CONTROL -> FUNTTASTIC CLIENT / GATEWAY      =========="
-    echo
+		show_title
+
     echo "   CHOOSE WHICH ACTION YOU WOULD LIKE TO PERFORM:"
     echo
     echo "   [1] START"
@@ -326,6 +438,10 @@ choose() {
     done
 }
 
-# =====================================================================================================================
+select_target_container() {
+		if get_container_name; then
+				choose
+		fi
+}
 
-choose
+select_target_container
