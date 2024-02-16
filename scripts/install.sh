@@ -112,6 +112,15 @@ docker_prune_selectively() {
     for container in "${temp_containers[@]}"; do
         docker rm -f "$container" &>/dev/null
     done
+
+		# If there is a container related to this project running, even if the
+		# container name is different, it will cause some applications to be
+		# unable to start because some ports, such as 50000, 50001, and 50002,
+		# are already in use. To try to avoid this as much as possible,
+		# pre-existing containers started in one of the steps above will be stopped.
+    for container_id in $all_stopped_containers; do
+				docker stop "$container_id" &>/dev/null &
+		done
 }
 
 container_exists() {
