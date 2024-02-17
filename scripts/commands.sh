@@ -4,8 +4,6 @@ SCRIPT_DIR=$(dirname "$0")
 SCRIPT_NAME="$(basename "$0")"
 SCRIPT_PATH="$SCRIPT_DIR/$SCRIPT_NAME"
 
-CONTAINER_NAME="fun-kuji-hb"
-
 HOST=https://localhost
 PORT=50001
 
@@ -19,7 +17,7 @@ CERTIFICATES_FOLDER="/root/shared/common/certificates"
 show_title() {
 		clear
 		echo
-		echo "   =========================   BOT CONTROL & WALLET MANAGING   ========================="
+		echo "   ========================   BOT CONTROL & WALLET MANAGEMENT   ========================"
 		echo
 }
 
@@ -48,8 +46,6 @@ container_exists() {
 }
 
 get_container_name() {
-    local skip_keyword="skip"
-
     filter_containers
 
     show_title
@@ -62,21 +58,18 @@ get_container_name() {
         		echo "   Enter the container name (was found: \"$CONTAINER_NAME\")"
 
 						echo
-						echo "   [Press Enter to use '$CONTAINER_NAME' or enter '$skip_keyword' to bypass]"
+						echo "   [Press Enter to use '$CONTAINER_NAME' or enter 'back' to return to main menu]"
 						echo
         else
         		echo "   Enter the container name (example: \"fun-kuji-hb\"):"
+        		echo
+        		echo "   [Enter 'back' to return to main menu]"
         		echo
         fi
 
         read -rp "   >>> " input_name
 
-				if [ "$input_name" == "$skip_keyword" ]; then
-						CONTAINER_NAME="$skip_keyword"
-						echo
-						echo "   ⚠️  Skipping restarting..."
-						return 1
-				elif [ -n "$CONTAINER_NAME" ]; then
+				if [ -n "$CONTAINER_NAME" ]; then
             while true; do
                 if [ -z "$input_name" ]; then
                 		# In this case, the name of the container defined in the CONTAINER_NAME variable will be used.
@@ -121,8 +114,6 @@ get_container_name() {
                 read -rp "   >>> " input_name
 
                 if [ "$input_name" == "back" ]; then
-                    echo
-                    echo "   ⚠️  Returning to the previous menu..."
                     return 1
                 fi
             done
@@ -137,6 +128,8 @@ send_request() {
 	local url=""
 	local payload=""
 	local certificates_folder=""
+	declare -g RAW_RESPONSE
+	declare -g RESPONSE
 
 	while [[ $# -gt 0 ]]; do
 		case "$1" in
@@ -157,7 +150,7 @@ send_request() {
 
 	echo
 
-  COMMAND="curl -X \"$method\" \
+  COMMAND="curl -s -X \"$method\" \
     --cert \"$certificates_folder/client_cert.pem\" \
     --key \"$certificates_folder/client_key.pem\" \
     --cacert \"$certificates_folder/ca_cert.pem\" \
@@ -165,9 +158,9 @@ send_request() {
     -d \"$payload\" \
     \"$host:$port$url\""
 
-  docker exec -e method -e certificates_folder -e payload -e host -e port -e url "$CONTAINER_NAME" /bin/bash -c "source /root/.bashrc && $COMMAND"
+  RAW_RESPONSE=$(docker exec -e method -e certificates_folder -e payload -e host -e port -e url "$CONTAINER_NAME" /bin/bash -c "source /root/.bashrc && $COMMAND")
 
-	echo
+  RESPONSE=$(echo "$RAW_RESPONSE" | grep -oP '(?<=:")[^"]*')
 }
 
 start() {
@@ -382,37 +375,72 @@ choose() {
         case $CHOICE in
             1)
                 start
-                sleep 3
+                echo "      $RESPONSE"
+
+                echo
+                read -s -n1 -rp "   Press any key to return to previous menu >>> "
                 clear
-                exec "$SCRIPT_PATH"
+                if [ -n "$CONTAINER_NAME" ]; then
+                		(echo "$CONTAINER_NAME"; cat -) | exec "$SCRIPT_PATH"
+                else
+                		exec "$SCRIPT_PATH"
+                fi
                 break
                 ;;
             2)
                 stop
-                sleep 3
+                echo "      $RESPONSE"
+
+                echo
+                read -s -n1 -rp "   Press any key to return to previous menu >>> "
                 clear
-                exec "$SCRIPT_PATH"
+                if [ -n "$CONTAINER_NAME" ]; then
+                		(echo "$CONTAINER_NAME"; cat -) | exec "$SCRIPT_PATH"
+                else
+                		exec "$SCRIPT_PATH"
+                fi
                 break
                 ;;
             3)
                 status
-                sleep 3
+                echo "      Status: $RESPONSE"
+
+                echo
+                read -s -n1 -rp "   Press any key to return to previous menu >>> "
                 clear
-                exec "$SCRIPT_PATH"
+                if [ -n "$CONTAINER_NAME" ]; then
+                		(echo "$CONTAINER_NAME"; cat -) | exec "$SCRIPT_PATH"
+                else
+                		exec "$SCRIPT_PATH"
+                fi
                 break
                 ;;
             4)
                 wallet "POST"
-                sleep 3
+                echo "      $RAW_RESPONSE"
+
+                echo
+                read -s -n1 -rp "   Press any key to return to previous menu >>> "
                 clear
-                exec "$SCRIPT_PATH"
+                if [ -n "$CONTAINER_NAME" ]; then
+                		(echo "$CONTAINER_NAME"; cat -) | exec "$SCRIPT_PATH"
+                else
+                		exec "$SCRIPT_PATH"
+                fi
                 break
                 ;;
             5)
                 wallet "DELETE"
-                sleep 3
+                echo "      $RAW_RESPONSE"
+
+                echo
+                read -s -n1 -rp "   Press any key to return to previous menu >>> "
                 clear
-                exec "$SCRIPT_PATH"
+                if [ -n "$CONTAINER_NAME" ]; then
+                		(echo "$CONTAINER_NAME"; cat -) | exec "$SCRIPT_PATH"
+                else
+                		exec "$SCRIPT_PATH"
+                fi
                 break
                 ;;
             "back")
@@ -441,6 +469,8 @@ choose() {
 select_target_container() {
 		if get_container_name; then
 				choose
+		else
+			  ./configure
 		fi
 }
 
