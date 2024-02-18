@@ -158,9 +158,16 @@ send_request() {
     -d \"$payload\" \
     \"$host:$port$url\""
 
-  RAW_RESPONSE=$(docker exec -e method -e certificates_folder -e payload -e host -e port -e url "$CONTAINER_NAME" /bin/bash -c "source /root/.bashrc && $COMMAND")
+	RAW_RESPONSE=$(docker exec -e method -e certificates_folder -e payload -e host -e port -e url "$CONTAINER_NAME" /bin/bash -c "source /root/.bashrc && $COMMAND" 2>&1)
 
-  RESPONSE=$(echo "$RAW_RESPONSE" | grep -oP '(?<=:")[^"]*')
+	if [[ $RAW_RESPONSE == *"is not running"* ]]; then
+			CONTAINER_ID=$(echo "$RAW_RESPONSE" | grep -oP 'Container\s+\K[a-f0-9]{12}')
+			if [ -n "$CONTAINER_ID" ]; then
+					RESPONSE="Fail: Container is not running\n      Container Name: $CONTAINER_NAME\n      Container ID: $CONTAINER_ID"
+			fi
+	else
+			RESPONSE=$(echo "$RAW_RESPONSE" | grep -oP '(?<=:")[^"]*')
+	fi
 }
 
 start() {
@@ -262,16 +269,6 @@ wallet() {
 	local account_number=0
 	local public_key=""
 
-#	while [[ $# -gt 0 ]]; do
-#		case "$1" in
-#			--strategy) strategy="$2"; shift ;;
-#			--version) version="$2"; shift ;;
-#			--id) id="$2"; shift ;;
-#			*) shift ;;
-#		esac
-#		shift
-#	done
-
 	strategy=${strategy:-$STRATEGY}
 	version=${version:-$VERSION}
 	id=${id:-$ID}
@@ -283,9 +280,10 @@ wallet() {
    [or type 'back' to return to menu] >>> " mnemonic
 
       if [ "$mnemonic" == 'back' ]; then
-        echo -e "\n\n      ℹ️  Returning to the menu..."
-        echo
-        break
+      	tput cuu 4
+				tput ed
+				echo
+        return 1
       fi
 
       if [ -z "$mnemonic" ]; then
@@ -307,16 +305,17 @@ wallet() {
             }"
 
     url="/wallet/add"
-  elif [  "$method" == "DELETE"  ]; then
+  elif [ "$method" == "DELETE" ]; then
     while true; do
       echo
       read -rp "   Enter the public key of the wallet you want to remove
    [or type 'back' to return to menu] >>> " public_key
 
       if [ "$public_key" == 'back' ]; then
-        echo -e "\n      ℹ️  Returning to the menu..."
-        echo
-        break
+      	tput cuu 5
+				tput ed
+				echo
+        return 1
       fi
 
       if [ -z "$public_key" ]; then
@@ -336,11 +335,13 @@ wallet() {
     url="/wallet/remove"
   fi
 
-  if [[ "$method" == "POST" && ! "$mnemonic" == "back" || "$method" == "DELETE" && ! "$public_key" == "back" ]]; then
+  if [[ ! "$mnemonic" == "back" && ! "$public_key" == "back" ]]; then
     send_request \
     --method "$method" \
     --url "$url" \
     --payload "$payload"
+
+    return 0
   fi
 }
 
@@ -352,101 +353,54 @@ more_information(){
 
 choose() {
 		show_title
-
-    echo "   CHOOSE WHICH ACTION YOU WOULD LIKE TO PERFORM:"
-    echo
-    echo "   [1] START"
-    echo "   [2] STOP"
-    echo "   [3] STATUS"
-    echo "   [4] ADD WALLET"
-    echo "   [5] REMOVE WALLET"
-    echo
-    echo "   [back] RETURN TO MAIN MENU"
-    echo "   [exit] STOP SCRIPT EXECUTION"
-    echo
-    more_information
-    echo
-
-    read -rp "   Enter your choice (1, 2, 3, 4, 5, back or exit): " CHOICE
-
-    clear
+		echo "   CHOOSE WHICH ACTION YOU WOULD LIKE TO PERFORM:"
+		echo
+		echo "   [1] START"
+		echo "   [2] STOP"
+		echo "   [3] STATUS"
+		echo "   [4] ADD WALLET"
+		echo "   [5] REMOVE WALLET"
+		echo
+		echo "   [back] RETURN TO MAIN MENU"
+		echo "   [exit] STOP SCRIPT EXECUTION"
+		echo
+		more_information
+		echo
 
     while true; do
+        read -rp "   Enter your choice (1, 2, 3, 4, 5, back, or exit): " CHOICE
+
         case $CHOICE in
             1)
                 start
-                echo "      $RESPONSE"
-
+                echo -e "      $RESPONSE"
                 echo
-                read -s -n1 -rp "   Press any key to return to previous menu >>> "
-                clear
-                if [ -n "$CONTAINER_NAME" ]; then
-                		(echo "$CONTAINER_NAME"; cat -) | exec "$SCRIPT_PATH"
-                else
-                		exec "$SCRIPT_PATH"
-                fi
-                break
                 ;;
             2)
                 stop
-                echo "      $RESPONSE"
-
+                echo -e "      $RESPONSE"
                 echo
-                read -s -n1 -rp "   Press any key to return to previous menu >>> "
-                clear
-                if [ -n "$CONTAINER_NAME" ]; then
-                		(echo "$CONTAINER_NAME"; cat -) | exec "$SCRIPT_PATH"
-                else
-                		exec "$SCRIPT_PATH"
-                fi
-                break
                 ;;
             3)
                 status
-                echo "      Status: $RESPONSE"
-
+                echo -e "      $RESPONSE"
                 echo
-                read -s -n1 -rp "   Press any key to return to previous menu >>> "
-                clear
-                if [ -n "$CONTAINER_NAME" ]; then
-                		(echo "$CONTAINER_NAME"; cat -) | exec "$SCRIPT_PATH"
-                else
-                		exec "$SCRIPT_PATH"
-                fi
-                break
                 ;;
             4)
-                wallet "POST"
-                echo "      $RAW_RESPONSE"
-
-                echo
-                read -s -n1 -rp "   Press any key to return to previous menu >>> "
-                clear
-                if [ -n "$CONTAINER_NAME" ]; then
-                		(echo "$CONTAINER_NAME"; cat -) | exec "$SCRIPT_PATH"
-                else
-                		exec "$SCRIPT_PATH"
+                if wallet "POST"; then
+                		echo "      $RAW_RESPONSE"
+                		echo
                 fi
-                break
                 ;;
             5)
-                wallet "DELETE"
-                echo "      $RAW_RESPONSE"
-
-                echo
-                read -s -n1 -rp "   Press any key to return to previous menu >>> "
-                clear
-                if [ -n "$CONTAINER_NAME" ]; then
-                		(echo "$CONTAINER_NAME"; cat -) | exec "$SCRIPT_PATH"
-                else
-                		exec "$SCRIPT_PATH"
+                if wallet "DELETE"; then
+                		echo "      $RAW_RESPONSE"
+                		echo
                 fi
-                break
                 ;;
             "back")
                 clear
                 ./configure
-                break
                 ;;
             "exit")
                 echo
@@ -458,9 +412,8 @@ choose() {
                 ;;
             *)
                 echo
-                echo "      ❌ Invalid Input. Enter a your choice (1, 2, 3, 4) or type back or exit."
+                echo "      ❌ Invalid Input. Enter your choice (1, 2, 3, 4, 5, back, or exit)."
                 echo
-                read -rp "   Enter your choice (1, 2, 3, 4, 5, back, or exit): " CHOICE
                 ;;
         esac
     done
