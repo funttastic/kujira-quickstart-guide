@@ -291,8 +291,35 @@ wallet() {
         echo
         echo "      ❌ Invalid mnemonic, please try again."
       else
-        echo
-        break
+        # Create an array of words from the mnemonic
+        IFS=' ' read -r -a words <<< "$mnemonic"
+        num_words="${#words[@]}"
+        valid=true
+
+        # Check if number of words is either 12 or 24
+        if [ "$num_words" != 12 ] && [ "$num_words" != 24 ]; then
+          valid=false
+        else
+          # Check if each word has at least 2 characters
+          for word in "${words[@]}"; do
+            if [ ${#word} -lt 2 ]; then
+              valid=false
+              break
+            fi
+          done
+        fi
+
+        if [ "$valid" = false ]; then
+          echo
+          echo
+
+          echo "      |      |  Mnemonic must have either 12 or 24 words, with each word having at least 2 characters."
+          echo "      |  ❌  |"
+          echo "      |      |  example: flag stadium copper carbon slight school fabric verb behave crunch mouse lottery"
+        else
+          echo
+          break
+        fi
       fi
     done
 
@@ -318,12 +345,15 @@ wallet() {
         return 1
       fi
 
-      if [ -z "$public_key" ]; then
-        echo
-        echo "      ❌ Invalid account public key, please try again."
-      else
-        echo
+      if [[ "$public_key" =~ ^kujira[a-z0-9]{39}$ ]]; then
         break
+      else
+      	echo
+        echo "      |      |  The wallet public key does not match the expected pattern of starting"
+        echo "      |  ❌  |  with 'kujira' followed by 39 lowercase letters and/or numbers."
+        echo "      |      |  example: \"kujira2q7kr0ffptrkq1hg8hhq71vqxex3kj6refy7sf6\""
+				echo
+        echo "      Please try again."
       fi
     done
 
