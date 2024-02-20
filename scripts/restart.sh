@@ -3,12 +3,31 @@
 SCRIPT_DIR=$(dirname "$0")
 SCRIPT_NAME="$(basename "$0")"
 SCRIPT_PATH="$SCRIPT_DIR/$SCRIPT_NAME"
+LOCAL_HOST_URL_PREFIX="http://localhost"
 
 show_title() {
 		clear
 		echo
 		echo "   ===========================   DOCKER CONTAINERS RESTART   ==========================="
 		echo
+}
+
+open_in_web_navigator() {
+    urls=("$@")
+
+    for url in "${urls[@]}"; do
+        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            xdg-open "$url" &>/dev/null &
+        elif [[ "$OSTYPE" == "darwin"* ]]; then
+            open "$url" &>/dev/null &
+        elif [[ "$OSTYPE" == "cygwin" ]]; then
+            cmd.exe /c start "$url" &>/dev/null &
+        elif [[ "$OSTYPE" == "msys" ]]; then
+            cmd.exe /c start "$url" &>/dev/null &
+        elif [[ "$OSTYPE" == "win32" ]]; then
+            cmd.exe /c start "$url" &>/dev/null &
+        fi
+    done
 }
 
 filter_containers() {
@@ -141,7 +160,21 @@ restart_container() {
 
 restart() {
     if get_container_name; then
-				restart_container "$CONTAINER_NAME" "docker attach $CONTAINER_NAME"
+				if restart_container "$CONTAINER_NAME"; then
+						local FILEBROWSER_PORT
+						local FUN_FRONTEND_PORT
+						local FILEBROWSER_URL
+						local FUN_FRONTEND_URL
+
+						FILEBROWSER_PORT=$(docker exec "$CONTAINER_NAME" /bin/bash -c "grep 'FILEBROWSER_PORT=' /root/.bashrc | cut -d'=' -f2")
+						FUN_FRONTEND_PORT=$(docker exec "$CONTAINER_NAME" /bin/bash -c "grep 'FRONTEND_PORT=' /root/.bashrc | cut -d'=' -f2")
+						FILEBROWSER_URL="$LOCAL_HOST_URL_PREFIX:$FILEBROWSER_PORT"
+						FUN_FRONTEND_URL="$LOCAL_HOST_URL_PREFIX:$FUN_FRONTEND_PORT"
+
+						open_in_web_navigator "$FILEBROWSER_URL" "$FUN_FRONTEND_URL"
+
+						docker attach "$CONTAINER_NAME"
+				fi
     fi
 }
 
