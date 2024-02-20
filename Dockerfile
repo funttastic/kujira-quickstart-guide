@@ -420,9 +420,9 @@ RUN <<-EOF
 	ln -rfs funttastic/client/resources/certificates/* hummingbot/gateway/certs
 	ln -rfs funttastic/client/resources/certificates/* hummingbot/client/certs
 
-	sed -i -e "/server:/,/port: 5000/ s/port: 5000/port: $FUN_CLIENT_PORT/" funttastic/client/resources/configuration/production.yml
-	sed -i -e '/logging:/,/use_telegram: true/ s/use_telegram: true/use_telegram: false/' -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' funttastic/client/resources/configuration/production.yml
-	sed -i -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' funttastic/client/resources/configuration/common.yml
+	sed -i -e "/server:/,/port: [0-9]*/ s/port: [0-9]*/port: $FUN_CLIENT_PORT/" funttastic/client/resources/configuration/production.yml
+	sed -i -e '/logging:/,/use_telegram:/ s/use_telegram:.*/use_telegram: false/' -e '/telegram:/,/enabled:/ s/enabled:.*/enabled: false/' -e '/telegram:/,/listen_commands:/ s/listen_commands:.*/listen_commands: false/' funttastic/client/resources/configuration/production.yml
+	sed -i -e '/telegram:/,/enabled:/ s/enabled:.*/enabled: false/' -e '/telegram:/,/listen_commands:/ s/listen_commands:.*/listen_commands: false/' funttastic/client/resources/configuration/common.yml
 
 	set +ex
 EOF
