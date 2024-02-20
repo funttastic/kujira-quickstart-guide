@@ -628,26 +628,29 @@ status() {
 	local hb_client_status=$(pgrep -f 'start_hb_client' >/dev/null && echo 'running' || echo 'stopped')
 	local hb_gateway_status=$(pgrep -f 'start_hb_gateway' >/dev/null && echo 'running' || echo 'stopped')
 
-	local fun_client_message="${fun_client_status^}."
-	local hb_client_message="${hb_client_status^}."
-	local hb_gateway_message="${hb_gateway_status^}."
+	local fun_client_message="$(echo $fun_client_status | awk '{print toupper(substr($0, 1, 1)) substr($0, 2)}')."
+	local hb_client_message="$(echo $hb_client_status | awk '{print toupper(substr($0, 1, 1)) substr($0, 2)}')."
+	local hb_gateway_message="$(echo $hb_gateway_status | awk '{print toupper(substr($0, 1, 1)) substr($0, 2)}')."
 
-	cat <<EOF
-	{
-	  "fun-client": {
-	    "status": "$fun_client_status",
-	    "message: "$fun_client_message"
-	  },
-	  "hb-client": {
-	    "status": "$hb_client_status",
-	    "message: "$hb_client_message"
-	  },
-	  "hb-gateway": {
-	    "status": "$hb_gateway_status",
-	    "message: "$hb_gateway_message"
-	  },
-	}
-	EOF
+  output=$(cat << OUTPUT
+{
+  "fun-client": {
+    "status": "$fun_client_status",
+    "message: "$fun_client_message"
+  },
+  "hb-client": {
+    "status": "$hb_client_status",
+    "message: "$hb_client_message"
+  },
+  "hb-gateway": {
+    "status": "$hb_gateway_status",
+    "message: "$hb_gateway_message"
+  }
+}
+OUTPUT
+)
+
+  echo $output
 }
 
 SCRIPT
