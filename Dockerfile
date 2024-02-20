@@ -474,7 +474,7 @@ start_filebrowser() {
   eval $FILEBROWSER_COMMAND
 }
 
-start_fun_client_api() {
+start_fun_client() {
   eval $FUN_CLIENT_COMMAND
 }
 
@@ -489,7 +489,7 @@ start_hb_client() {
 start_all() {
   start_fun_frontend
   start_filebrowser
-  start_fun_client_api
+  start_fun_client
   start_hb_gateway
   start_hb_client
 }
@@ -516,8 +516,8 @@ start() {
         start_filebrowser
         return
         ;;
-      --start_fun_client_api)
-        start_fun_client_api
+      --start_fun_client)
+        start_fun_client
         return
         ;;
       --start_hb_gateway)
@@ -534,30 +534,51 @@ start() {
   done
 }
 
+kill_processes_and_subprocesses() {
+  local search_pattern="$1"
+  local target_pids parent_pids child_pids
+
+  target_pids=$(pgrep -f "$search_pattern" || true)
+
+  if [ ! -z "$target_pids" ]; then
+    parent_pids=$(echo "$target_pids" | grep -o -E '([0-9]+)' | tr "\n" " ")
+
+    for parent_pid in $parent_pids; do
+      child_pids=$(pstree -p $parent_pid | grep -o -E '([0-9]+)' | tr "\n" " ")
+
+      kill -9 $parent_pid 2>/dev/null || true
+
+      for child_pid in $child_pids; do
+        kill -9 $child_pid 2>/dev/null || true
+      done
+    done
+  fi
+}
+
 stop_fun_frontend() {
-  echo > /dev/null 2>&1 &
+  kill_processes_and_subprocesses "start_fun_frontend"
 }
 
 stop_filebrowser() {
-  echo > /dev/null 2>&1 &
+  kill_processes_and_subprocesses "start_filebrowser"
 }
 
-stop_fun_client_api() {
-  echo > /dev/null 2>&1 &
+stop_fun_client() {
+  kill_processes_and_subprocesses "start_fun_client"
 }
 
 stop_hb_gateway() {
-  echo > /dev/null 2>&1 &
+  kill_processes_and_subprocesses "start_hb_gateway"
 }
 
 stop_hb_client() {
-  echo > /dev/null 2>&1 &
+  kill_processes_and_subprocesses "start_hb_client"
 }
 
 stop_all() {
   stop_fun_frontend
   stop_filebrowser
-  stop_fun_client_api
+  stop_fun_client
   stop_hb_gateway
   stop_hb_client
 }
@@ -584,8 +605,8 @@ stop() {
         stop_filebrowser
         return
         ;;
-      --stop_fun_client_api)
-        stop_fun_client_api
+      --stop_fun_client)
+        stop_fun_client
         return
         ;;
       --stop_hb_gateway)
@@ -600,6 +621,33 @@ stop() {
     esac
     shift
   done
+}
+
+status() {
+	local fun_client_status=$(pgrep -f 'start_fun_client' >/dev/null && echo 'running' || echo 'stopped')
+	local hb_client_status=$(pgrep -f 'start_hb_client' >/dev/null && echo 'running' || echo 'stopped')
+	local hb_gateway_status=$(pgrep -f 'start_hb_gateway' >/dev/null && echo 'running' || echo 'stopped')
+
+	local fun_client_message="${fun_client_status^}."
+	local hb_client_message="${hb_client_status^}."
+	local hb_gateway_message="${hb_gateway_status^}."
+
+	cat <<EOF
+	{
+	  "fun-client": {
+	    "status": "$fun_client_status",
+	    "message: "$fun_client_message"
+	  },
+	  "hb-client": {
+	    "status": "$hb_client_status",
+	    "message: "$hb_client_message"
+	  },
+	  "hb-gateway": {
+	    "status": "$hb_gateway_status",
+	    "message: "$hb_gateway_message"
+	  },
+	}
+	EOF
 }
 
 SCRIPT
