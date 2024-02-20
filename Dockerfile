@@ -145,7 +145,7 @@ RUN <<-EOF
 
   if [ -z "$FILEBROWSER_COMMAND" ]
   then
-    echo "export FILEBROWSER_COMMAND=\"cd /root/filebrowser && filebrowser -p \$FILEBROWSER_PORT -r ../shared > /dev/null 2>&1 &\"" >> ~/.bashrc
+    echo "export FILEBROWSER_COMMAND=\"cd /root/filebrowser && filebrowser --address=0.0.0.0 -p \$FILEBROWSER_PORT -r ../shared > /dev/null 2>&1 &\"" >> ~/.bashrc
   else
     echo "export FILEBROWSER_COMMAND=\"$FILEBROWSER_COMMAND\"" >> ~/.bashrc
   fi
