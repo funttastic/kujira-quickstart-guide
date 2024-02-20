@@ -7,7 +7,7 @@ TAG="latest"
 CHOICE=""
 MIN_PASSPHRASE_LENGTH=4
 ENTRYPOINT=""
-NETWORK="host"
+NETWORK="bridge"
 LOCAL_HOST_URL_PREFIX="http://localhost"
 DEFAULT_WAITING_TIME=3
 
@@ -1073,6 +1073,8 @@ docker_create_container() {
             -e HB_CLIENT_PMM_SCRIPTS_FOLDER="/root/hummingbot/client/pmm_scripts" \
             -e HB_GATEWAY_CONF_FOLDER="/root/hummingbot/gateway/conf" \
             -e HB_GATEWAY_LOGS_FOLDER="/root/hummingbot/gateway/logs" \
+            -p $FUN_FRONTEND_PORT:$FUN_FRONTEND_PORT \
+            -p $FILEBROWSER_PORT:$FILEBROWSER_PORT \
             $ENTRYPOINT \
             "$IMAGE_NAME":$TAG
 }

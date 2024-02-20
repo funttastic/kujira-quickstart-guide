@@ -34,9 +34,8 @@ ARG HB_CLIENT_COMMAND
 ARG FILEBROWSER_COMMAND
 ARG FILEBROWSER_PORT
 
-EXPOSE $FUN_CLIENT_PORT
-#EXPOSE $HB_GATEWAY_PORT
-#EXPOSE $FILEBROWSER_PORT
+EXPOSE $FUN_FRONTEND_PORT
+EXPOSE $FILEBROWSER_PORT
 
 WORKDIR /root
 
@@ -88,7 +87,7 @@ RUN <<-EOF
 
   if [ -z "$FUN_FRONTEND_COMMAND" ]
   then
-    echo "export FUN_FRONTEND_COMMAND=\"cd /root/funttastic/frontend && yarn start > /dev/null 2>&1 &\"" >> ~/.bashrc
+    echo "export FUN_FRONTEND_COMMAND=\"cd /root/funttastic/frontend && yarn start --host > /dev/null 2>&1 &\"" >> ~/.bashrc
   else
     echo "export FUN_FRONTEND_COMMAND=\"$FUN_FRONTEND_COMMAND\"" >> ~/.bashrc
   fi
@@ -142,6 +141,7 @@ RUN <<-EOF
   else
     echo "export FILEBROWSER_PORT=$FILEBROWSER_PORT" >> ~/.bashrc
   fi
+  echo 'export VITE_FILEBROWSER_PORT=$FILEBROWSER_PORT' >> ~/.bashrc
 
   if [ -z "$FILEBROWSER_COMMAND" ]
   then
@@ -202,6 +202,8 @@ RUN <<-EOF
 	filebrowser config set --branding.name "Funttastic"
 	filebrowser config set --branding.theme "dark"
 	filebrowser config set --branding.files /root/filebrowser/branding
+	filebrowser config set --port $FILEBROWSER_PORT
+	filebrowser config set --baseurl /
 
 	#	cp /root/funttastic/frontend/resources/assets/funttastic/logo/logo.svg branding/img/logo.svg
 
