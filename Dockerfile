@@ -40,12 +40,12 @@ EXPOSE $FUN_CLIENT_PORT
 
 WORKDIR /root
 
-RUN :> /root/.bashrc
-
-RUN rm /usr/bin/sh && ln -s /bin/bash /usr/bin/sh
+SHELL ["/bin/bash", "-c"]
 
 RUN <<-EOF
 	set -ex
+	
+	truncate -s 0 /root/.bashrc
 
 	apt-get update
 
@@ -69,98 +69,87 @@ RUN <<-EOF
 		ca-certificates \
 		postgresql-server-dev-all
 
-	set +ex
-EOF
-
-RUN <<-EOF
-	set -ex
-
-	echo -e "\n" >> ~/.bashrc
+	echo -e "\n" >> /root/.bashrc
 
 	# Funttastic Client Frontend environment variables
 
   if [ -z "$FRONTEND_PORT" ]
   then
-    echo 'export FRONTEND_PORT=50000' >> ~/.bashrc
+    echo 'export FRONTEND_PORT=50000' >> /root/.bashrc
   else
-    echo "export FRONTEND_PORT=$FRONTEND_PORT" >> ~/.bashrc
+    echo "export FRONTEND_PORT=$FRONTEND_PORT" >> /root/.bashrc
   fi
 
   if [ -z "$FUN_FRONTEND_COMMAND" ]
   then
-    echo "export FUN_FRONTEND_COMMAND=\"cd /root/funttastic/frontend && yarn start > /dev/null 2>&1 &\"" >> ~/.bashrc
+    echo "export FUN_FRONTEND_COMMAND=\"cd /root/funttastic/frontend && yarn start > /dev/null 2>&1 &\"" >> /root/.bashrc
   else
-    echo "export FUN_FRONTEND_COMMAND=\"$FUN_FRONTEND_COMMAND\"" >> ~/.bashrc
+    echo "export FUN_FRONTEND_COMMAND=\"$FUN_FRONTEND_COMMAND\"" >> /root/.bashrc
   fi
 
   # Funttastic Client server environment variables
 
   if [ -z "$FUN_CLIENT_PORT" ]
   then
-    echo 'export FUN_CLIENT_PORT=50001' >> ~/.bashrc
+    echo 'export FUN_CLIENT_PORT=50001' >> /root/.bashrc
   else
-    echo "export FUN_CLIENT_PORT=$FUN_CLIENT_PORT" >> ~/.bashrc
+    echo "export FUN_CLIENT_PORT=$FUN_CLIENT_PORT" >> /root/.bashrc
   fi
 
   if [ -z "$FUN_CLIENT_COMMAND" ]
   then
-    echo "export FUN_CLIENT_COMMAND=\"conda activate funttastic && cd /root/funttastic/client && python app.py > /dev/null 2>&1 &\"" >> ~/.bashrc
+    echo "export FUN_CLIENT_COMMAND=\"conda activate funttastic && cd /root/funttastic/client && python app.py > /dev/null 2>&1 &\"" >> /root/.bashrc
   else
-    echo "export FUN_CLIENT_COMMAND=\"$FUN_CLIENT_COMMAND\"" >> ~/.bashrc
+    echo "export FUN_CLIENT_COMMAND=\"$FUN_CLIENT_COMMAND\"" >> /root/.bashrc
   fi
 
   # HB Gateway environment variables
 
   if [ -z "$HB_GATEWAY_PORT" ]
   then
-    echo 'export HB_GATEWAY_PORT=15888' >> ~/.bashrc
+    echo 'export HB_GATEWAY_PORT=15888' >> /root/.bashrc
   else
-    echo "export HB_GATEWAY_PORT=$HB_GATEWAY_PORT" >> ~/.bashrc
+    echo "export HB_GATEWAY_PORT=$HB_GATEWAY_PORT" >> /root/.bashrc
   fi
 
   if [ -z "$HB_GATEWAY_COMMAND" ]
   then
-    echo "export HB_GATEWAY_COMMAND=\"cd /root/hummingbot/gateway && yarn start > /dev/null 2>&1 &\"" >> ~/.bashrc
+    echo "export HB_GATEWAY_COMMAND=\"cd /root/hummingbot/gateway && yarn start > /dev/null 2>&1 &\"" >> /root/.bashrc
   else
-    echo "export HB_GATEWAY_COMMAND=\"$HB_GATEWAY_COMMAND\"" >> ~/.bashrc
+    echo "export HB_GATEWAY_COMMAND=\"$HB_GATEWAY_COMMAND\"" >> /root/.bashrc
   fi
 
   # HB Client environment variables
 
   if [ -z "$HB_CLIENT_COMMAND" ]
   then
-    echo "export HB_CLIENT_COMMAND=\"conda activate hummingbot && cd /root/hummingbot/client && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log\"" >> ~/.bashrc
+    echo "export HB_CLIENT_COMMAND=\"conda activate hummingbot && cd /root/hummingbot/client && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log\"" >> /root/.bashrc
   else
-    echo "export HB_CLIENT_COMMAND=\"$HB_CLIENT_COMMAND\"" >> ~/.bashrc
+    echo "export HB_CLIENT_COMMAND=\"$HB_CLIENT_COMMAND\"" >> /root/.bashrc
   fi
 
   # FileBrowser environment variables
 
   if [ -z "$FILEBROWSER_PORT" ]
   then
-    echo 'export FILEBROWSER_PORT=50002' >> ~/.bashrc
+    echo 'export FILEBROWSER_PORT=50002' >> /root/.bashrc
   else
-    echo "export FILEBROWSER_PORT=$FILEBROWSER_PORT" >> ~/.bashrc
+    echo "export FILEBROWSER_PORT=$FILEBROWSER_PORT" >> /root/.bashrc
   fi
 
   if [ -z "$FILEBROWSER_COMMAND" ]
   then
-    echo "export FILEBROWSER_COMMAND=\"cd /root/filebrowser && filebrowser -p \$FILEBROWSER_PORT -r ../shared > /dev/null 2>&1 &\"" >> ~/.bashrc
+    echo "export FILEBROWSER_COMMAND=\"cd /root/filebrowser && filebrowser -p \$FILEBROWSER_PORT -r ../shared > /dev/null 2>&1 &\"" >> /root/.bashrc
   else
-    echo "export FILEBROWSER_COMMAND=\"$FILEBROWSER_COMMAND\"" >> ~/.bashrc
+    echo "export FILEBROWSER_COMMAND=\"$FILEBROWSER_COMMAND\"" >> /root/.bashrc
   fi
 
-  echo -e "\n" >> ~/.bashrc
+  echo -e "\n" >> /root/.bashrc
 
-	set +ex
-EOF
-
-RUN <<-EOF
-	set -e
 	set +x
 
 	if [[ "$SSH_DEPLOY_PUBLIC_KEY" && "$SSH_DEPLOY_PRIVATE_KEY" ]]; then \
-	  set -ex
+	  set -x
 
     mkdir -p /root/.ssh
     chmod 0700 /root/.ssh
@@ -171,26 +160,16 @@ RUN <<-EOF
 		set +x
 		echo "$SSH_DEPLOY_PRIVATE_KEY" > /root/.ssh/id_rsa
 
-		set -ex
+		set -x
     chmod 600 /root/.ssh/id_rsa
     chmod 600 /root/.ssh/id_rsa.pub
 	fi
 
-	set +ex
-EOF
-
-RUN <<-EOF
-	set -ex
+	set -x
 
 	unlink /usr/bin/pip
 	ln -s /usr/bin/python3 /usr/bin/python
 	ln -s /usr/bin/pip3 /usr/bin/pip
-
-	set +ex
-EOF
-
-RUN <<-EOF
-	set -ex
 
 	curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
 	rm -f get.sh
@@ -210,12 +189,6 @@ html {
     scrollbar-width: none;
 }
 CSS
-
-	set +ex
-EOF
-
-RUN <<-EOF
-	set -ex
 
 	ARCHITECTURE="$(uname -m)"
 
@@ -277,12 +250,6 @@ RUN <<-EOF
 
 	conda init --all
 
-	set +ex
-EOF
-
-RUN <<-EOF
-	set -ex
-
 	source /root/.bashrc
 
 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
@@ -303,12 +270,6 @@ RUN <<-EOF
 
 	rm -rf /root/.cache
 
-	set +ex
-EOF
-
-RUN <<-EOF
-	set -ex
-
 	source /root/.bashrc
 
 	mkdir -p funttastic/client
@@ -324,12 +285,6 @@ RUN <<-EOF
 	cp resources/configuration/production.example.yml resources/configuration/production.yml
 	cp -a resources/strategies/templates/. resources/strategies
 
-	set +ex
-EOF
-
-RUN <<-EOF
-	set -ex
-
 	source /root/.bashrc
 
 	mkdir -p funttastic/frontend
@@ -338,12 +293,6 @@ RUN <<-EOF
   git clone -b $FUN_FRONTEND_REPOSITORY_BRANCH $FUN_FRONTEND_REPOSITORY_URL .
 
   yarn install
-
-	set +ex
-EOF
-
-RUN <<-EOF
-	set -ex
 
 	source /root/.bashrc
 
@@ -364,12 +313,6 @@ RUN <<-EOF
 	yarn
 	yarn prebuild
 	yarn build
-
-	set +ex
-EOF
-
-RUN <<-EOF
-	set -ex
 
 	source /root/.bashrc
 
@@ -405,12 +348,6 @@ RUN <<-EOF
 		scripts \
 		pmm_scripts
 
-	set +ex
-EOF
-
-RUN <<-EOF
-	set -ex
-
 	rm -rf /root/temp
 
 	source /root/.bashrc
@@ -424,14 +361,9 @@ RUN <<-EOF
 	sed -i -e '/logging:/,/use_telegram: true/ s/use_telegram: true/use_telegram: false/' -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' funttastic/client/resources/configuration/production.yml
 	sed -i -e '/telegram:/,/enabled: true/ s/enabled: true/enabled: false/' -e '/telegram:/,/listen_commands: true/ s/listen_commands: true/listen_commands: false/' funttastic/client/resources/configuration/common.yml
 
-	set +ex
-EOF
-
-RUN <<-EOF
-	set -e
-	set +x
-
 	source /root/.bashrc
+
+	set +x
 
 	# HB Gateway
   echo "export GATEWAY_PASSPHRASE=$HB_GATEWAY_PASSPHRASE" >> /root/.bashrc
@@ -455,15 +387,11 @@ RUN <<-EOF
   filebrowser users add $ADMIN_USERNAME $ADMIN_PASSWORD --perm.admin
   filebrowser users update $ADMIN_USERNAME --commands="ls,git,tree,curl,rm,mkdir,pwd,cp,mv,cat,less,find,touch,echo,chmod,chown,df,du,ps,kill"
 
-	set +ex
-EOF
+	set -x
 
-RUN <<-EOF
-set -ex
+	mkdir -p shared/scripts
 
-mkdir -p shared/scripts
-
-cat <<'SCRIPT' > shared/scripts/functions.sh
+	cat <<'SCRIPT' > shared/scripts/functions.sh
 #!/bin/bash
 
 start_fun_frontend() {
@@ -495,7 +423,7 @@ start_all() {
 }
 
 start() {
-  source ~/.bashrc
+  source /root/.bashrc
 
   if [[ $# -eq 0 ]]; then
     start_all
@@ -584,7 +512,7 @@ stop_all() {
 }
 
 stop() {
-  source ~/.bashrc
+  source /root/.bashrc
 
   if [[ $# -eq 0 ]]; then
     stop_all
@@ -667,24 +595,18 @@ OUTPUT
 
 SCRIPT
 
-chmod +x shared/scripts/functions.sh
+	chmod +x shared/scripts/functions.sh
 
-cat <<'SCRIPT' > shared/scripts/initialize.sh
+	cat <<'SCRIPT' > shared/scripts/initialize.sh
 #!/bin/bash
 
 source /root/shared/scripts/functions.sh
 
 SCRIPT
 
-echo "source /root/shared/scripts/initialize.sh" >> /root/.bashrc
+	echo "source /root/shared/scripts/initialize.sh" >> /root/.bashrc
 
-source /root/.bashrc
-
-set +ex
-EOF
-
-RUN <<-EOF
-	set -ex
+	source /root/.bashrc
 
 	mkdir -p \
 		/root/shared/common \
@@ -719,12 +641,6 @@ RUN <<-EOF
   ln -s /root/shared/hummingbot/client/data /root/hummingbot/client/data
   ln -s /root/shared/hummingbot/client/scripts /root/hummingbot/client/scripts
   ln -s /root/shared/hummingbot/client/pmm_scripts /root/hummingbot/client/pmm_scripts
-
-	set +ex
-EOF
-
-RUN <<-EOF
-	set -ex
 
 	if [ "$LOCK_APT" == "TRUE" ]
 	then
