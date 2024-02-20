@@ -624,16 +624,28 @@ stop() {
 }
 
 status() {
-	local fun_client_status=$(pgrep -f 'start_fun_client' >/dev/null && echo 'running' || echo 'stopped')
-	local hb_client_status=$(pgrep -f 'start_hb_client' >/dev/null && echo 'running' || echo 'stopped')
-	local hb_gateway_status=$(pgrep -f 'start_hb_gateway' >/dev/null && echo 'running' || echo 'stopped')
+  local fun_frontend_status=$(pgrep -f 'fun.*frontend.*vite' >/dev/null && echo 'running' || echo 'stopped')
+  local filebrowser_status=$(pgrep -f 'filebrowser.*' >/dev/null && echo 'running' || echo 'stopped')
+	local fun_client_status=$(pgrep -f 'python.*app.py' >/dev/null && echo 'running' || echo 'stopped')
+	local hb_client_status=$(pgrep -f 'python.*hummingbot_quickstart.py' >/dev/null && echo 'running' || echo 'stopped')
+	local hb_gateway_status=$(pgrep -f 'node.*yarn.*start' >/dev/null && echo 'running' || echo 'stopped')
 
+  local fun_frontend_message="$(echo $fun_frontend_status | awk '{print toupper(substr($0, 1, 1)) substr($0, 2)}')."
+  local filebrowser_message="$(echo $filebrowser_status | awk '{print toupper(substr($0, 1, 1)) substr($0, 2)}')."
 	local fun_client_message="$(echo $fun_client_status | awk '{print toupper(substr($0, 1, 1)) substr($0, 2)}')."
 	local hb_client_message="$(echo $hb_client_status | awk '{print toupper(substr($0, 1, 1)) substr($0, 2)}')."
 	local hb_gateway_message="$(echo $hb_gateway_status | awk '{print toupper(substr($0, 1, 1)) substr($0, 2)}')."
 
   output=$(cat << OUTPUT
 {
+  "fun-frontend": {
+    "status": "$fun_frontend_status",
+    "message: "$fun_frontend_message"
+  },
+  "filebrowser": {
+    "status": "$filebrowser_status",
+    "message: "$filebrowser_message"
+  },
   "fun-client": {
     "status": "$fun_client_status",
     "message: "$fun_client_message"
