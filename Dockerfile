@@ -205,7 +205,7 @@ RUN <<-EOF
 	filebrowser config set --port $FILEBROWSER_PORT
 	filebrowser config set --baseurl /
 
-	#	cp /root/funttastic/frontend/resources/assets/funttastic/logo/logo.svg branding/img/logo.svg
+		cp /root/funttastic/frontend/resources/assets/funttastic/logo/logo.svg branding/img/logo.svg
 
   cat <<'CSS' > branding/custom.css
 html {
