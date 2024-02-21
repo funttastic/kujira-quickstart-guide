@@ -211,6 +211,14 @@ RUN <<-EOF
 html {
     scrollbar-width: none;
 }
+
+header {
+    padding: 0.5em 0 0.5em 0;
+}
+
+header img {
+    display: none;
+}
 CSS
 
 	set +ex
