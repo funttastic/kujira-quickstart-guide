@@ -192,41 +192,6 @@ EOF
 RUN <<-EOF
 	set -ex
 
-	curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
-	rm -f get.sh
-
-	mkdir -p filebrowser/branding/img
-	cd filebrowser
-
-	filebrowser config init
-	filebrowser config set --branding.name "Funttastic"
-	filebrowser config set --branding.theme "dark"
-	filebrowser config set --branding.files /root/filebrowser/branding
-	filebrowser config set --port $FILEBROWSER_PORT
-	filebrowser config set --baseurl /
-
-		cp /root/funttastic/frontend/resources/assets/funttastic/logo/logo.svg branding/img/logo.svg
-
-  cat <<'CSS' > branding/custom.css
-html {
-    scrollbar-width: none;
-}
-
-header {
-    padding: 0.5em 0 0.5em 0;
-}
-
-header img {
-    display: none;
-}
-CSS
-
-	set +ex
-EOF
-
-RUN <<-EOF
-	set -ex
-
 	ARCHITECTURE="$(uname -m)"
 
 	case $(uname | tr '[:upper:]' '[:lower:]') in
@@ -348,6 +313,41 @@ RUN <<-EOF
   git clone -b $FUN_FRONTEND_REPOSITORY_BRANCH $FUN_FRONTEND_REPOSITORY_URL .
 
   yarn install
+
+	set +ex
+EOF
+
+RUN <<-EOF
+	set -ex
+
+	curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
+	rm -f get.sh
+
+	mkdir -p filebrowser/branding/img
+	cd filebrowser
+
+	filebrowser config init
+	filebrowser config set --branding.name "Funttastic"
+	filebrowser config set --branding.theme "dark"
+	filebrowser config set --branding.files /root/filebrowser/branding
+	filebrowser config set --port $FILEBROWSER_PORT
+	filebrowser config set --baseurl /
+
+		cp /root/funttastic/frontend/resources/assets/funttastic/logo/logo.svg branding/img/logo.svg
+
+  cat <<'CSS' > branding/custom.css
+html {
+    scrollbar-width: none;
+}
+
+header {
+    padding: 0.5em 0 0.5em 0;
+}
+
+header img {
+    display: none;
+}
+CSS
 
 	set +ex
 EOF
