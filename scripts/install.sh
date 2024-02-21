@@ -1,5 +1,11 @@
 #!/bin/bash
 
+SCRIPT_DIR=$(dirname "$0")
+SCRIPT_NAME="$(basename "$0")"
+SCRIPT_PATH="$SCRIPT_DIR/$SCRIPT_NAME"
+
+source "$SCRIPT_DIR/common.sh"
+
 CUSTOMIZE=$1
 USER=$(whoami)
 GROUP=$(id -gn)
@@ -25,24 +31,6 @@ generate_passphrase() {
 	done
 
 	echo "$passphrase"
-}
-
-open_in_web_navigator() {
-	urls=("$@")
-
-	for url in "${urls[@]}"; do
-		if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-			xdg-open "$url" &>/dev/null &
-		elif [[ "$OSTYPE" == "darwin"* ]]; then
-			open "$url" &>/dev/null &
-		elif [[ "$OSTYPE" == "cygwin" ]]; then
-			cmd.exe /c start "$url" &>/dev/null &
-		elif [[ "$OSTYPE" == "msys" ]]; then
-			cmd.exe /c start "$url" &>/dev/null &
-		elif [[ "$OSTYPE" == "win32" ]]; then
-			cmd.exe /c start "$url" &>/dev/null &
-		fi
-	done
 }
 
 image_exists() {
@@ -675,15 +663,7 @@ pre_installation_change_post_installation_commands() {
 	read -rp "   Do you want to customize any app launch commands? (\"y/N\") >>> " RESPONSE
 
 	if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" ]]; then
-		show_title() {
-			clear
-			echo
-			echo
-			echo "   ===============  CUSTOMIZING POST-INSTALLATION COMMANDS  ================"
-			echo
-		}
-
-		show_title
+		show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 		echo "   CHOOSE WHICH SERVICE WHOSE COMMAND YOU WOULD LIKE TO CHANGE:"
 		echo
 		echo "   [1] CHANGE ALL APPS COMMANDS"
@@ -739,32 +719,32 @@ pre_installation_change_post_installation_commands() {
 			case $APP_COMMAND in
 			1)
 				clear
-				show_title
+				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 				default_fun_client_server_command="conda activate funttastic && cd /root/funttastic/client && python app.py > /dev/null 2>&1 &"
 				set_app_post_installation_command "$default_fun_client_server_command" "Funttastic Client Server" "FUN_CLIENT_COMMAND"
 
 				clear
-				show_title
+				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 				default_fun_client_frontend_command="cd /root/funttastic/frontend && yarn start > /dev/null 2>&1 &"
 				set_app_post_installation_command "$default_fun_client_frontend_command" "Funttastic Client Frontend" "FUN_FRONTEND_COMMAND"
 
 				clear
-				show_title
+				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 				default_hummingbot_client_command="conda activate hummingbot && cd /root/hummingbot/client && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log"
 				set_app_post_installation_command "$default_hummingbot_client_command" "Hummingbot Client" "HB_CLIENT_COMMAND"
 
 				clear
-				show_title
+				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 				default_hummingbot_gateway_command="cd /root/hummingbot/gateway && yarn start > /dev/null 2>&1 &"
 				set_app_post_installation_command "$default_hummingbot_gateway_command" "Hummingbot Gateway" "HB_GATEWAY_COMMAND"
 
 				clear
-				show_title
+				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 				default_filebrowser_command="cd /root/filebrowser && filebrowser -p \$FILEBROWSER_PORT -r ../shared > /dev/null 2>&1 &"
 				set_app_post_installation_command "$default_filebrowser_command" "FileBrowser" "FILEBROWSER_COMMAND"
 
 				clear
-				show_title
+				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 				echo "   See below the modified commands:"
 				echo
 
@@ -808,35 +788,35 @@ pre_installation_change_post_installation_commands() {
 				;;
 			2)
 				clear
-				show_title
+				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 				default_fun_client_server_command="conda activate funttastic && cd /root/funttastic/client && python app.py > /dev/null 2>&1 &"
 				set_app_post_installation_command "$default_fun_client_server_command" "Funttastic Client Server" "FUN_CLIENT_COMMAND" 3
 				break
 				;;
 			3)
 				clear
-				show_title
+				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 				default_fun_client_frontend_command="cd /root/funttastic/frontend && yarn start > /dev/null 2>&1 &"
 				set_app_post_installation_command "$default_fun_client_frontend_command" "Funttastic Client Frontend" "FUN_FRONTEND_COMMAND" 3
 				break
 				;;
 			4)
 				clear
-				show_title
+				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 				default_hummingbot_client_command="conda activate hummingbot && cd /root/hummingbot/client && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log"
 				set_app_post_installation_command "$default_hummingbot_client_command" "Hummingbot Client" "HB_CLIENT_COMMAND" 3
 				break
 				;;
 			5)
 				clear
-				show_title
+				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 				default_hummingbot_gateway_command="cd /root/hummingbot/gateway && yarn start > /dev/null 2>&1 &"
 				set_app_post_installation_command "$default_hummingbot_gateway_command" "Hummingbot Gateway" "HB_GATEWAY_COMMAND" 3
 				break
 				;;
 			6)
 				clear
-				show_title
+				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 				default_filebrowser_command="cd /root/filebrowser && filebrowser -p \$FILEBROWSER_PORT -r ../shared > /dev/null 2>&1 &"
 				set_app_post_installation_command "$default_filebrowser_command" "FileBrowser" "FILEBROWSER_COMMAND" 3
 				break
@@ -931,8 +911,8 @@ if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "" ]]; then
 	echo
 elif [[ "$RESPONSE" == "back" ]]; then
 	clear
-	./configure
-	exit 0
+	main_menu
+	exit_application
 else
 	CUSTOMIZE="--customize"
 fi
