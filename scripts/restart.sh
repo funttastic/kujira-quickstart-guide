@@ -73,7 +73,9 @@ get_container_name() {
 
 		read -rp "   >>> " input_name
 
-		if [ "$input_name" == "back" ]; then
+		if [ "$input_name" == "exit" ]; then
+			exit 0
+		elif [ "$input_name" == "back" ]; then
 			CONTAINER_NAME="back"
 			echo
 			echo "   ⚠️  Returning to the previous menu..."
@@ -97,7 +99,9 @@ get_container_name() {
 
 				read -rp "   >>> " input_name
 
-				if [ "$input_name" == "back" ]; then
+				if [ "$input_name" == "exit" ]; then
+					exit 0
+				elif [ "$input_name" == "back" ]; then
 					echo
 					echo "   ⚠️  Returning to the previous menu..."
 					return 1
@@ -122,7 +126,9 @@ get_container_name() {
 
 				read -rp "   >>> " input_name
 
-				if [ "$input_name" == "back" ]; then
+				if [ "$input_name" == "exit" ]; then
+					exit 0
+				elif [ "$input_name" == "back" ]; then
 					echo
 					echo "   ⚠️  Returning to the previous menu..."
 					return 1
