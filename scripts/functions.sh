@@ -1361,13 +1361,15 @@ open_in_web_navigator() {
 }
 
 open_hb_client() {
-	tmux has-session -t $TMUX_SESSION_NAME 2>/dev/null
+#	tmux has-session -t $TMUX_SESSION_NAME 2>/dev/null
+#
+#	if [ $? != 0 ]; then
+#			tmux new-session -d -s $TMUX_SESSION_NAME "docker attach $CONTAINER_NAME"
+#	fi
+#
+#	tmux attach -t $TMUX_SESSION_NAME
 
-	if [ $? != 0 ]; then
-			tmux new-session -d -s $TMUX_SESSION_NAME "docker attach $CONTAINER_NAME"
-	fi
-
-	tmux attach -t $TMUX_SESSION_NAME
+	docker attach "$CONTAINER_NAME"
 }
 
 actions_submenu() {
