@@ -21,6 +21,10 @@ ID="default"
 # Inside the container
 CERTIFICATES_FOLDER="/root/shared/common/certificates"
 
+TMUX_SESSION_NAME="fun-kuji-hb"
+
+FUN_FRONTEND_URL="http://localhost:50000"
+
 more_information() {
 	echo "   For more information about the FUNTTASTIC CLIENT, please visit:"
 	echo
@@ -954,6 +958,10 @@ install_menu() {
 }
 
 get_container_name() {
+	if [ -n "$CONTAINER_NAME" ]; then
+		return 0
+	fi
+
 	filter_containers
 
 	show_title "==============================   CONTAINER SELECTION  ==============================="
@@ -1055,12 +1063,7 @@ restart_container() {
 }
 
 restart_all_services() {
-	if get_container_name; then
-#		if restart_container "$CONTAINER_NAME"; then
-#			docker attach "$CONTAINER_NAME"
-#		fi
-		restart_container "$CONTAINER_NAME"
-	fi
+	restart_container "$CONTAINER_NAME"
 }
 
 fun_client_send_request() {
@@ -1339,7 +1342,12 @@ open_in_web_navigator() {
 
 	for url in "${urls[@]}"; do
 		if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-			xdg-open "$url" &>/dev/null &
+			# If running in WSL
+			if grep -qi microsoft /proc/version; then
+        cmd.exe /c start "$url" &>/dev/null &
+      else
+        xdg-open "$url" &>/dev/null &
+      fi
 		elif [[ "$OSTYPE" == "darwin"* ]]; then
 			open "$url" &>/dev/null &
 		elif [[ "$OSTYPE" == "cygwin" ]]; then
@@ -1353,9 +1361,13 @@ open_in_web_navigator() {
 }
 
 open_hb_client() {
-	get_container_name
+	tmux has-session -t $TMUX_SESSION_NAME 2>/dev/null
 
-	docker attach "$CONTAINER_NAME"
+	if [ $? != 0 ]; then
+			tmux new-session -d -s $TMUX_SESSION_NAME "docker attach $CONTAINER_NAME"
+	fi
+
+	tmux attach -t $TMUX_SESSION_NAME
 }
 
 actions_submenu() {
@@ -1420,11 +1432,12 @@ actions_submenu() {
 			fi
 			;;
 		6)
-			open_in_web_navigator
+			open_in_web_navigator "$FUN_FRONTEND_URL"
 			main_menu
 			;;
 		7)
 			open_hb_client
+			restart_all_services
 			main_menu
 			;;
 		"back")
@@ -1445,11 +1458,7 @@ actions_submenu() {
 }
 
 actions_menu() {
-	if get_container_name; then
-		actions_submenu
-	else
-		main_menu
-	fi
+	actions_submenu
 }
 
 main_menu() {
@@ -1474,10 +1483,12 @@ main_menu() {
 			break
 			;;
 		2)
+			get_container_name
 			restart_all_services
-#			break
+			break
 			;;
 		3)
+			get_container_name
 			actions_menu
 			break
 			;;
@@ -1492,6 +1503,8 @@ main_menu() {
 			;;
 		esac
 	done
+
+	main_menu
 }
 
 filter_containers() {
@@ -1724,7 +1737,7 @@ docker_create_container() {
 
 post_installation() {
 	if [ "$OPEN_IN_BROWSER" == "TRUE" ]; then
-		open_in_web_navigator "$FILEBROWSER_URL" "$FUN_FRONTEND_URL"
+		open_in_web_navigator "$FUN_FRONTEND_URL"
 	fi
 
 	if [ "$HB_CLIENT_ATTACH" == "TRUE" ]; then
