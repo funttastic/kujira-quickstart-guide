@@ -21,9 +21,9 @@ ID="default"
 # Inside the container
 CERTIFICATES_FOLDER="/root/shared/common/certificates"
 
-TMUX_SESSION_NAME="fun-kuji-hb"
+#TMUX_SESSION_NAME="fun-kuji-hb"
 
-FUN_FRONTEND_URL="http://localhost:50000"
+#FUN_FRONTEND_URL="http://localhost:50000"
 
 more_information() {
 	echo "   For more information about the FUNTTASTIC CLIENT, please visit:"
@@ -957,6 +957,21 @@ install_menu() {
   fi
 }
 
+filter_containers() {
+	# Getting the list of containers
+	local containers
+
+	containers=$(docker ps -a --format "{{.Names}}")
+
+	# Filtering the containers
+	for name in $containers; do
+		# Checking if the name contains 'fun', 'kuji' and 'hb'
+		if [[ $name =~ fun ]] && [[ $name =~ kuji ]] && [[ $name =~ hb ]] && [ -z "$CONTAINER_NAME" ]; then
+			declare -g CONTAINER_NAME=$name
+		fi
+	done
+}
+
 get_container_name() {
 	if [ -n "$CONTAINER_NAME" ]; then
 		return 0
@@ -1038,6 +1053,41 @@ get_container_name() {
 	done
 }
 
+container_is_running() {
+    # Accepts a container name or id as the first argument
+    local container_name_or_id="$1"
+
+#		# Checks if the specified container is running using docker ps
+#		if [ -n "$(docker ps -q -f name="$container_name_or_id")" ]; then
+#				return 0
+#		else
+#				return 1
+#		fi
+
+    # Checks if the specified container is running using docker inspect
+		if [ "$(docker inspect -f '{{.State.Running}}' "$container_name_or_id")" == "true" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+
+set_urls() {
+	if container_is_running "$CONTAINER_NAME" ]; then
+		local FILEBROWSER_PORT
+		local FUN_FRONTEND_PORT
+		local LOCAL_HOST_URL_PREFIX="http://localhost"
+		declare -g FILEBROWSER_URL
+		declare -g FUN_FRONTEND_URL
+
+		FILEBROWSER_PORT=$(docker exec "$CONTAINER_NAME" /bin/bash -c "grep 'FILEBROWSER_PORT=' /root/.bashrc | cut -d'=' -f2")
+		FUN_FRONTEND_PORT=$(docker exec "$CONTAINER_NAME" /bin/bash -c "grep 'FRONTEND_PORT=' /root/.bashrc | cut -d'=' -f2")
+		FILEBROWSER_URL="$LOCAL_HOST_URL_PREFIX:$FILEBROWSER_PORT"
+		FUN_FRONTEND_URL="$LOCAL_HOST_URL_PREFIX:$FUN_FRONTEND_PORT"
+	fi
+}
+
 restart_container() {
 	local container_name=${1:-$CONTAINER_NAME}
 	local post_restart_command=$2
@@ -1049,7 +1099,7 @@ restart_container() {
 	echo
 	echo "      Stopping: $({
 		docker stop -t 1 "$container_name" && sleep 1 &&
-			if [ "$(docker inspect -f '{{.State.Running}}' "$container_name")" == "true" ]; then
+			if container_is_running "$container_name"; then
 				docker kill "$container_name"
 			fi
 	} 2>&1)"
@@ -1491,6 +1541,7 @@ main_menu() {
 			;;
 		3)
 			get_container_name
+			set_urls
 			actions_menu
 			break
 			;;
@@ -1507,21 +1558,6 @@ main_menu() {
 	done
 
 	main_menu
-}
-
-filter_containers() {
-	# Getting the list of containers
-	local containers
-
-	containers=$(docker ps -a --format "{{.Names}}")
-
-	# Filtering the containers
-	for name in $containers; do
-		# Checking if the name contains 'fun', 'kuji' and 'hb'
-		if [[ $name =~ fun ]] && [[ $name =~ kuji ]] && [[ $name =~ hb ]] && [ -z "$CONTAINER_NAME" ]; then
-			declare -g CONTAINER_NAME=$name
-		fi
-	done
 }
 
 container_exists() {
