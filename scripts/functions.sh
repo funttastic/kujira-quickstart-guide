@@ -1379,8 +1379,8 @@ actions_submenu() {
 	echo "   [3] STRATEGY STATUS"
 	echo "   [4] ADD WALLET"
 	echo "   [5] REMOVE WALLET"
-	echo "   [6] OPEN FUNTTASTIC CLIENT"
-	echo "   [7] OPEN HUMMINGBOT CLIENT"
+	echo "   [6] OPEN HUMMINGBOT CLIENT"
+	echo "   [7] OPEN FUNTTASTIC CLIENT"
 	echo
 	echo "   [back] RETURN TO MAIN MENU"
 	echo "   [exit] STOP SCRIPT EXECUTION"
@@ -1432,12 +1432,12 @@ actions_submenu() {
 			fi
 			;;
 		6)
-			open_in_web_navigator "$FUN_FRONTEND_URL"
+			open_hb_client
+			restart_all_services
 			main_menu
 			;;
 		7)
-			open_hb_client
-			restart_all_services
+			open_in_web_navigator "$FUN_FRONTEND_URL"
 			main_menu
 			;;
 		"back")
