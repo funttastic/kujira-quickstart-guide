@@ -4,6 +4,6 @@ SCRIPT_DIR=$(dirname "$0")
 SCRIPT_NAME="$(basename "$0")"
 SCRIPT_PATH="$SCRIPT_DIR/$SCRIPT_NAME"
 
-source "$SCRIPT_DIR/scripts/common.sh"
+source "$SCRIPT_DIR/scripts/functions.sh"
 
 main_menu
