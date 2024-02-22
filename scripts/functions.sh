@@ -23,8 +23,6 @@ CERTIFICATES_FOLDER="/root/shared/common/certificates"
 
 #TMUX_SESSION_NAME="fun-kuji-hb"
 
-#FUN_FRONTEND_URL="http://localhost:50000"
-
 more_information() {
 	echo "   For more information about the FUNTTASTIC CLIENT, please visit:"
 	echo
@@ -1775,7 +1773,7 @@ docker_create_container() {
 
 post_installation() {
 	if [ "$OPEN_IN_BROWSER" == "TRUE" ]; then
-		open_in_web_navigator "$FUN_FRONTEND_URL"
+		open_on_web_browser "$FUN_FRONTEND_URL"
 	fi
 
 	if [ "$HB_CLIENT_ATTACH" == "TRUE" ]; then
