@@ -1369,7 +1369,7 @@ open_hb_client() {
 #
 #	tmux attach -t $TMUX_SESSION_NAME
 
-	docker attach "$CONTAINER_NAME"
+	docker exec -it "$CONTAINER_NAME" bash -c "source /root/.bashrc && start_hb_client"
 }
 
 actions_submenu() {

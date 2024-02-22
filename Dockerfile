@@ -496,12 +496,16 @@ start_hb_client() {
   eval $HB_CLIENT_COMMAND
 }
 
+keep() {
+  tail -f /dev/null
+}
+
 start_all() {
   start_fun_frontend
   start_filebrowser
   start_fun_client
   start_hb_gateway
-  start_hb_client
+  keep
 }
 
 start() {
