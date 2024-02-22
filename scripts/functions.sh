@@ -1337,7 +1337,7 @@ fun_client_wallet() {
 	fi
 }
 
-open_in_web_navigator() {
+open_on_web_browser() {
 	urls=("$@")
 
 	for url in "${urls[@]}"; do
@@ -1439,7 +1439,7 @@ actions_submenu() {
 			main_menu
 			;;
 		7)
-			open_in_web_navigator "$FUN_FRONTEND_URL"
+			open_on_web_browser "$FUN_FRONTEND_URL"
 			main_menu
 			;;
 		"back")
