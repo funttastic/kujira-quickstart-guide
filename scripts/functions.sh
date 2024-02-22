@@ -1115,7 +1115,7 @@ fun_client_send_request() {
     --key \"$certificates_folder/client_key.pem\" \
     --cacert \"$certificates_folder/ca_cert.pem\" \
     --header \"Content-Type: application/json\" \
-    -d \"$payload\" \
+    -d '$payload' \
     \"$host:$port$url\""
 
 	RAW_RESPONSE=$(docker exec -e method -e certificates_folder -e payload -e host -e port -e url "$CONTAINER_NAME" /bin/bash -c "source /root/.bashrc && $COMMAND" 2>&1)
@@ -1152,11 +1152,11 @@ fun_client_strategy_start() {
 	fun_client_send_request \
 		--method "POST" \
 		--url "/strategy/start" \
-		--payload "{
-		\"strategy\": \"$strategy\",
-		\"version\": \"$version\",
-		\"id\": \"$id\"
-	}"
+		--payload '{
+			"strategy": "'"$strategy"'",
+			"version": "'"$version"'",
+			"id": "'"$id"'"
+		}'
 }
 
 fun_client_strategy_stop() {
@@ -1181,11 +1181,11 @@ fun_client_strategy_stop() {
 	fun_client_send_request \
 		--method "POST" \
 		--url "/strategy/stop" \
-		--payload "{
-		\"strategy\": \"$strategy\",
-		\"version\": \"$version\",
-		\"id\": \"$id\"
-	}"
+		--payload '{
+			"strategy": "'"$strategy"'",
+			"version": "'"$version"'",
+			"id": "'"$id"'"
+		}'
 }
 
 fun_client_strategy_status() {
@@ -1208,13 +1208,13 @@ fun_client_strategy_status() {
 	id=${id:-$ID}
 
 	fun_client_send_request \
-		--method "POST" \
+		--method "GET" \
 		--url "/strategy/status" \
-		--payload "{
-		\"strategy\": \"$strategy\",
-		\"version\": \"$version\",
-		\"id\": \"$id\"
-	}"
+		--payload '{
+			"strategy": "'"$strategy"'",
+			"version": "'"$version"'",
+			"id": "'"$id"'"
+		}'
 }
 
 fun_client_wallet() {
@@ -1283,20 +1283,19 @@ fun_client_wallet() {
 			fi
 		done
 
-		payload="{
-              \"chain\": \"$chain\",
-              \"network\": \"$network\",
-              \"connector\": \"$connector\",
-              \"privateKey\": \"$mnemonic\",
-              \"accountNumber\": $account_number
-            }"
+		payload='{
+			"chain": "'"$chain"'",
+			"network": "'"$network"'",
+			"connector": "'"$connector"'",
+			"privateKey": "'"$mnemonic"'",
+			"accountNumber": '"$account_number"'
+		}'
 
 		url="/wallet/add"
 	elif [ "$method" == "DELETE" ]; then
 		while true; do
 			echo
-			read -rp "   Enter the public key of the wallet you want to remove
-   [or type 'back' to return to menu] >>> " public_key
+			read -rp "   Enter the public key of the wallet you want to remove [or type 'back' to return to menu] >>> " public_key
 
 			if [ "$public_key" == 'back' ]; then
 				tput cuu 5
@@ -1317,10 +1316,10 @@ fun_client_wallet() {
 			fi
 		done
 
-		payload="{
-              \"chain\": \"$chain\",
-              \"address\": \"$public_key\"
-            }"
+		payload='{
+			"chain": "'"$chain"'",
+			"address": "'"$public_key"'",
+		}'
 
 		url="/wallet/remove"
 	fi
