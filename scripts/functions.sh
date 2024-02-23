@@ -1435,7 +1435,6 @@ add_indentation() {
     eval "$var_name=\"\$new_content\""
 }
 
-
 actions_submenu() {
 	show_menu_options() {
 		show_title "========================   BOT CONTROL & WALLET MANAGEMENT   ========================"
@@ -1725,9 +1724,35 @@ remove_docker_container() {
 }
 
 prompt_proceed() {
-	read -rp "   Do you want to proceed? [Y/n] >>> " RESPONSE
-	if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "" ]]; then
+	while true; do
+		echo
+		echo "   ℹ️  Enter 'restart' to restart all process or 'exit' to exit script."
+		echo
+		read -rp "   Do you want to proceed? [Y/n] >>> " RESPONSE
+
+		if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || \
+          "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || \
+          "$RESPONSE" == "" ||  \
+          "$RESPONSE" == "N" || "$RESPONSE" == "n" || \
+          "$RESPONSE" == "No" || "$RESPONSE" == "no" || \
+          "$RESPONSE" == "restart" || "$RESPONSE" == "exit" ]]; then
+			break
+		else
+			tput cuu 4
+			tput ed
+		fi
+	done
+
+	if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]; then
 		PROCEED="Y"
+	fi
+
+	if [[ "$RESPONSE" == "restart" ]]; then
+		install_menu
+	fi
+
+	if [[ "$RESPONSE" == "exit" ]]; then
+		exit_application
 	fi
 }
 
