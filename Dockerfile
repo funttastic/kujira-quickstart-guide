@@ -644,34 +644,13 @@ status() {
 	local hb_client_status=$(pgrep -f 'python.*hummingbot_quickstart.py' >/dev/null && echo 'running' || echo 'stopped')
 	local hb_gateway_status=$(pgrep -f 'node.*yarn.*start' >/dev/null && echo 'running' || echo 'stopped')
 
-  local fun_frontend_message="$(echo $fun_frontend_status | awk '{print toupper(substr($0, 1, 1)) substr($0, 2)}')."
-  local filebrowser_message="$(echo $filebrowser_status | awk '{print toupper(substr($0, 1, 1)) substr($0, 2)}')."
-	local fun_client_message="$(echo $fun_client_status | awk '{print toupper(substr($0, 1, 1)) substr($0, 2)}')."
-	local hb_client_message="$(echo $hb_client_status | awk '{print toupper(substr($0, 1, 1)) substr($0, 2)}')."
-	local hb_gateway_message="$(echo $hb_gateway_status | awk '{print toupper(substr($0, 1, 1)) substr($0, 2)}')."
-
   output=$(cat << OUTPUT
 {
-  "fun-frontend": {
-    "status": "$fun_frontend_status",
-    "message: "$fun_frontend_message"
-  },
-  "filebrowser": {
-    "status": "$filebrowser_status",
-    "message: "$filebrowser_message"
-  },
-  "fun-client": {
-    "status": "$fun_client_status",
-    "message: "$fun_client_message"
-  },
-  "hb-client": {
-    "status": "$hb_client_status",
-    "message: "$hb_client_message"
-  },
-  "hb-gateway": {
-    "status": "$hb_gateway_status",
-    "message: "$hb_gateway_message"
-  }
+  "fun-frontend": "$fun_frontend_status",
+  "filebrowser": "$filebrowser_status",
+  "fun-client": "$fun_client_status",
+  "hb-client": "$hb_client_status",
+  "hb-gateway": "$hb_gateway_status"
 }
 OUTPUT
 )
