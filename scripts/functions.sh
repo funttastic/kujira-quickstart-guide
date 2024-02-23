@@ -1806,7 +1806,9 @@ docker_create_image() {
 				echo "   |      http://www.funttastic.com/discord                  |"
 				echo "   |_________________________________________________________|"
 				echo
-				exit 1
+				echo
+				read -s -n1 -rp "   Press any key to return to the main menu >>> "
+				main_menu
 		fi
 	fi
 }
