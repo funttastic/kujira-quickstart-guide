@@ -21,8 +21,6 @@ ID="default"
 # Inside the container
 CERTIFICATES_FOLDER="/root/shared/common/certificates"
 
-#TMUX_SESSION_NAME="fun-kuji-hb"
-
 more_information() {
 	echo "   For more information about the FUNTTASTIC CLIENT, please visit:"
 	echo
@@ -53,9 +51,10 @@ exit_application() {
 
 waiting() {
 	local sleep_time=${1:-$DEFAULT_WAITING_TIME}
+	local spacer=$2
 
 	for i in $(seq 1 "$sleep_time"); do
-		echo "      Waiting $i-$sleep_time seconds to return."
+		echo -e "${spacer}Waiting $i-$sleep_time seconds to return."
 		sleep 1
 		tput cuu 1
 		tput ed
@@ -1291,7 +1290,9 @@ fun_client_wallet() {
 		while true; do
 			echo
 			echo "   Enter your Kujira wallet mnemonic"
-			read -s -rp "   [or type 'back' to return to menu] >>> " mnemonic
+			echo "   [or type 'back' to return to menu]"
+			echo
+			read -s -rp "   >>> " mnemonic
 
 			if [ "$mnemonic" == 'back' ]; then
 				tput cuu 4
@@ -1352,10 +1353,12 @@ fun_client_wallet() {
 		while true; do
 			echo
 			echo "   Enter the public key of the wallet you want to remove "
-			read -rp "   [or type 'back' to return to menu] >>> " public_key
+			echo "   [or type 'back' to return to menu] "
+			echo
+			read -rp "   >>> " public_key
 
 			if [ "$public_key" == 'back' ]; then
-				tput cuu 5
+				tput cuu 7
 				tput ed
 				echo
 				return 1
@@ -1367,7 +1370,7 @@ fun_client_wallet() {
 				echo
 				echo "   |      |  The wallet public key does not match the expected pattern of starting"
 				echo "   |  ❌  |  with 'kujira' followed by 39 lowercase letters and/or numbers."
-				echo "   |      |  example: \"kujira2q7kr0ffptrkq1hg8hhq71vqxex3kj6refy7sf6\""
+				echo "   |      |  example: \"kujira18gapnqgd6z6d76z6h360aeklw75uk44qqac0pl\""
 				echo
 				echo "   Please try again."
 			fi
@@ -1415,34 +1418,31 @@ open_on_web_browser() {
 }
 
 open_hb_client() {
-#	tmux has-session -t $TMUX_SESSION_NAME 2>/dev/null
-#
-#	if [ $? != 0 ]; then
-#			tmux new-session -d -s $TMUX_SESSION_NAME "docker attach $CONTAINER_NAME"
-#	fi
-#
-#	tmux attach -t $TMUX_SESSION_NAME
-
 	docker exec -it "$CONTAINER_NAME" bash -c "source /root/.bashrc && start_hb_client"
 }
 
 actions_submenu() {
-	show_title "========================   BOT CONTROL & WALLET MANAGEMENT   ========================"
-	echo "   CHOOSE WHICH ACTION YOU WOULD LIKE TO PERFORM:"
-	echo
-	echo "   [1] START STRATEGY"
-	echo "   [2] STOP STRATEGY"
-	echo "   [3] STRATEGY STATUS"
-	echo "   [4] ADD WALLET"
-	echo "   [5] REMOVE WALLET"
-	echo "   [6] OPEN HUMMINGBOT CLIENT"
-	echo "   [7] OPEN FUNTTASTIC CLIENT"
-	echo
-	echo "   [back] RETURN TO MAIN MENU"
-	echo "   [exit] STOP SCRIPT EXECUTION"
-	echo
-	echo "   ℹ️  Selected Container: $CONTAINER_NAME"
-	echo
+	show_menu_options() {
+		show_title "========================   BOT CONTROL & WALLET MANAGEMENT   ========================"
+
+		echo "   CHOOSE WHICH ACTION YOU WOULD LIKE TO PERFORM:"
+		echo
+		echo "   [1] START STRATEGY"
+		echo "   [2] STOP STRATEGY"
+		echo "   [3] STRATEGY STATUS"
+		echo "   [4] ADD WALLET"
+		echo "   [5] REMOVE WALLET"
+		echo "   [6] OPEN HUMMINGBOT CLIENT"
+		echo "   [7] OPEN FUNTTASTIC CLIENT"
+		echo
+		echo "   [back] RETURN TO MAIN MENU"
+		echo "   [exit] STOP SCRIPT EXECUTION"
+		echo
+		echo "   ℹ️  Selected Container: $CONTAINER_NAME"
+		echo
+	}
+
+	show_menu_options
 
 	while true; do
 		read -rp "   Enter your choice (1, 2, 3, 4, 5, 6, 7, back, or exit): " CHOICE
@@ -1456,6 +1456,9 @@ actions_submenu() {
       	echo "      $RAW_RESPONSE"
       fi
 			echo
+      waiting 3 "   "
+			clear
+      show_menu_options
 			;;
 		2)
 			fun_client_strategy_stop
@@ -1464,7 +1467,10 @@ actions_submenu() {
       else
       	echo "      $RAW_RESPONSE"
       fi
-			echo
+      echo
+      waiting 3 "   "
+			clear
+      show_menu_options
 			;;
 		3)
 			fun_client_strategy_status
@@ -1474,17 +1480,26 @@ actions_submenu() {
       	echo "      $RAW_RESPONSE"
       fi
 			echo
+      waiting 3 "   "
+			clear
+      show_menu_options
 			;;
 		4)
 			if fun_client_wallet "POST"; then
 				echo "      $RAW_RESPONSE"
 				echo
+				waiting 3 "   "
+				clear
+        show_menu_options
 			fi
 			;;
 		5)
 			if fun_client_wallet "DELETE"; then
 				echo "      $RAW_RESPONSE"
 				echo
+				waiting 3 "   "
+				clear
+        show_menu_options
 			fi
 			;;
 		6)
@@ -1543,8 +1558,9 @@ main_menu() {
 			restart_all_services
 			if container_is_running "$CONTAINER_NAME"; then
 				echo
-				echo "      Restarting is complete."
-				waiting 4
+				echo "      ✅ Restarting is complete."
+				echo
+				waiting 4 "   "
 			fi
 			break
 			;;
