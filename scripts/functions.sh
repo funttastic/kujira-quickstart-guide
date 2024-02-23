@@ -29,6 +29,10 @@ more_information() {
 	echo "      https://www.funttastic.com/partners/kujira"
 }
 
+info_back_or_exit() {
+	echo "   ℹ️  Enter 'back' to return to previous menu or 'exit' to exit script."
+}
+
 show_title() {
 	local title="$1"
 
@@ -179,10 +183,10 @@ pre_installation_image_and_container() {
 		echo
 		read -rp "   Are you sure you want to remove all Docker images and containers? (\"y/N\") >>> " RESPONSE
 
-		if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]; then
-			return 1
-		else
+		if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" ]]; then
 			return 0
+		else
+			return 1
 		fi
 	}
 
@@ -267,13 +271,13 @@ pre_installation_image_and_container() {
 				echo
 				read -rp "   Are you sure you want to remove the image \"$IMAGE_NAME\"? (\"y/N\") >>> " RESPONSE
 
-				if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]; then
-					tput cuu 12
-					tput ed
-
-					handle_image_name_conflict
-				else
+				if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" ]]; then
 					docker_prune_selectively "$IMAGE_NAME"
+				else
+					tput cuu 12
+          tput ed
+
+          handle_image_name_conflict
 				fi
 				;;
 			3)
@@ -350,14 +354,14 @@ pre_installation_image_and_container() {
 			echo
 			read -rp "   Are you sure you want to remove the container \"$CONTAINER_NAME\"? (\"y/N\") >>> " RESPONSE
 
-			if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "" ]]; then
-				tput cuu 13
-				tput ed
+			if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" ]]; then
+      	remove_docker_container "$CONTAINER_NAME"
+      else
+      	tput cuu 13
+        tput ed
 
-				handle_container_name_conflict
-			else
-				remove_docker_container "$CONTAINER_NAME"
-			fi
+        handle_container_name_conflict
+      fi
 			;;
 		3)
 			if should_prune_docker; then
@@ -386,6 +390,10 @@ pre_installation_image_and_container() {
 }
 
 pre_installation_fun_client() {
+	if [ "$BUILD_CACHE" == "" ]; then
+  	return
+  fi
+
 	show_title "====================   FUNTTASTIC CLIENT INSTALLATION SETTINGS   ===================="
 
 	default_values_info
@@ -400,25 +408,23 @@ pre_installation_fun_client() {
 		FUN_CLIENT_PORT=$RESPONSE
 	fi
 
-	if [ "$BUILD_CACHE" == "--no-cache" ]; then
-		echo
-		echo "   Enter the url from the repository to be cloned"
-		read -rp "   (default = \"https://github.com/funttastic/fun-hb-client.git\") >>> " RESPONSE
+	echo
+	echo "   Enter the url from the repository to be cloned"
+	read -rp "   (default = \"https://github.com/funttastic/fun-hb-client.git\") >>> " RESPONSE
 
-		if [ "$RESPONSE" == "" ]; then
-			FUN_CLIENT_REPOSITORY_URL="https://github.com/funttastic/fun-hb-client.git"
-		else
-			FUN_CLIENT_REPOSITORY_URL="$RESPONSE"
-		fi
+	if [ "$RESPONSE" == "" ]; then
+		FUN_CLIENT_REPOSITORY_URL="https://github.com/funttastic/fun-hb-client.git"
+	else
+		FUN_CLIENT_REPOSITORY_URL="$RESPONSE"
+	fi
 
-		echo
-		read -rp "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
+	echo
+	read -rp "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
 
-		if [ "$RESPONSE" == "" ]; then
-			FUN_CLIENT_REPOSITORY_BRANCH="community"
-		else
-			FUN_CLIENT_REPOSITORY_BRANCH="$RESPONSE"
-		fi
+	if [ "$RESPONSE" == "" ]; then
+		FUN_CLIENT_REPOSITORY_BRANCH="community"
+	else
+		FUN_CLIENT_REPOSITORY_BRANCH="$RESPONSE"
 	fi
 }
 
@@ -450,6 +456,10 @@ pre_installation_hb_client() {
 }
 
 pre_installation_hb_gateway() {
+	if [ "$BUILD_CACHE" == "" ]; then
+  	return
+  fi
+
 	show_title "===================   HUMMINGBOT GATEWAY INSTALLATION SETTINGS   ===================="
 
 	default_values_info
@@ -482,25 +492,23 @@ pre_installation_hb_gateway() {
 		fi
 	fi
 
-	if [ "$BUILD_CACHE" == "--no-cache" ]; then
-		echo
-		echo "   Enter the url from the repository to be cloned"
-		read -rp "   (default = \"https://github.com/Team-Kujira/gateway.git\") >>> " RESPONSE
+	echo
+	echo "   Enter the url from the repository to be cloned"
+	read -rp "   (default = \"https://github.com/Team-Kujira/gateway.git\") >>> " RESPONSE
 
-		if [ "$RESPONSE" == "" ]; then
-			HB_GATEWAY_REPOSITORY_URL="https://github.com/Team-Kujira/gateway.git"
-		else
-			HB_GATEWAY_REPOSITORY_URL="$RESPONSE"
-		fi
+	if [ "$RESPONSE" == "" ]; then
+		HB_GATEWAY_REPOSITORY_URL="https://github.com/Team-Kujira/gateway.git"
+	else
+		HB_GATEWAY_REPOSITORY_URL="$RESPONSE"
+	fi
 
-		echo
-		read -rp "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
+	echo
+	read -rp "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
 
-		if [ "$RESPONSE" == "" ]; then
-			HB_GATEWAY_REPOSITORY_BRANCH="community"
-		else
-			HB_GATEWAY_REPOSITORY_BRANCH="$RESPONSE"
-		fi
+	if [ "$RESPONSE" == "" ]; then
+		HB_GATEWAY_REPOSITORY_BRANCH="community"
+	else
+		HB_GATEWAY_REPOSITORY_BRANCH="$RESPONSE"
 	fi
 }
 
@@ -522,6 +530,10 @@ pre_installation_launch_apps_after_installation() {
 }
 
 pre_installation_change_post_installation_commands() {
+	if [ "$BUILD_CACHE" == "" ]; then
+  	return
+  fi
+
 	show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
 
 	default_values_info
@@ -666,21 +678,16 @@ pre_installation_change_post_installation_commands() {
 }
 
 pre_installation_open_apps_in_browser() {
-	if [ "$BUILD_CACHE" == "" ]; then
-		return
-	fi
-
 	show_title "===========================   OPEN APPS IN THE BROWSER   ============================"
 
 	default_values_info
 
 	echo
-	echo "   Do you want to open the management apps in the browser after the installation is complete?"
+	echo "   Do you want to open the management app in the browser after the installation is complete?"
 	echo
-	echo "   Applications to open:"
+	echo "   It will open:"
 	echo
 	echo "      > FUNTTASTIC CLIENT FRONTEND [$FUN_FRONTEND_URL]"
-	echo "      > FILEBROWSER [$FILEBROWSER_URL]"
 	echo
 	read -rp "   [\"Y/n\"] >>> " RESPONSE
 
@@ -847,19 +854,21 @@ install_menu() {
   	printf "%25s %3s\n" "Reuse image:" "$REUSE_IMAGE"
   	printf "%25s %5s\n" "Version:" "$TAG"
   	printf "%25s %5s\n" "Entrypoint:" "$DEFINED_ENTRYPOINT"
-  	printf "%25s %3s\n" "Lock APT:" "$LOCK_APT"
-  	printf "%25s %3s\n" "Open Management Apps:" "$OPEN_IN_BROWSER"
+  	if [ "$BUILD_CACHE" == "--no-cache" ]; then
+  		printf "%25s %3s\n" "Lock APT:" "$LOCK_APT"
+  	fi
+  	printf "%25s %3s\n" "Open Management App:" "$OPEN_IN_BROWSER"
   	echo
 
-  	echo
-  	echo "   ℹ️  Confirm below if the Funttastic Client Server settings are correct:"
-  	echo
   	if [ "$BUILD_CACHE" == "--no-cache" ]; then
+  		echo
+      echo "   ℹ️  Confirm below if the Funttastic Client Server settings are correct:"
+      echo
   		printf "%25s %5s\n" "Repository url:" "$FUN_CLIENT_REPOSITORY_URL"
   		printf "%25s %5s\n" "Repository branch:" "$FUN_CLIENT_REPOSITORY_BRANCH"
+  		printf "%25s %4s\n" "Exposed port:" "$FUN_CLIENT_PORT"
+      echo
   	fi
-  	printf "%25s %4s\n" "Exposed port:" "$FUN_CLIENT_PORT"
-  	echo
 
   	echo
   	echo "   ℹ️  Confirm below if the Funttastic Client Fronted settings are correct:"
@@ -880,11 +889,12 @@ install_menu() {
   		printf "%25s %5s\n" "Repository branch:" "$HB_CLIENT_REPOSITORY_BRANCH"
   	fi
   	printf "%25s %3s\n" "See UI On Finish:" "$HB_CLIENT_ATTACH"
-  	echo
 
-  	echo
-  	echo "   ℹ️  Confirm below if the Hummingbot Gateway settings are correct:"
-  	echo
+		if [[ "$BUILD_CACHE" == "--no-cache" || "$EXPOSE_HB_GATEWAY_PORT" == "TRUE" ]]; then
+			echo
+			echo "   ℹ️  Confirm below if the Hummingbot Gateway settings are correct:"
+			echo
+  	fi
   	if [ "$BUILD_CACHE" == "--no-cache" ]; then
   		printf "%25s %5s\n" "Repository url:" "$HB_GATEWAY_REPOSITORY_URL"
   		printf "%25s %5s\n" "Repository branch:" "$HB_GATEWAY_REPOSITORY_BRANCH"
@@ -901,29 +911,31 @@ install_menu() {
   	printf "%25s %4s\n" "Access URL:" "$FILEBROWSER_URL"
   	echo
 
-  	if [[ -n "$FUN_CLIENT_COMMAND" || -n "$FUN_FRONTEND_COMMAND" || -n "$HB_GATEWAY_COMMAND" || -n "$HB_CLIENT_COMMAND" || -n "$FILEBROWSER_COMMAND" ]]; then
-  		echo
-  		echo "   ℹ️  Confirm below if the personalized apps post installation commands are correct:"
-  		echo
+		if [ "$BUILD_CACHE" == "--no-cache" ]; then
+			if [[ -n "$FUN_CLIENT_COMMAND" || -n "$FUN_FRONTEND_COMMAND" || -n "$HB_GATEWAY_COMMAND" || -n "$HB_CLIENT_COMMAND" || -n "$FILEBROWSER_COMMAND" ]]; then
+				echo
+				echo "   ℹ️  Confirm below if the personalized apps post installation commands are correct:"
+				echo
 
-  		if [ -n "$FUN_CLIENT_COMMAND" ]; then
-  			printf "%42s %s\n" "Funttastic Client Server Command:" "$FUN_CLIENT_COMMAND"
-  		fi
-  		if [ -n "$FUN_FRONTEND_COMMAND" ]; then
-  			printf "%42s %s\n" "Funttastic Client Frontend Command:" "$FUN_FRONTEND_COMMAND"
-  		fi
-  		if [ -n "$HB_GATEWAY_COMMAND" ]; then
-  			printf "%42s %s\n" "Hummingbot Gateway Command:" "$HB_GATEWAY_COMMAND"
-  		fi
-  		if [ -n "$HB_CLIENT_COMMAND" ]; then
-  			printf "%42s %s\n" "Hummingbot Client Command:" "$HB_CLIENT_COMMAND"
-  		fi
-  		if [ -n "$FILEBROWSER_COMMAND" ]; then
-  			printf "%42s %s\n" "FileBrowser Command:" "$FILEBROWSER_COMMAND"
-  		fi
+				if [ -n "$FUN_CLIENT_COMMAND" ]; then
+					printf "%42s %s\n" "Funttastic Client Server Command:" "$FUN_CLIENT_COMMAND"
+				fi
+				if [ -n "$FUN_FRONTEND_COMMAND" ]; then
+					printf "%42s %s\n" "Funttastic Client Frontend Command:" "$FUN_FRONTEND_COMMAND"
+				fi
+				if [ -n "$HB_GATEWAY_COMMAND" ]; then
+					printf "%42s %s\n" "Hummingbot Gateway Command:" "$HB_GATEWAY_COMMAND"
+				fi
+				if [ -n "$HB_CLIENT_COMMAND" ]; then
+					printf "%42s %s\n" "Hummingbot Client Command:" "$HB_CLIENT_COMMAND"
+				fi
+				if [ -n "$FILEBROWSER_COMMAND" ]; then
+					printf "%42s %s\n" "FileBrowser Command:" "$FILEBROWSER_COMMAND"
+				fi
 
-  		echo
-  		echo
+				echo
+				echo
+			fi
   	fi
 
   	prompt_proceed
@@ -967,13 +979,15 @@ get_container_name() {
 	filter_containers
 
 	show_title "==============================   CONTAINER SELECTION  ==============================="
+	info_back_or_exit
+	echo
 
 	while true; do
 		if [ -n "$CONTAINER_NAME" ]; then
 			echo "   Enter the container name (was found: \"$CONTAINER_NAME\")"
 
 			echo
-			echo "   [Press Enter to use '$CONTAINER_NAME' or enter 'back' to return to the previous menu]"
+			echo "   [Press Enter to use '$CONTAINER_NAME']"
 			echo
 		else
 			echo "   Enter the container name (example: \"fun-kuji-hb\"):"
@@ -998,7 +1012,7 @@ get_container_name() {
 						return 0
 					else
 						echo
-						echo "   ⚠️  Container not found! Please enter a valid container name or 'back' to exit."
+						echo "   ⚠️  Container not found! Please enter a valid container."
 						echo
 					fi
 				fi
@@ -1015,7 +1029,7 @@ get_container_name() {
 			while true; do
 				if [ -z "$input_name" ]; then
 					echo
-					echo "   ⚠️  Please enter a container name or 'back' to return to previous menu."
+					echo "   ⚠️  Please enter a container name."
 					echo
 				else
 					if container_exists "$input_name"; then
@@ -1023,7 +1037,7 @@ get_container_name() {
 						return 0
 					else
 						echo
-						echo "   ⚠️  Container not found! Please enter a valid container name or 'back' to return to previous menu."
+						echo "   ⚠️  Container not found! Please enter a valid container name."
 						echo
 					fi
 				fi
@@ -1427,7 +1441,7 @@ actions_submenu() {
 	echo "   [back] RETURN TO MAIN MENU"
 	echo "   [exit] STOP SCRIPT EXECUTION"
 	echo
-	more_information
+	echo "   ℹ️  Selected Container: $CONTAINER_NAME"
 	echo
 
 	while true; do
@@ -1774,7 +1788,7 @@ post_installation() {
 	fi
 
 	if [ "$HB_CLIENT_ATTACH" == "TRUE" ]; then
-		docker attach "$CONTAINER_NAME"
+		docker exec -it "$CONTAINER_NAME" bash -c "source /root/.bashrc && start_hb_client"
 	fi
 }
 
