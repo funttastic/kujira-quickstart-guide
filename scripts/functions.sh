@@ -47,8 +47,15 @@ exit_application() {
 	exit 0
 }
 
-pre_installation_waiting() {
-	sleep $DEFAULT_WAITING_TIME
+waiting() {
+	local sleep_time=${1:-$DEFAULT_WAITING_TIME}
+
+	for i in $(seq 1 "$sleep_time"); do
+		echo "      Waiting $i-$sleep_time seconds to return."
+		sleep 1
+		tput cuu 1
+		tput ed
+	done
 }
 
 pre_installation_define_passphrase() {
@@ -112,10 +119,7 @@ pre_installation_define_passphrase() {
 		fi
 	done
 
-	clear
-	echo
-	echo "   ======================   PASSWORD & USERNAME SETTING PROCESS   ======================"
-	echo
+	show_title "======================   PASSWORD & USERNAME SETTING PROCESS   ======================"
 	echo "   ________________________________________________________________"
 	echo "   | SERVICE OR APPLICATION |  NEEDS USERNAME  |  NEEDS PASSWORD  |"
 	echo "   |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|"
@@ -283,8 +287,10 @@ pre_installation_image_and_container() {
 				fi
 				;;
 			*)
-				echo "      ❌ Invalid Input. Restart the script and try again."
-				exit 1
+				tput cuu 10
+        tput ed
+
+				handle_image_name_conflict
 				;;
 			esac
 		}
@@ -315,8 +321,8 @@ pre_installation_image_and_container() {
 		echo
 		echo "      ⚠️  An container with the name \"$CONTAINER_NAME\", which you defined, already exists!"
 		echo
-		echo "      To ensure that no crashes occur while creating this new container, choose one
-			of the options below."
+		echo "      To ensure that no crashes occur while creating this new container, choose one"
+		echo "      of the options below."
 		echo
 		echo "      [1] SET A DIFFERENT NAME"
 		echo "      [2] REMOVE EXISTING CONTAINER"
@@ -364,8 +370,10 @@ pre_installation_image_and_container() {
 			fi
 			;;
 		*)
-			echo "      ❌ Invalid Input. Restart the script and try again."
-			exit 1
+			tput cuu 11
+			tput ed
+
+			handle_container_name_conflict
 			;;
 		esac
 	}
@@ -618,21 +626,6 @@ pre_installation_change_post_installation_commands() {
 					echo
 				fi
 
-#				if [[ -n "$FUN_CLIENT_COMMAND" || -n "$FUN_FRONTEND_COMMAND" || -n "$HB_GATEWAY_COMMAND" || -n "$HB_CLIENT_COMMAND" || -n "$FILEBROWSER_COMMAND" ]]; then
-#					echo
-#					echo "   Waiting a few seconds for your inspection:"
-#					echo
-#
-#					max_waiting_time=5
-#
-#					for i in $(seq 1 $max_waiting_time); do
-#						echo "      >> Waiting $i-$max_waiting_time seconds"
-#						sleep 1
-#						tput cuu 1
-#						tput ed
-#					done
-#				fi
-
 				break
 				;;
 			2)
@@ -729,10 +722,8 @@ pre_installation_lock_apt() {
 install_menu() {
 	pre_installation_define_passphrase
 
-  clear
-  echo
-  echo "   =============================   INSTALLATION OPTIONS   =============================="
-  echo
+  show_title "=============================   INSTALLATION OPTIONS   =============================="
+
   echo "   Do you want to automate the entire process? [Y/n]"
 
   echo
@@ -765,15 +756,17 @@ install_menu() {
   else
   	# Default settings to install Funttastic Client, Hummingbot Gateway and Hummingbot Client
 
+  	LOCAL_HOST_URL_PREFIX="http://localhost"
+
   	# Funttastic Frontend Settings
   	FUN_FRONTEND_PORT=${FUN_FRONTEND_PORT:-50000}
-  	FUN_FRONTEND_URL="http://localhost:$FUN_FRONTEND_PORT"
+  	FUN_FRONTEND_URL="$LOCAL_HOST_URL_PREFIX:$FUN_FRONTEND_PORT"
   	FUN_FRONTEND_REPOSITORY_URL=${FUN_FRONTEND_REPOSITORY_URL:-"https://github.com/funttastic/fun-hb-frontend.git"}
   	FUN_FRONTEND_REPOSITORY_BRANCH=${FUN_FRONTEND_REPOSITORY_BRANCH:-"development"}
 
   	# Filebrowser Settings
   	FILEBROWSER_PORT=${FILEBROWSER_PORT:-50002}
-  	FILEBROWSER_URL="http://localhost:$FILEBROWSER_PORT"
+  	FILEBROWSER_URL="$LOCAL_HOST_URL_PREFIX:$FILEBROWSER_PORT"
 
   	# Funttastic Client Settings
   	FUN_CLIENT_PORT=${FUN_CLIENT_PORT:-50001}
@@ -823,7 +816,7 @@ install_menu() {
 
   if [ -z "$CUSTOMIZE" ]; then
   	echo "   |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|"
-  	echo "   |   ℹ️  After the installation,      |"
+  	echo "   |   ℹ️   After the installation,      |"
   	echo "   |                                    |"
   	echo "   |   to view and edit configuration   |"
   	echo "   |   files, use the Frontend at       |"
@@ -1072,7 +1065,7 @@ container_is_running() {
 
 
 set_urls() {
-	if container_is_running "$CONTAINER_NAME" ]; then
+	if container_is_running "$CONTAINER_NAME"; then
 		local FILEBROWSER_PORT
 		local FUN_FRONTEND_PORT
 		local LOCAL_HOST_URL_PREFIX="http://localhost"
@@ -1287,8 +1280,8 @@ fun_client_wallet() {
 	if [ "$method" == "POST" ]; then
 		while true; do
 			echo
-			read -s -rp "   Enter your Kujira wallet mnemonic
-   [or type 'back' to return to menu] >>> " mnemonic
+			echo "   Enter your Kujira wallet mnemonic"
+			read -s -rp "   [or type 'back' to return to menu] >>> " mnemonic
 
 			if [ "$mnemonic" == 'back' ]; then
 				tput cuu 4
@@ -1324,9 +1317,11 @@ fun_client_wallet() {
 					echo
 					echo
 
-					echo "      |      |  Mnemonic must have either 12 or 24 words, with each word having at least 2 characters."
-					echo "      |  ❌  |"
-					echo "      |      |  example: flag stadium copper carbon slight school fabric verb behave crunch mouse lottery"
+					echo "   |      |  Mnemonic must have either 12 or 24 words, with each word having at least 2 characters."
+					echo "   |  ❌  |"
+					echo "   |      |  example: flag stadium copper carbon slight school fabric verb behave crunch mouse lottery"
+					echo
+					echo "   Please try again."
 				else
 					echo
 					break
@@ -1346,7 +1341,8 @@ fun_client_wallet() {
 	elif [ "$method" == "DELETE" ]; then
 		while true; do
 			echo
-			read -rp "   Enter the public key of the wallet you want to remove [or type 'back' to return to menu] >>> " public_key
+			echo "   Enter the public key of the wallet you want to remove "
+			read -rp "   [or type 'back' to return to menu] >>> " public_key
 
 			if [ "$public_key" == 'back' ]; then
 				tput cuu 5
@@ -1359,11 +1355,11 @@ fun_client_wallet() {
 				break
 			else
 				echo
-				echo "      |      |  The wallet public key does not match the expected pattern of starting"
-				echo "      |  ❌  |  with 'kujira' followed by 39 lowercase letters and/or numbers."
-				echo "      |      |  example: \"kujira2q7kr0ffptrkq1hg8hhq71vqxex3kj6refy7sf6\""
+				echo "   |      |  The wallet public key does not match the expected pattern of starting"
+				echo "   |  ❌  |  with 'kujira' followed by 39 lowercase letters and/or numbers."
+				echo "   |      |  example: \"kujira2q7kr0ffptrkq1hg8hhq71vqxex3kj6refy7sf6\""
 				echo
-				echo "      Please try again."
+				echo "   Please try again."
 			fi
 		done
 
@@ -1535,6 +1531,11 @@ main_menu() {
 		2)
 			get_container_name
 			restart_all_services
+			if container_is_running "$CONTAINER_NAME"; then
+				echo
+				echo "      Restarting is complete."
+				waiting 4
+			fi
 			break
 			;;
 		3)
