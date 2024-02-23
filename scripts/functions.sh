@@ -1421,6 +1421,21 @@ open_hb_client() {
 	docker exec -it "$CONTAINER_NAME" bash -c "source /root/.bashrc && start_hb_client"
 }
 
+add_indentation() {
+    local var_name=$1
+    local spacer=$2
+    local new_content=""
+
+    while IFS= read -r line; do
+        new_content="${new_content}${spacer}$line\n"
+    done <<< "$(eval echo \"\$"$var_name"\")"
+
+    new_content=${new_content%\\n}
+
+    eval "$var_name=\"\$new_content\""
+}
+
+
 actions_submenu() {
 	show_menu_options() {
 		show_title "========================   BOT CONTROL & WALLET MANAGEMENT   ========================"
@@ -1475,9 +1490,11 @@ actions_submenu() {
 		3)
 			fun_client_strategy_status
 			if [ -n "$RESPONSE" ]; then
-      	echo -e "      $RESPONSE"
+				add_indentation "RESPONSE" "      "
+      	echo -e "$RESPONSE"
       else
-      	echo "      $RAW_RESPONSE"
+				add_indentation "RAW_RESPONSE" "      "
+      	echo "$RAW_RESPONSE"
       fi
 			echo
       waiting 3 "   "
@@ -1505,11 +1522,13 @@ actions_submenu() {
 		6)
 			open_hb_client
 			restart_all_services
-			main_menu
+			clear
+      show_menu_options
 			;;
 		7)
 			open_on_web_browser "$FUN_FRONTEND_URL"
-			main_menu
+			clear
+      show_menu_options
 			;;
 		"back")
 			clear
