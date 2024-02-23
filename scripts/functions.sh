@@ -578,27 +578,28 @@ pre_installation_change_post_installation_commands() {
 			fi
 		}
 
+		local default_fun_client_server_command="conda activate funttastic && cd /root/funttastic/client && python app.py > /dev/null 2>&1 &"
+		local default_fun_client_frontend_command="cd /root/funttastic/frontend && yarn start --host > /dev/null 2>&1 &"
+		local default_hummingbot_client_command="conda activate hummingbot && cd /root/hummingbot/client && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log"
+		local default_hummingbot_gateway_command="cd /root/hummingbot/gateway && yarn start > /dev/null 2>&1 &"
+		local default_filebrowser_command="cd /root/filebrowser && filebrowser --address=0.0.0.0 -p \$FILEBROWSER_PORT -r ../shared > /dev/null 2>&1 &"
+
 		while true; do
 			case $APP_COMMAND in
 			1)
 				show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
-				default_fun_client_server_command="conda activate funttastic && cd /root/funttastic/client && python app.py > /dev/null 2>&1 &"
 				set_app_post_installation_command "$default_fun_client_server_command" "Funttastic Client Server" "FUN_CLIENT_COMMAND"
 
 				show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
-				default_fun_client_frontend_command="cd /root/funttastic/frontend && yarn start --host > /dev/null 2>&1 &"
 				set_app_post_installation_command "$default_fun_client_frontend_command" "Funttastic Client Frontend" "FUN_FRONTEND_COMMAND"
 
 				show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
-				default_hummingbot_client_command="conda activate hummingbot && cd /root/hummingbot/client && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log"
 				set_app_post_installation_command "$default_hummingbot_client_command" "Hummingbot Client" "HB_CLIENT_COMMAND"
 
 				show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
-				default_hummingbot_gateway_command="cd /root/hummingbot/gateway && yarn start > /dev/null 2>&1 &"
 				set_app_post_installation_command "$default_hummingbot_gateway_command" "Hummingbot Gateway" "HB_GATEWAY_COMMAND"
 
 				show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
-				default_filebrowser_command="cd /root/filebrowser && filebrowser --address=0.0.0.0 -p \$FILEBROWSER_PORT -r ../shared > /dev/null 2>&1 &"
 				set_app_post_installation_command "$default_filebrowser_command" "FileBrowser" "FILEBROWSER_COMMAND"
 
 				show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
@@ -630,31 +631,26 @@ pre_installation_change_post_installation_commands() {
 				;;
 			2)
 				show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
-				default_fun_client_server_command="conda activate funttastic && cd /root/funttastic/client && python app.py > /dev/null 2>&1 &"
 				set_app_post_installation_command "$default_fun_client_server_command" "Funttastic Client Server" "FUN_CLIENT_COMMAND" 3
 				break
 				;;
 			3)
 				show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
-				default_fun_client_frontend_command="cd /root/funttastic/frontend && yarn start > /dev/null 2>&1 &"
 				set_app_post_installation_command "$default_fun_client_frontend_command" "Funttastic Client Frontend" "FUN_FRONTEND_COMMAND" 3
 				break
 				;;
 			4)
 				show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
-				default_hummingbot_client_command="conda activate hummingbot && cd /root/hummingbot/client && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log"
 				set_app_post_installation_command "$default_hummingbot_client_command" "Hummingbot Client" "HB_CLIENT_COMMAND" 3
 				break
 				;;
 			5)
 				show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
-				default_hummingbot_gateway_command="cd /root/hummingbot/gateway && yarn start > /dev/null 2>&1 &"
 				set_app_post_installation_command "$default_hummingbot_gateway_command" "Hummingbot Gateway" "HB_GATEWAY_COMMAND" 3
 				break
 				;;
 			6)
 				show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
-				default_filebrowser_command="cd /root/filebrowser && filebrowser -p \$FILEBROWSER_PORT -r ../shared > /dev/null 2>&1 &"
 				set_app_post_installation_command "$default_filebrowser_command" "FileBrowser" "FILEBROWSER_COMMAND" 3
 				break
 				;;
