@@ -7,9 +7,6 @@ ARG LOCK_APT=${LOCK_APT:-"TRUE"}
 ARG ADMIN_USERNAME
 ARG ADMIN_PASSWORD
 
-ARG SSH_DEPLOY_PUBLIC_KEY
-ARG SSH_DEPLOY_PRIVATE_KEY
-
 ARG FUN_FRONTEND_REPOSITORY_URL="${FUN_FRONTEND_REPOSITORY_URL:-https://github.com/funttastic/fun-hb-frontend.git}"
 ARG FUN_FRONTEND_REPOSITORY_BRANCH="${FUN_FRONTEND_REPOSITORY_BRANCH:-development}"
 ARG FUN_FRONTEND_COMMAND
@@ -156,28 +153,16 @@ RUN <<-EOF
 EOF
 
 RUN <<-EOF
-	set -e
-	set +x
+	set -ex
 
-	if [[ "$SSH_DEPLOY_PUBLIC_KEY" && "$SSH_DEPLOY_PRIVATE_KEY" ]]; then \
-	  set -ex
-
-    mkdir -p /root/.ssh
-    chmod 0700 /root/.ssh
-    ssh-keyscan github.com > /root/.ssh/known_hosts
-
-		echo "$SSH_DEPLOY_PUBLIC_KEY" > /root/.ssh/id_rsa.pub
-
-		set +x
-		echo "$SSH_DEPLOY_PRIVATE_KEY" > /root/.ssh/id_rsa
-
-		set -ex
-    chmod 600 /root/.ssh/id_rsa
-    chmod 600 /root/.ssh/id_rsa.pub
-	fi
+  mkdir -p /root/.ssh
+  chmod 0700 /root/.ssh
 
 	set +ex
 EOF
+
+#COPY $SSH_PUBLIC_KEY_HOST_PATH /root/.ssh
+#COPY $SSH_PRIVATE_KEY_HOST_PATH /root/.ssh
 
 RUN <<-EOF
 	set -ex

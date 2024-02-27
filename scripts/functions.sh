@@ -21,6 +21,70 @@ ID="default"
 # Inside the container
 CERTIFICATES_FOLDER="/root/shared/common/certificates"
 
+function select_ssh_key() {
+	local keys=()
+	local key_paths=()
+	for key in ~/.ssh/*; do
+		# If this key is a public key, skip it.
+		if [[ ${key} == *.pub ]]; then
+			continue
+		fi
+
+		# If there is no corresponding .pub file, skip this key.
+		if [[ ! -f "${key}.pub" ]]; then
+			continue
+		fi
+
+		# This is a private key with a corresponding public key.
+		keys+=("$(basename "${key}")")
+		key_paths+=("${key}")
+	done
+
+	local count=${#keys[@]}
+
+	echo "   Found $count private SSH keys:"
+	echo
+
+	for i in "${!keys[@]}"; do
+		echo "      $(($i+1))) ${keys[i]}"
+	done
+
+	while true; do
+		echo
+		echo "   Select one of these keys or enter the absolute path of a key"
+		echo
+		read -rp "   >>> " REPLY
+
+		if [[ "$REPLY" =~ ^[0-9]+$ ]] && [ 1 -le "$REPLY" ] && [ "$REPLY" -le "$count" ]; then
+			echo
+			echo "      ✅ You selected the key: ${key_paths[$REPLY-1]}"
+			export SSH_PRIVATE_KEY_HOST_PATH="${key_paths[$REPLY-1]}"
+			export SSH_PUBLIC_KEY_HOST_PATH="$SSH_PRIVATE_KEY_HOST_PATH.pub"
+			break
+		elif [[ "$REPLY" == /* || "$REPLY" == ~* ]]; then
+				local expanded_reply="${REPLY/#\~/$HOME}"
+				expanded_reply="${expanded_reply/#\~\//$(whoami)/}"
+				if [[ -f "$expanded_reply" ]]; then
+					echo
+					echo "      ✅ You selected the key: $expanded_reply"
+					export SSH_PRIVATE_KEY_HOST_PATH="$expanded_reply"
+					export SSH_PUBLIC_KEY_HOST_PATH="$SSH_PRIVATE_KEY_HOST_PATH.pub"
+					if [[ ! -f "$SSH_PUBLIC_KEY_HOST_PATH" ]]; then
+						echo
+						echo "      ❌ Warning: Corresponding .pub file not found."
+					fi
+					break
+				else
+					echo
+					echo "      ❌ File not found! Please enter a valid file path or select a key from the list."
+				fi
+			else
+				echo
+				echo "      ❌ Invalid option. Try again."
+			fi
+	done
+}
+
 more_information() {
 	echo "   For more information about the FUNTTASTIC CLIENT, please visit:"
 	echo
@@ -59,6 +123,79 @@ waiting() {
 		tput cuu 1
 		tput ed
 	done
+}
+
+pre_installation_password_encryption() {
+	password_encryption_warning() {
+		show_title "======================   PASSWORD & USERNAME SETTING PROCESS   ======================"
+		echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+		echo "   |                                                               |"
+		echo "   |  ⚠️  Attention! Answer the following question carefully!       |"
+		echo "   |                                                               |"
+		echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+		echo
+	}
+
+	password_encryption_warning
+
+  while true; do
+  	echo "   Do you want to allow internal scripts to be able to decrypt"
+  	echo "   your password automatically when you need to use it to "
+  	echo "   restart an application?"
+  	echo
+  	echo "   ℹ️  If you choose 'No', you will need to enter your "
+  	echo "      password whenever you need to restart an app."
+  	echo
+  	read -rp "   (\"Y/n\") >>> " RESPONSE
+
+  	if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || \
+  				"$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || \
+  				"$RESPONSE" == "" ||  \
+  				"$RESPONSE" == "N" || "$RESPONSE" == "n" || \
+  				"$RESPONSE" == "No" || "$RESPONSE" == "no" ]]; then
+  		break
+  	else
+  		tput cuu 8
+  		tput ed
+  	fi
+  done
+
+  password_encryption_warning
+
+  if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]; then
+  	SELF_DISCOVERY="TRUE"
+
+  	while true; do
+  		echo "   ℹ️  To encrypt the password and username, we can use an SSH key "
+  		echo "      pair that you already have."
+  		echo
+  		echo "   Do you want to use an existing SSH key pair?"
+  		echo
+  		echo "   Choose 'No' to create a new pair automatically."
+  		echo
+  		read -rp "   (\"y/N\") >>> " RESPONSE
+
+    	if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || \
+    				"$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || \
+    				"$RESPONSE" == "" ||  \
+    				"$RESPONSE" == "N" || "$RESPONSE" == "n" || \
+    				"$RESPONSE" == "No" || "$RESPONSE" == "no" ]]; then
+    		break
+    	else
+    		tput cuu 7
+    		tput ed
+    	fi
+    done
+
+  	if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" ]]; then
+  		password_encryption_warning
+  		select_ssh_key
+			echo
+  		waiting 3 "   "
+  	fi
+  else
+  	SELF_DISCOVERY="FALSE"
+  fi
 }
 
 pre_installation_define_passphrase() {
@@ -121,6 +258,8 @@ pre_installation_define_passphrase() {
 			break
 		fi
 	done
+
+	pre_installation_password_encryption
 
 	show_title "======================   PASSWORD & USERNAME SETTING PROCESS   ======================"
 	echo "   ________________________________________________________________"
@@ -794,13 +933,12 @@ install_menu() {
   	IMAGE_NAME="fun-kuji-hb"
   	CONTAINER_NAME="$IMAGE_NAME"
   	BUILD_CACHE=${BUILD_CACHE:-"--no-cache"}
-  	SSH_PUBLIC_KEY="$SSH_PUBLIC_KEY"
-  	SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY"
   	TAG=${TAG:-"latest"}
   	ENTRYPOINT=${ENTRYPOINT:-""}
   	#  ENTRYPOINT=${ENTRYPOINT:-"--entrypoint=\"source /root/.bashrc && start\""}
   	OPEN_IN_BROWSER=${OPEN_IN_BROWSER:-"TRUE"}
   	LOCK_APT=${LOCK_APT:-"TRUE"}
+  	SELF_DISCOVERY=${SELF_DISCOVERY:-"TRUE"}
 
   	if image_exists "$IMAGE_NAME"; then
   		docker_prune_selectively "$IMAGE_NAME"
@@ -810,10 +948,6 @@ install_menu() {
   	if container_exists "$CONTAINER_NAME"; then
   		remove_docker_container "$CONTAINER_NAME"
   	fi
-  fi
-
-  if [[ "$SSH_PUBLIC_KEY" && "$SSH_PRIVATE_KEY" ]]; then
-  	FUN_CLIENT_REPOSITORY_URL="git@github.com:funttastic/fun-hb-client.git"
   fi
 
   if [ -z "$CUSTOMIZE" ]; then
@@ -1767,12 +1901,15 @@ docker_create_image() {
 		sed -i "s/#EXPOSE $HB_GATEWAY_PORT/EXPOSE $HB_GATEWAY_PORT/g" Dockerfile
 	fi
 
+	if [[ "$SELF_DISCOVERY" == "TRUE" && -n "$SSH_PUBLIC_KEY_HOST_PATH" && -n "$SSH_PRIVATE_KEY_HOST_PATH" ]]; then
+		sed -i -e "/COPY \$SSH_PUBLIC_KEY_HOST_PATH \/root\/.ssh/ s/^#//" ./Dockerfile
+		sed -i -e "/COPY \$SSH_PRIVATE_KEY_HOST_PATH \/root\/.ssh/ s/^#//" ./Dockerfile
+	fi
+
 	if [ ! "$BUILD_CACHE" == "" ]; then
 		BUILT=$(DOCKER_BUILDKIT=1 docker build \
 			--build-arg ADMIN_USERNAME="$ADMIN_USERNAME" \
 			--build-arg ADMIN_PASSWORD="$ADMIN_PASSWORD" \
-			--build-arg SSH_PUBLIC_KEY="$SSH_PUBLIC_KEY" \
-			--build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" \
 			--build-arg HB_GATEWAY_PASSPHRASE="$ADMIN_PASSWORD" \
 			--build-arg FUN_CLIENT_REPOSITORY_URL="$FUN_CLIENT_REPOSITORY_URL" \
 			--build-arg FUN_CLIENT_REPOSITORY_BRANCH="$FUN_CLIENT_REPOSITORY_BRANCH" \
