@@ -813,20 +813,21 @@ RUN <<-EOF
 
 	mkdir -p /root/.ssh
 	chmod 0700 /root/.ssh
+	cd /root/.ssh/
 
 	# Generate a new pair of RSA keys using OpenSSL
-	openssl genpkey -algorithm RSA -out /root/.ssh/id_rsa_openssl.pem -pkeyopt rsa_keygen_bits:4096 > /dev/null 2>&1
-	openssl rsa -pubout -in /root/.ssh/id_rsa_openssl.pem -out /root/.ssh/id_rsa_openssl.pub.pem > /dev/null 2>&1
+	openssl genpkey -algorithm RSA -out id_rsa_openssl.pem -pkeyopt rsa_keygen_bits:4096 > /dev/null 2>&1
+	openssl rsa -pubout -in id_rsa_openssl.pem -out id_rsa_openssl.pub.pem > /dev/null 2>&1
 
 	# Convert the OpenSSL keys to the SSH format (PEM)
-	openssl rsa -in /root/.ssh/id_rsa_openssl.pem -out id_rsa > /dev/null 2>&1
-	ssh-keygen -f /root/.ssh/id_rsa_openssl.pub.pem -i -mPKCS8 > id_rsa.pub
+	openssl rsa -in id_rsa_openssl.pem -out id_rsa > /dev/null 2>&1
+	ssh-keygen -f id_rsa_openssl.pub.pem -i -mPKCS8 > id_rsa.pub
 
 	# Restricting permissions
-	chmod 600 /root/.ssh/id_rsa_openssl.pem
-	chmod 600 /root/.ssh/id_rsa_openssl.pub.pem
-	chmod 600 /root/.ssh/id_rsa
-	chmod 600 /root/.ssh/id_rsa.pub
+	chmod 600 id_rsa_openssl.pem
+	chmod 600 id_rsa_openssl.pub.pem
+	chmod 600 id_rsa
+	chmod 600 id_rsa.pub
 
 	local escaped_admin_username
 	local escaped_admin_password
