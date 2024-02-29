@@ -98,14 +98,45 @@ info_back_or_exit() {
 show_title() {
 	local title="$1"
 
+	format_string() {
+  	local input_str="$1"
+  	local upper_str
+  	local str_length
+  	local total_length
+  	local padding_length
+
+  	upper_str=$(echo "$input_str" | tr '[:lower:]' '[:upper:]')
+  	str_length=${#upper_str}
+  	total_length=85
+  	padding_length=$(( (total_length - str_length - 6) / 2 )) # 6 for the spaces (3 on each side)
+
+  	if [ "$str_length" -gt 77 ]; then
+  		# Adjust format for strings longer than 77 characters
+  		echo "==  $upper_str  =="
+  	else
+  		local equal_signs
+  		local remainder
+
+  		equal_signs=$(printf '=%.0s' $(seq 1 $padding_length))
+  		remainder=$(( (total_length - (2 * padding_length + str_length + 6)) ))
+
+  		# Ensure total length is 85, adding an extra "=" at the end if necessary
+  		if [ $remainder -gt 0 ]; then
+  			echo "${equal_signs}   $upper_str   ${equal_signs}="
+  		else
+  			echo "${equal_signs}   $upper_str   ${equal_signs}"
+  		fi
+  	fi
+  }
+
 	clear
 	echo
-	echo "   $title"
+	echo "   $(format_string "$title")"
 	echo
 }
 
 exit_application() {
-	show_title "==============================   LEAVING THE SCRIPT   ==============================="
+	show_title "LEAVING THE SCRIPT"
 	echo "      Feel free to come back whenever you want."
 	echo
 	more_information
@@ -127,7 +158,7 @@ waiting() {
 
 pre_installation_password_encryption() {
 	password_encryption_warning() {
-		show_title "======================   PASSWORD & USERNAME SETTING PROCESS   ======================"
+		show_title "PASSWORD & USERNAME SETTING PROCESS"
 		echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 		echo "   |                                                               |"
 		echo "   |  ⚠️  Attention! Answer the following question carefully!       |"
@@ -202,7 +233,7 @@ pre_installation_password_encryption() {
 }
 
 pre_installation_define_passphrase() {
-	show_title "======================   PASSWORD & USERNAME SETTING PROCESS   ======================"
+	show_title "PASSWORD & USERNAME SETTING PROCESS"
 	echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 	echo "   |                                                                 |"
 	echo "   |  ⚠️  It's important that your data remains secure, so we need    |"
@@ -264,7 +295,7 @@ pre_installation_define_passphrase() {
 
 	pre_installation_password_encryption
 
-	show_title "======================   PASSWORD & USERNAME SETTING PROCESS   ======================"
+	show_title "PASSWORD & USERNAME SETTING PROCESS"
 	echo "   ________________________________________________________________"
 	echo "   | SERVICE OR APPLICATION |  NEEDS USERNAME  |  NEEDS PASSWORD  |"
 	echo "   |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|"
@@ -280,7 +311,7 @@ pre_installation_define_passphrase() {
 }
 
 pre_installation_fun_frontend() {
-	show_title "===================   FUNTTASTIC FRONTEND INSTALLATION SETTINGS   ==================="
+	show_title "FUNTTASTIC FRONTEND INSTALLATION SETTINGS"
 
 	default_values_info
 
@@ -299,7 +330,7 @@ pre_installation_fun_frontend() {
 }
 
 pre_installation_filebrowser() {
-	show_title "=======================   FILEBROWSER INSTALLATION SETTINGS   ======================="
+	show_title "FILEBROWSER INSTALLATION SETTINGS"
 
 	default_values_info
 
@@ -316,7 +347,7 @@ pre_installation_filebrowser() {
 }
 
 pre_installation_image_and_container() {
-	show_title "======================   DOCKER IMAGE AND CONTAINER SETTINGS   ======================"
+	show_title "DOCKER IMAGE AND CONTAINER SETTINGS"
 
 	default_values_info
 
@@ -535,7 +566,7 @@ pre_installation_fun_client() {
   	return
   fi
 
-	show_title "====================   FUNTTASTIC CLIENT INSTALLATION SETTINGS   ===================="
+	show_title "FUNTTASTIC CLIENT INSTALLATION SETTINGS"
 
 	default_values_info
 
@@ -570,7 +601,7 @@ pre_installation_fun_client() {
 }
 
 pre_installation_hb_client() {
-	show_title "====================   HUMMINGBOT CLIENT INSTALLATION SETTINGS   ===================="
+	show_title "HUMMINGBOT CLIENT INSTALLATION SETTINGS"
 
 	default_values_info
 
@@ -601,7 +632,7 @@ pre_installation_hb_gateway() {
   	return
   fi
 
-	show_title "===================   HUMMINGBOT GATEWAY INSTALLATION SETTINGS   ===================="
+	show_title "HUMMINGBOT GATEWAY INSTALLATION SETTINGS"
 
 	default_values_info
 
@@ -654,7 +685,7 @@ pre_installation_hb_gateway() {
 }
 
 pre_installation_launch_apps_after_installation() {
-	show_title "====================   HUMMINGBOT CLIENT INITIALIZATION SETTING   ==================="
+	show_title "HUMMINGBOT CLIENT INITIALIZATION SETTING"
 
 	default_values_info
 
@@ -675,7 +706,7 @@ pre_installation_change_post_installation_commands() {
   	return
   fi
 
-	show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
+	show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 
 	default_values_info
 
@@ -683,7 +714,7 @@ pre_installation_change_post_installation_commands() {
 	read -rp "   Do you want to customize any app launch commands? (\"y/N\") >>> " RESPONSE
 
 	if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" ]]; then
-		show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
+		show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 		echo "   CHOOSE WHICH SERVICE WHOSE COMMAND YOU WOULD LIKE TO CHANGE:"
 		echo
 		echo "   [1] CHANGE ALL APPS COMMANDS"
@@ -740,22 +771,22 @@ pre_installation_change_post_installation_commands() {
 		while true; do
 			case $APP_COMMAND in
 			1)
-				show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
+				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 				set_app_post_installation_command "$default_fun_client_server_command" "Funttastic Client Server" "FUN_CLIENT_COMMAND"
 
-				show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
+				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 				set_app_post_installation_command "$default_fun_client_frontend_command" "Funttastic Client Frontend" "FUN_FRONTEND_COMMAND"
 
-				show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
+				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 				set_app_post_installation_command "$default_hummingbot_client_command" "Hummingbot Client" "HB_CLIENT_COMMAND"
 
-				show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
+				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 				set_app_post_installation_command "$default_hummingbot_gateway_command" "Hummingbot Gateway" "HB_GATEWAY_COMMAND"
 
-				show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
+				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 				set_app_post_installation_command "$default_filebrowser_command" "FileBrowser" "FILEBROWSER_COMMAND"
 
-				show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
+				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 				echo "   See below the modified commands:"
 				echo
 
@@ -783,27 +814,27 @@ pre_installation_change_post_installation_commands() {
 				break
 				;;
 			2)
-				show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
+				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 				set_app_post_installation_command "$default_fun_client_server_command" "Funttastic Client Server" "FUN_CLIENT_COMMAND" 3
 				break
 				;;
 			3)
-				show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
+				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 				set_app_post_installation_command "$default_fun_client_frontend_command" "Funttastic Client Frontend" "FUN_FRONTEND_COMMAND" 3
 				break
 				;;
 			4)
-				show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
+				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 				set_app_post_installation_command "$default_hummingbot_client_command" "Hummingbot Client" "HB_CLIENT_COMMAND" 3
 				break
 				;;
 			5)
-				show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
+				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 				set_app_post_installation_command "$default_hummingbot_gateway_command" "Hummingbot Gateway" "HB_GATEWAY_COMMAND" 3
 				break
 				;;
 			6)
-				show_title "====================   CUSTOMIZING POST-INSTALLATION COMMANDS   ====================="
+				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 				set_app_post_installation_command "$default_filebrowser_command" "FileBrowser" "FILEBROWSER_COMMAND" 3
 				break
 				;;
@@ -819,7 +850,7 @@ pre_installation_change_post_installation_commands() {
 }
 
 pre_installation_open_apps_in_browser() {
-	show_title "===========================   OPEN APPS IN THE BROWSER   ============================"
+	show_title "OPEN APPS IN THE BROWSER"
 
 	default_values_info
 
@@ -844,7 +875,7 @@ pre_installation_lock_apt() {
 		return
 	fi
 
-	show_title "===========================   LOCK ADDING NEW PACKAGES   ============================"
+	show_title "LOCK ADDING NEW PACKAGES"
 
 	default_values_info
 
@@ -866,7 +897,7 @@ pre_installation_lock_apt() {
 install_menu() {
 	pre_installation_define_passphrase
 
-  show_title "=============================   INSTALLATION OPTIONS   =============================="
+  show_title "INSTALLATION OPTIONS"
 
   echo "   Do you want to automate the entire process? [Y/n]"
 
@@ -980,7 +1011,7 @@ install_menu() {
   		DEFINED_ENTRYPOINT="$ENTRYPOINT"
   	fi
 
-  	show_title "=============================   SETTINGS CONFIRMATION   ============================="
+  	show_title "SETTINGS CONFIRMATION"
 
   	echo
   	echo "   ℹ️  Confirm below if the common settings are correct:"
@@ -1114,7 +1145,7 @@ get_container_name() {
 
 	filter_containers
 
-	show_title "==============================   CONTAINER SELECTION  ==============================="
+	show_title "CONTAINER SELECTION"
 	info_back_or_exit
 	echo
 
@@ -1574,7 +1605,7 @@ add_indentation() {
 
 actions_submenu() {
 	show_menu_options() {
-		show_title "========================   BOT CONTROL & WALLET MANAGEMENT   ========================"
+		show_title "BOT CONTROL & WALLET MANAGEMENT"
 
 		echo "   CHOOSE WHICH ACTION YOU WOULD LIKE TO PERFORM:"
 		echo
@@ -1688,7 +1719,7 @@ actions_menu() {
 }
 
 main_menu() {
-	show_title "======================   WELCOME TO FUNTTASTIC CLIENT SETUP   ======================="
+	show_title "WELCOME TO FUNTTASTIC CLIENT SETUP"
 	echo "   CHOOSE WHICH ACTION YOU WOULD LIKE TO DO:"
 	echo
 	echo "   [1] INSTALL"
