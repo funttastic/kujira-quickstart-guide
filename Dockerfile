@@ -6,6 +6,7 @@ ARG LOCK_APT=${LOCK_APT:-"TRUE"}
 
 ARG ADMIN_USERNAME
 ARG ADMIN_PASSWORD
+ARG AUTO_SIGNIN
 
 ARG FUN_FRONTEND_REPOSITORY_URL="${FUN_FRONTEND_REPOSITORY_URL:-https://github.com/funttastic/fun-hb-frontend.git}"
 ARG FUN_FRONTEND_REPOSITORY_BRANCH="${FUN_FRONTEND_REPOSITORY_BRANCH:-development}"
@@ -151,18 +152,6 @@ RUN <<-EOF
 
 	set +ex
 EOF
-
-RUN <<-EOF
-	set -ex
-
-  mkdir -p /root/.ssh
-  chmod 0700 /root/.ssh
-
-	set +ex
-EOF
-
-#COPY $SSH_PUBLIC_KEY_HOST_PATH /root/.ssh
-#COPY $SSH_PRIVATE_KEY_HOST_PATH /root/.ssh
 
 RUN <<-EOF
 	set -ex
@@ -423,37 +412,6 @@ RUN <<-EOF
 EOF
 
 RUN <<-EOF
-	set -e
-	set +x
-
-	source /root/.bashrc
-
-	# HB Gateway
-  echo "export GATEWAY_PASSPHRASE=$HB_GATEWAY_PASSPHRASE" >> /root/.bashrc
-	source /root/.bashrc
-
-	# HB Client
-	conda activate hummingbot
-	python funttastic/client/resources/scripts/generate_hb_client_password_verification_file.py -p "$GATEWAY_PASSPHRASE" -d hummingbot/client/conf
-
-	# Fun Client
-	conda activate funttastic
-  sed -i "s/<password>/"$HB_GATEWAY_PASSPHRASE"/g" funttastic/client/resources/configuration/production.yml
-  python funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $HB_GATEWAY_PASSPHRASE --cert-path funttastic/client/resources/certificates
-
-	# Fun Frontend
-	sed -i "s/password: '.*'/password: '$HB_GATEWAY_PASSPHRASE'/" funttastic/frontend/src/mock/data/authData.ts
-	sed -i "s/accountUserName: '.*'/accountUserName: '$ADMIN_USERNAME'/" funttastic/frontend/src/mock/data/authData.ts
-
-  # Filebrowser
-  cd filebrowser
-  filebrowser users add $ADMIN_USERNAME $ADMIN_PASSWORD --perm.admin
-  filebrowser users update $ADMIN_USERNAME --commands="ls,git,tree,curl,rm,mkdir,pwd,cp,mv,cat,less,find,touch,echo,chmod,chown,df,du,ps,kill"
-
-	set +ex
-EOF
-
-RUN <<-EOF
 set -ex
 
 mkdir -p shared/scripts
@@ -474,7 +432,13 @@ start_fun_client() {
 }
 
 start_hb_gateway() {
+  local password="$1"
+
+  export GATEWAY_PASSPHRASE="$password"
+
   eval $HB_GATEWAY_COMMAND
+
+  unset GATEWAY_PASSPHRASE
 }
 
 start_hb_client() {
@@ -486,15 +450,32 @@ keep() {
 }
 
 start_all() {
+  local username="$1"
+  local password="$2"
+
   start_fun_frontend
   start_filebrowser
   start_fun_client
-  start_hb_gateway
+  start_hb_gateway "$password"
   keep
 }
 
 start() {
+  local credentials
+  local username
+  local password
+
   source ~/.bashrc
+
+  credentials=$(authenticate)
+
+  if echo "$credentials" | grep -iq "error"; then
+    echo "$credentials" >&2
+    return 1
+  else
+    username=$(extract_credentials "username" "$credentials")
+    password=$(extract_credentials "password" "$credentials")
+  fi
 
   if [[ $# -eq 0 ]]; then
     start_all
@@ -520,7 +501,7 @@ start() {
         return
         ;;
       --start_hb_gateway)
-        start_hb_gateway
+        start_hb_gateway "$password"
         return
         ;;
       --start_hb_client)
@@ -631,7 +612,7 @@ status() {
 
   output=$(cat << OUTPUT
 {
-  "fun-frontend": "$fun_frontend_status",
+	"fun-frontend": "$fun_frontend_status",
   "filebrowser": "$filebrowser_status",
   "fun-client": "$fun_client_status",
   "hb-client": "$hb_client_status",
@@ -641,6 +622,147 @@ OUTPUT
 )
 
   echo $output
+}
+
+encrypt_message() {
+	local message=$1
+
+	# After encryption, it is converted to base64 format to avoid failures in transfers between variables and programs
+	local encrypted_message_base64=$(echo "$message" | openssl pkeyutl -encrypt -pubin -inkey /root/.ssh/id_rsa_openssl.pub.pem -pkeyopt rsa_padding_mode:oaep | base64)
+
+	echo "$encrypted_message_base64"
+}
+
+decrypt_message() {
+	local encrypted_message_base64=$1
+
+	# Decode the Base64 encrypted message and decrypt it directly
+	local decrypted_message=$(echo "$encrypted_message_base64" | base64 --decode | openssl pkeyutl -decrypt -inkey /root/.ssh/id_rsa -pkeyopt rsa_padding_mode:oaep)
+
+	echo "$decrypted_message"
+}
+
+generate_sha256sum() {
+	local encrypted_message_base64=$1
+
+	# Generate a SHA256 hash of the encrypted Base64 message
+	local hash_value=$(echo -n "$encrypted_message_base64" | sha256sum | awk '{print $1}')
+
+	echo "$hash_value"
+}
+
+escape_string() {
+	local string=$1
+	local escaped_string="${string//\"/\\\"}"
+
+	echo "${escaped_string//[^a-zA-Z0-9 ,.\-_]/}"
+}
+
+extract_credentials() {
+	local key=$1
+	local json_string=$2
+	local value
+
+	if [ "$key" = "username" ]; then
+		value=$(echo $json_string | sed -n 's/.*"username": "\([^"]*\)".*/\1/p')
+	elif [ "$key" = "password" ]; then
+		value=$(echo $json_string | sed -n 's/.*"password": "\([^"]*\)".*/\1/p')
+	else
+		value=""
+	fi
+
+	echo "$value"
+}
+
+#fix_credentials_exports() {
+#	local encrypted_message_base64=$1
+#	local encrypted_message_base64_sha256sum=$1
+#
+#	if [ -n "$encrypted_message_base64" ]; then
+#		if grep -q "export ENCRYPTED_CREDENTIALS=" /root/.bashrc; then
+#			if grep -q "export ENCRYPTED_CREDENTIALS=\"\"" /root/.bashrc; then
+#				sed -i '/export ENCRYPTED_CREDENTIALS=""/c\export ENCRYPTED_CREDENTIALS="'$encrypted_message_base64'"' /root/.bashrc
+#			fi
+#		else
+#			echo "export ENCRYPTED_CREDENTIALS=\"$encrypted_message_base64\"" >> /root/.bashrc
+#		fi
+#	fi
+#
+#	if [ -n "$encrypted_message_base64_sha256sum" ]; then
+#		if grep -q "export ENCRYPTED_CREDENTIALS_SHA256SUM=" /root/.bashrc; then
+#			if grep -q "export ENCRYPTED_CREDENTIALS_SHA256SUM=\"\"" /root/.bashrc; then
+#				sed -i '/export ENCRYPTED_CREDENTIALS_SHA256SUM=""/c\export ENCRYPTED_CREDENTIALS_SHA256SUM="'$encrypted_message_base64_sha256sum'"' /root/.bashrc
+#			fi
+#		else
+#			echo "export ENCRYPTED_CREDENTIALS_SHA256SUM=\"$encrypted_message_base64_sha256sum\"" >> /root/.bashrc
+#		fi
+#	fi
+#}
+
+authenticate() {
+	local username="$1"
+	local password="$2"
+
+	get_credentials() {
+		if [ -z "$username" ]; then
+			echo
+			read -p "Username: " username
+		fi
+
+		if [ -z "$password" ]; then
+			read -s -p "Password: " password
+		fi
+	}
+
+	if [ ! -f "/root/.ssh/id_rsa" ]; then
+		get_credentials
+	else
+		if [ -n "$ENCRYPTED_CREDENTIALS" ]; then
+			local decrypted_message
+			json=$(decrypt_message "$ENCRYPTED_CREDENTIALS")
+
+			username=$(extract_credentials "username" "$json")
+			password=$(extract_credentials "password" "$json")
+		else
+			get_credentials
+		fi
+	fi
+
+	local escaped_username
+	local escaped_password
+	local json
+	local encrypted_message_base64
+	local encrypted_message_base64_sha256sum
+
+	escaped_username=$(escape_string "$username")
+	escaped_password=$(escape_string "$password")
+
+	json="{ \"username\": \"$escaped_username\", \"password\": \"$escaped_password\"}"
+
+	encrypted_message_base64=$(encrypt_message "$json")
+	encrypted_message_base64_sha256sum=$(generate_sha256sum "$encrypted_message")
+
+	if [ -n "$ENCRYPTED_CREDENTIALS_SHA256SUM" ]; then
+		if [ "$encrypted_message_base64_sha256sum" == "$ENCRYPTED_CREDENTIALS_SHA256SUM" ]; then
+			echo $json
+		else
+			>&2 echo "Error: Authentication failed. Invalid username or password."
+			return 1
+		fi
+	elif [ -n "$ENCRYPTED_CREDENTIALS" ]; then
+		local stored_encrypted_message_base64_sha256sum
+		stored_encrypted_message_base64_sha256sum=$(generate_sha256sum "$ENCRYPTED_CREDENTIALS")
+
+		if [ "$encrypted_message_base64_sha256sum" == "$stored_encrypted_message_base64_sha256sum" ]; then
+			echo $json
+		else
+			>&2 echo "Error: Authentication failed. Invalid username or password."
+			return 1
+		fi
+	else
+		>&2 echo "Error: Authentication failed. No stored credentials found."
+		return 1
+	fi
 }
 
 SCRIPT
@@ -659,6 +781,76 @@ echo "source /root/shared/scripts/initialize.sh" >> /root/.bashrc
 source /root/.bashrc
 
 set +ex
+EOF
+
+RUN <<-EOF
+	set -e
+	set +x
+
+	source /root/.bashrc
+
+  # HB Gateway
+#  echo "export GATEWAY_PASSPHRASE=$HB_GATEWAY_PASSPHRASE" >> /root/.bashrc
+#  source /root/.bashrc
+
+  # HB Client
+  conda activate hummingbot
+  python funttastic/client/resources/scripts/generate_hb_client_password_verification_file.py -p "$ADMIN_PASSWORD" -d hummingbot/client/conf
+
+  # Fun Client
+  conda activate funttastic
+  sed -i "s/<password>/"$ADMIN_PASSWORD"/g" funttastic/client/resources/configuration/production.yml
+  python funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $ADMIN_PASSWORD --cert-path funttastic/client/resources/certificates
+
+  # Fun Frontend
+  sed -i "s/password: '.*'/password: '$ADMIN_PASSWORD'/" funttastic/frontend/src/mock/data/authData.ts
+  sed -i "s/accountUserName: '.*'/accountUserName: '$ADMIN_USERNAME'/" funttastic/frontend/src/mock/data/authData.ts
+
+  # Filebrowser
+  cd filebrowser
+  filebrowser users add $ADMIN_USERNAME $ADMIN_PASSWORD --perm.admin
+  filebrowser users update $ADMIN_USERNAME --commands="ls,git,tree,curl,rm,mkdir,pwd,cp,mv,cat,less,find,touch,echo,chmod,chown,df,du,ps,kill"
+
+  mkdir -p /root/.ssh
+  chmod 0700 /root/.ssh
+
+  # Generate a new pair of RSA keys using OpenSSL
+  openssl genpkey -algorithm RSA -out /root/.ssh/id_rsa_openssl.pem -pkeyopt rsa_keygen_bits:4096 > /dev/null 2>&1
+  openssl rsa -pubout -in /root/.ssh/id_rsa_openssl.pem -out /root/.ssh/id_rsa_openssl.pub.pem > /dev/null 2>&1
+
+  # Convert the OpenSSL keys to the SSH format (PEM)
+  openssl rsa -in /root/.ssh/id_rsa_openssl.pem -out id_rsa > /dev/null 2>&1
+  ssh-keygen -f /root/.ssh/id_rsa_openssl.pub.pem -i -mPKCS8 > id_rsa.pub
+
+  # Restricting permissions
+  chmod 600 /root/.ssh/id_rsa_openssl.pem
+  chmod 600 /root/.ssh/id_rsa_openssl.pub.pem
+  chmod 600 /root/.ssh/id_rsa
+  chmod 600 /root/.ssh/id_rsa.pub
+
+  local escaped_admin_username
+  local escaped_admin_password
+
+  escaped_admin_username=$(escape_string "${ADMIN_USERNAME}")
+  escaped_admin_password=$(escape_string "${ADMIN_PASSWORD}")
+
+  local ENCRYPTED_CREDENTIALS_BASE64
+  ENCRYPTED_CREDENTIALS_BASE64=$(encrypt_message "{\"username\": \"$escaped_admin_username\", \"password\": \"$escaped_admin_password\"}")
+
+  local ENCRYPTED_CREDENTIALS_BASE64_SHA256SUM
+  ENCRYPTED_CREDENTIALS_BASE64_SHA256SUM=$(generate_sha256sum "$ENCRYPTED_CREDENTIALS_BASE64")
+
+  echo "# Credentials Section - Start" >> /root/.bashrc
+  echo "export ENCRYPTED_CREDENTIALS=\"$ENCRYPTED_CREDENTIALS_BASE64\"" >> /root/.bashrc
+  echo "export ENCRYPTED_CREDENTIALS_SHA256SUM=\"$ENCRYPTED_CREDENTIALS_BASE64_SHA256SUM\"" >> /root/.bashrc
+  echo "# Credentials Section - End" >> /root/.bashrc
+
+  if [ ! "$AUTO_SIGNIN" == "TRUE" ]; then
+    rm -f /root/.ssh/id_rsa
+    rm -f /root/.ssh/id_rsa_openssl.pem
+  fi
+
+  set +ex
 EOF
 
 RUN <<-EOF

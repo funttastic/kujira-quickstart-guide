@@ -163,7 +163,10 @@ pre_installation_password_encryption() {
   password_encryption_warning
 
   if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" || "$RESPONSE" == "Yes" || "$RESPONSE" == "yes" || "$RESPONSE" == "" ]]; then
-  	SELF_DISCOVERY="TRUE"
+  	AUTO_SIGNIN="TRUE"
+
+		# This 'return' is being used to disable the question below
+		return
 
   	while true; do
   		echo "   ℹ️  To encrypt the password and username, we can use an SSH key "
@@ -194,7 +197,7 @@ pre_installation_password_encryption() {
   		waiting 3 "   "
   	fi
   else
-  	SELF_DISCOVERY="FALSE"
+  	AUTO_SIGNIN="FALSE"
   fi
 }
 
@@ -938,7 +941,7 @@ install_menu() {
   	#  ENTRYPOINT=${ENTRYPOINT:-"--entrypoint=\"source /root/.bashrc && start\""}
   	OPEN_IN_BROWSER=${OPEN_IN_BROWSER:-"TRUE"}
   	LOCK_APT=${LOCK_APT:-"TRUE"}
-  	SELF_DISCOVERY=${SELF_DISCOVERY:-"TRUE"}
+  	AUTO_SIGNIN=${AUTO_SIGNIN:-"TRUE"}
 
   	if image_exists "$IMAGE_NAME"; then
   		docker_prune_selectively "$IMAGE_NAME"
@@ -1901,7 +1904,7 @@ docker_create_image() {
 		sed -i "s/#EXPOSE $HB_GATEWAY_PORT/EXPOSE $HB_GATEWAY_PORT/g" Dockerfile
 	fi
 
-	if [[ "$SELF_DISCOVERY" == "TRUE" && -n "$SSH_PUBLIC_KEY_HOST_PATH" && -n "$SSH_PRIVATE_KEY_HOST_PATH" ]]; then
+	if [[ "$AUTO_SIGNIN" == "TRUE" && -n "$SSH_PUBLIC_KEY_HOST_PATH" && -n "$SSH_PRIVATE_KEY_HOST_PATH" ]]; then
 		sed -i -e "/COPY \$SSH_PUBLIC_KEY_HOST_PATH \/root\/.ssh/ s/^#//" ./Dockerfile
 		sed -i -e "/COPY \$SSH_PRIVATE_KEY_HOST_PATH \/root\/.ssh/ s/^#//" ./Dockerfile
 	fi
@@ -1910,6 +1913,7 @@ docker_create_image() {
 		BUILT=$(DOCKER_BUILDKIT=1 docker build \
 			--build-arg ADMIN_USERNAME="$ADMIN_USERNAME" \
 			--build-arg ADMIN_PASSWORD="$ADMIN_PASSWORD" \
+			--build-arg AUTO_SIGNIN="$AUTO_SIGNIN" \
 			--build-arg HB_GATEWAY_PASSPHRASE="$ADMIN_PASSWORD" \
 			--build-arg FUN_CLIENT_REPOSITORY_URL="$FUN_CLIENT_REPOSITORY_URL" \
 			--build-arg FUN_CLIENT_REPOSITORY_BRANCH="$FUN_CLIENT_REPOSITORY_BRANCH" \
