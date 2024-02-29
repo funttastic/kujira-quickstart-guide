@@ -789,10 +789,6 @@ RUN <<-EOF
 
 	source /root/.bashrc
 
-	# HB Gateway
-#  echo "export GATEWAY_PASSPHRASE=$HB_GATEWAY_PASSPHRASE" >> /root/.bashrc
-#  source /root/.bashrc
-
 	# HB Client
 	conda activate hummingbot
 	python funttastic/client/resources/scripts/generate_hb_client_password_verification_file.py -p "$ADMIN_PASSWORD" -d hummingbot/client/conf
@@ -829,16 +825,10 @@ RUN <<-EOF
 	chmod 600 id_rsa
 	chmod 600 id_rsa.pub
 
-	local escaped_admin_username
-	local escaped_admin_password
-
 	escaped_admin_username=$(escape_string "${ADMIN_USERNAME}")
 	escaped_admin_password=$(escape_string "${ADMIN_PASSWORD}")
 
-	local ENCRYPTED_CREDENTIALS_BASE64
 	ENCRYPTED_CREDENTIALS_BASE64=$(encrypt_message "{\"username\": \"$escaped_admin_username\", \"password\": \"$escaped_admin_password\"}")
-
-	local ENCRYPTED_CREDENTIALS_BASE64_SHA256SUM
 	ENCRYPTED_CREDENTIALS_BASE64_SHA256SUM=$(generate_sha256sum "$ENCRYPTED_CREDENTIALS_BASE64")
 
 	echo "# Credentials Section - Start" >> /root/.bashrc
