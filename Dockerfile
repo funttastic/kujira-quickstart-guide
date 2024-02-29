@@ -76,79 +76,79 @@ RUN <<-EOF
 
 	# Funttastic Client Frontend environment variables
 
-  if [ -z "$FRONTEND_PORT" ]
-  then
-    echo 'export FRONTEND_PORT=50000' >> ~/.bashrc
-  else
-    echo "export FRONTEND_PORT=$FRONTEND_PORT" >> ~/.bashrc
-  fi
+	if [ -z "$FRONTEND_PORT" ]
+	then
+		echo 'export FRONTEND_PORT=50000' >> ~/.bashrc
+	else
+		echo "export FRONTEND_PORT=$FRONTEND_PORT" >> ~/.bashrc
+	fi
 
-  if [ -z "$FUN_FRONTEND_COMMAND" ]
-  then
-    echo "export FUN_FRONTEND_COMMAND=\"cd /root/funttastic/frontend && yarn start --host > /dev/null 2>&1 &\"" >> ~/.bashrc
-  else
-    echo "export FUN_FRONTEND_COMMAND=\"$FUN_FRONTEND_COMMAND\"" >> ~/.bashrc
-  fi
+	if [ -z "$FUN_FRONTEND_COMMAND" ]
+	then
+		echo "export FUN_FRONTEND_COMMAND=\"cd /root/funttastic/frontend && yarn start --host > /dev/null 2>&1 &\"" >> ~/.bashrc
+	else
+		echo "export FUN_FRONTEND_COMMAND=\"$FUN_FRONTEND_COMMAND\"" >> ~/.bashrc
+	fi
 
-  # Funttastic Client server environment variables
+	# Funttastic Client server environment variables
 
-  if [ -z "$FUN_CLIENT_PORT" ]
-  then
-    echo 'export FUN_CLIENT_PORT=50001' >> ~/.bashrc
-  else
-    echo "export FUN_CLIENT_PORT=$FUN_CLIENT_PORT" >> ~/.bashrc
-  fi
+	if [ -z "$FUN_CLIENT_PORT" ]
+	then
+		echo 'export FUN_CLIENT_PORT=50001' >> ~/.bashrc
+	else
+		echo "export FUN_CLIENT_PORT=$FUN_CLIENT_PORT" >> ~/.bashrc
+	fi
 
-  if [ -z "$FUN_CLIENT_COMMAND" ]
-  then
-    echo "export FUN_CLIENT_COMMAND=\"conda activate funttastic && cd /root/funttastic/client && python app.py > /dev/null 2>&1 &\"" >> ~/.bashrc
-  else
-    echo "export FUN_CLIENT_COMMAND=\"$FUN_CLIENT_COMMAND\"" >> ~/.bashrc
-  fi
+	if [ -z "$FUN_CLIENT_COMMAND" ]
+	then
+		echo "export FUN_CLIENT_COMMAND=\"conda activate funttastic && cd /root/funttastic/client && python app.py > /dev/null 2>&1 &\"" >> ~/.bashrc
+	else
+		echo "export FUN_CLIENT_COMMAND=\"$FUN_CLIENT_COMMAND\"" >> ~/.bashrc
+	fi
 
-  # HB Gateway environment variables
+	# HB Gateway environment variables
 
-  if [ -z "$HB_GATEWAY_PORT" ]
-  then
-    echo 'export HB_GATEWAY_PORT=15888' >> ~/.bashrc
-  else
-    echo "export HB_GATEWAY_PORT=$HB_GATEWAY_PORT" >> ~/.bashrc
-  fi
+	if [ -z "$HB_GATEWAY_PORT" ]
+	then
+		echo 'export HB_GATEWAY_PORT=15888' >> ~/.bashrc
+	else
+		echo "export HB_GATEWAY_PORT=$HB_GATEWAY_PORT" >> ~/.bashrc
+	fi
 
-  if [ -z "$HB_GATEWAY_COMMAND" ]
-  then
-    echo "export HB_GATEWAY_COMMAND=\"cd /root/hummingbot/gateway && yarn start > /dev/null 2>&1 &\"" >> ~/.bashrc
-  else
-    echo "export HB_GATEWAY_COMMAND=\"$HB_GATEWAY_COMMAND\"" >> ~/.bashrc
-  fi
+	if [ -z "$HB_GATEWAY_COMMAND" ]
+	then
+		echo "export HB_GATEWAY_COMMAND=\"cd /root/hummingbot/gateway && yarn start > /dev/null 2>&1 &\"" >> ~/.bashrc
+	else
+		echo "export HB_GATEWAY_COMMAND=\"$HB_GATEWAY_COMMAND\"" >> ~/.bashrc
+	fi
 
-  # HB Client environment variables
+	# HB Client environment variables
 
-  if [ -z "$HB_CLIENT_COMMAND" ]
-  then
-    echo "export HB_CLIENT_COMMAND=\"conda activate hummingbot && cd /root/hummingbot/client && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log\"" >> ~/.bashrc
-  else
-    echo "export HB_CLIENT_COMMAND=\"$HB_CLIENT_COMMAND\"" >> ~/.bashrc
-  fi
+	if [ -z "$HB_CLIENT_COMMAND" ]
+	then
+		echo "export HB_CLIENT_COMMAND=\"conda activate hummingbot && cd /root/hummingbot/client && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log\"" >> ~/.bashrc
+	else
+		echo "export HB_CLIENT_COMMAND=\"$HB_CLIENT_COMMAND\"" >> ~/.bashrc
+	fi
 
-  # FileBrowser environment variables
+	# FileBrowser environment variables
 
-  if [ -z "$FILEBROWSER_PORT" ]
-  then
-    echo 'export FILEBROWSER_PORT=50002' >> ~/.bashrc
-  else
-    echo "export FILEBROWSER_PORT=$FILEBROWSER_PORT" >> ~/.bashrc
-  fi
-  echo 'export VITE_FILEBROWSER_PORT=$FILEBROWSER_PORT' >> ~/.bashrc
+	if [ -z "$FILEBROWSER_PORT" ]
+	then
+		echo 'export FILEBROWSER_PORT=50002' >> ~/.bashrc
+	else
+		echo "export FILEBROWSER_PORT=$FILEBROWSER_PORT" >> ~/.bashrc
+	fi
+	echo 'export VITE_FILEBROWSER_PORT=$FILEBROWSER_PORT' >> ~/.bashrc
 
-  if [ -z "$FILEBROWSER_COMMAND" ]
-  then
-    echo "export FILEBROWSER_COMMAND=\"cd /root/filebrowser && filebrowser --address=0.0.0.0 -p \$FILEBROWSER_PORT -r ../shared > /dev/null 2>&1 &\"" >> ~/.bashrc
-  else
-    echo "export FILEBROWSER_COMMAND=\"$FILEBROWSER_COMMAND\"" >> ~/.bashrc
-  fi
+	if [ -z "$FILEBROWSER_COMMAND" ]
+	then
+		echo "export FILEBROWSER_COMMAND=\"cd /root/filebrowser && filebrowser --address=0.0.0.0 -p \$FILEBROWSER_PORT -r ../shared > /dev/null 2>&1 &\"" >> ~/.bashrc
+	else
+		echo "export FILEBROWSER_COMMAND=\"$FILEBROWSER_COMMAND\"" >> ~/.bashrc
+	fi
 
-  echo -e "\n" >> ~/.bashrc
+	echo -e "\n" >> ~/.bashrc
 
 	set +ex
 EOF
@@ -282,11 +282,11 @@ RUN <<-EOF
 	source /root/.bashrc
 
 	mkdir -p funttastic/frontend
-  cd funttastic/frontend
+	cd funttastic/frontend
 
-  git clone -b $FUN_FRONTEND_REPOSITORY_BRANCH $FUN_FRONTEND_REPOSITORY_URL .
+	git clone -b $FUN_FRONTEND_REPOSITORY_BRANCH $FUN_FRONTEND_REPOSITORY_URL .
 
-  yarn install
+	yarn install
 
 	set +ex
 EOF
@@ -309,17 +309,17 @@ RUN <<-EOF
 
 		cp /root/funttastic/frontend/resources/assets/funttastic/logo/logo.svg branding/img/logo.svg
 
-  cat <<'CSS' > branding/custom.css
+	cat <<'CSS' > branding/custom.css
 html {
-    scrollbar-width: none;
+		scrollbar-width: none;
 }
 
 header {
-    padding: 0.5em 0 0.5em 0;
+		padding: 0.5em 0 0.5em 0;
 }
 
 header img {
-    display: none;
+		display: none;
 }
 CSS
 
@@ -420,208 +420,208 @@ cat <<'SCRIPT' > shared/scripts/functions.sh
 #!/bin/bash
 
 start_fun_frontend() {
-  eval $FUN_FRONTEND_COMMAND
+	eval $FUN_FRONTEND_COMMAND
 }
 
 start_filebrowser() {
-  eval $FILEBROWSER_COMMAND
+	eval $FILEBROWSER_COMMAND
 }
 
 start_fun_client() {
-  eval $FUN_CLIENT_COMMAND
+	eval $FUN_CLIENT_COMMAND
 }
 
 start_hb_gateway() {
-  local password="$1"
+	local password="$1"
 
-  export GATEWAY_PASSPHRASE="$password"
+	export GATEWAY_PASSPHRASE="$password"
 
-  eval $HB_GATEWAY_COMMAND
+	eval $HB_GATEWAY_COMMAND
 
-  unset GATEWAY_PASSPHRASE
+	unset GATEWAY_PASSPHRASE
 }
 
 start_hb_client() {
-  eval $HB_CLIENT_COMMAND
+	eval $HB_CLIENT_COMMAND
 }
 
 keep() {
-  tail -f /dev/null
+	tail -f /dev/null
 }
 
 start_all() {
-  local username="$1"
-  local password="$2"
+	local username="$1"
+	local password="$2"
 
-  start_fun_frontend
-  start_filebrowser
-  start_fun_client
-  start_hb_gateway "$password"
-  keep
+	start_fun_frontend
+	start_filebrowser
+	start_fun_client
+	start_hb_gateway "$password"
+	keep
 }
 
 start() {
-  local credentials
-  local username
-  local password
+	local credentials
+	local username
+	local password
 
-  source ~/.bashrc
+	source ~/.bashrc
 
-  credentials=$(authenticate)
+	credentials=$(authenticate)
 
-  if echo "$credentials" | grep -iq "error"; then
-    echo "$credentials" >&2
-    return 1
-  else
-    username=$(extract_credentials "username" "$credentials")
-    password=$(extract_credentials "password" "$credentials")
-  fi
+	if echo "$credentials" | grep -iq "error"; then
+		echo "$credentials" >&2
+		return 1
+	else
+		username=$(extract_credentials "username" "$credentials")
+		password=$(extract_credentials "password" "$credentials")
+	fi
 
-  if [[ $# -eq 0 ]]; then
-    start_all
-    return
-  fi
+	if [[ $# -eq 0 ]]; then
+		start_all
+		return
+	fi
 
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --start_all)
-        start_all
-        return
-        ;;
-      --start_fun_frontend)
-        start_fun_frontend
-        return
-        ;;
-      --start_filebrowser)
-        start_filebrowser
-        return
-        ;;
-      --start_fun_client)
-        start_fun_client
-        return
-        ;;
-      --start_hb_gateway)
-        start_hb_gateway "$password"
-        return
-        ;;
-      --start_hb_client)
-        start_hb_client
-        return
-        ;;
-      *)
-    esac
-    shift
-  done
+	while [[ $# -gt 0 ]]; do
+		case "$1" in
+			--start_all)
+				start_all
+				return
+				;;
+			--start_fun_frontend)
+				start_fun_frontend
+				return
+				;;
+			--start_filebrowser)
+				start_filebrowser
+				return
+				;;
+			--start_fun_client)
+				start_fun_client
+				return
+				;;
+			--start_hb_gateway)
+				start_hb_gateway "$password"
+				return
+				;;
+			--start_hb_client)
+				start_hb_client
+				return
+				;;
+			*)
+		esac
+		shift
+	done
 }
 
 kill_processes_and_subprocesses() {
-  local search_pattern="$1"
-  local target_pids parent_pids child_pids
+	local search_pattern="$1"
+	local target_pids parent_pids child_pids
 
-  target_pids=$(pgrep -f "$search_pattern" || true)
+	target_pids=$(pgrep -f "$search_pattern" || true)
 
-  if [ ! -z "$target_pids" ]; then
-    parent_pids=$(echo "$target_pids" | grep -o -E '([0-9]+)' | tr "\n" " ")
+	if [ ! -z "$target_pids" ]; then
+		parent_pids=$(echo "$target_pids" | grep -o -E '([0-9]+)' | tr "\n" " ")
 
-    for parent_pid in $parent_pids; do
-      child_pids=$(pstree -p $parent_pid | grep -o -E '([0-9]+)' | tr "\n" " ")
+		for parent_pid in $parent_pids; do
+			child_pids=$(pstree -p $parent_pid | grep -o -E '([0-9]+)' | tr "\n" " ")
 
-      kill -9 $parent_pid 2>/dev/null || true
+			kill -9 $parent_pid 2>/dev/null || true
 
-      for child_pid in $child_pids; do
-        kill -9 $child_pid 2>/dev/null || true
-      done
-    done
-  fi
+			for child_pid in $child_pids; do
+				kill -9 $child_pid 2>/dev/null || true
+			done
+		done
+	fi
 }
 
 stop_fun_frontend() {
-  kill_processes_and_subprocesses "start_fun_frontend"
+	kill_processes_and_subprocesses "start_fun_frontend"
 }
 
 stop_filebrowser() {
-  kill_processes_and_subprocesses "start_filebrowser"
+	kill_processes_and_subprocesses "start_filebrowser"
 }
 
 stop_fun_client() {
-  kill_processes_and_subprocesses "start_fun_client"
+	kill_processes_and_subprocesses "start_fun_client"
 }
 
 stop_hb_gateway() {
-  kill_processes_and_subprocesses "start_hb_gateway"
+	kill_processes_and_subprocesses "start_hb_gateway"
 }
 
 stop_hb_client() {
-  kill_processes_and_subprocesses "start_hb_client"
+	kill_processes_and_subprocesses "start_hb_client"
 }
 
 stop_all() {
-  stop_fun_frontend
-  stop_filebrowser
-  stop_fun_client
-  stop_hb_gateway
-  stop_hb_client
+	stop_fun_frontend
+	stop_filebrowser
+	stop_fun_client
+	stop_hb_gateway
+	stop_hb_client
 }
 
 stop() {
-  source ~/.bashrc
+	source ~/.bashrc
 
-  if [[ $# -eq 0 ]]; then
-    stop_all
-    return
-  fi
+	if [[ $# -eq 0 ]]; then
+		stop_all
+		return
+	fi
 
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --stop_all)
-        stop_all
-        return
-        ;;
-      --stop_fun_frontend)
-        stop_fun_frontend
-        return
-        ;;
-      --stop_filebrowser)
-        stop_filebrowser
-        return
-        ;;
-      --stop_fun_client)
-        stop_fun_client
-        return
-        ;;
-      --stop_hb_gateway)
-        stop_hb_gateway
-        return
-        ;;
-      --stop_hb_client)
-        stop_hb_client
-        return
-        ;;
-      *)
-    esac
-    shift
-  done
+	while [[ $# -gt 0 ]]; do
+		case "$1" in
+			--stop_all)
+				stop_all
+				return
+				;;
+			--stop_fun_frontend)
+				stop_fun_frontend
+				return
+				;;
+			--stop_filebrowser)
+				stop_filebrowser
+				return
+				;;
+			--stop_fun_client)
+				stop_fun_client
+				return
+				;;
+			--stop_hb_gateway)
+				stop_hb_gateway
+				return
+				;;
+			--stop_hb_client)
+				stop_hb_client
+				return
+				;;
+			*)
+		esac
+		shift
+	done
 }
 
 status() {
-  local fun_frontend_status=$(pgrep -f 'fun.*frontend.*vite' >/dev/null && echo 'running' || echo 'stopped')
-  local filebrowser_status=$(pgrep -f 'filebrowser.*' >/dev/null && echo 'running' || echo 'stopped')
+	local fun_frontend_status=$(pgrep -f 'fun.*frontend.*vite' >/dev/null && echo 'running' || echo 'stopped')
+	local filebrowser_status=$(pgrep -f 'filebrowser.*' >/dev/null && echo 'running' || echo 'stopped')
 	local fun_client_status=$(pgrep -f 'python.*app.py' >/dev/null && echo 'running' || echo 'stopped')
 	local hb_client_status=$(pgrep -f 'python.*hummingbot_quickstart.py' >/dev/null && echo 'running' || echo 'stopped')
 	local hb_gateway_status=$(pgrep -f 'node.*yarn.*start' >/dev/null && echo 'running' || echo 'stopped')
 
-  output=$(cat << OUTPUT
+	output=$(cat << OUTPUT
 {
 	"fun-frontend": "$fun_frontend_status",
-  "filebrowser": "$filebrowser_status",
-  "fun-client": "$fun_client_status",
-  "hb-client": "$hb_client_status",
-  "hb-gateway": "$hb_gateway_status"
+	"filebrowser": "$filebrowser_status",
+	"fun-client": "$fun_client_status",
+	"hb-client": "$hb_client_status",
+	"hb-gateway": "$hb_gateway_status"
 }
 OUTPUT
 )
 
-  echo $output
+	echo $output
 }
 
 encrypt_message() {
@@ -789,68 +789,68 @@ RUN <<-EOF
 
 	source /root/.bashrc
 
-  # HB Gateway
+	# HB Gateway
 #  echo "export GATEWAY_PASSPHRASE=$HB_GATEWAY_PASSPHRASE" >> /root/.bashrc
 #  source /root/.bashrc
 
-  # HB Client
-  conda activate hummingbot
-  python funttastic/client/resources/scripts/generate_hb_client_password_verification_file.py -p "$ADMIN_PASSWORD" -d hummingbot/client/conf
+	# HB Client
+	conda activate hummingbot
+	python funttastic/client/resources/scripts/generate_hb_client_password_verification_file.py -p "$ADMIN_PASSWORD" -d hummingbot/client/conf
 
-  # Fun Client
-  conda activate funttastic
-  sed -i "s/<password>/"$ADMIN_PASSWORD"/g" funttastic/client/resources/configuration/production.yml
-  python funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $ADMIN_PASSWORD --cert-path funttastic/client/resources/certificates
+	# Fun Client
+	conda activate funttastic
+	sed -i "s/<password>/"$ADMIN_PASSWORD"/g" funttastic/client/resources/configuration/production.yml
+	python funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $ADMIN_PASSWORD --cert-path funttastic/client/resources/certificates
 
-  # Fun Frontend
-  sed -i "s/password: '.*'/password: '$ADMIN_PASSWORD'/" funttastic/frontend/src/mock/data/authData.ts
-  sed -i "s/accountUserName: '.*'/accountUserName: '$ADMIN_USERNAME'/" funttastic/frontend/src/mock/data/authData.ts
+	# Fun Frontend
+	sed -i "s/password: '.*'/password: '$ADMIN_PASSWORD'/" funttastic/frontend/src/mock/data/authData.ts
+	sed -i "s/accountUserName: '.*'/accountUserName: '$ADMIN_USERNAME'/" funttastic/frontend/src/mock/data/authData.ts
 
-  # Filebrowser
-  cd filebrowser
-  filebrowser users add $ADMIN_USERNAME $ADMIN_PASSWORD --perm.admin
-  filebrowser users update $ADMIN_USERNAME --commands="ls,git,tree,curl,rm,mkdir,pwd,cp,mv,cat,less,find,touch,echo,chmod,chown,df,du,ps,kill"
+	# Filebrowser
+	cd filebrowser
+	filebrowser users add $ADMIN_USERNAME $ADMIN_PASSWORD --perm.admin
+	filebrowser users update $ADMIN_USERNAME --commands="ls,git,tree,curl,rm,mkdir,pwd,cp,mv,cat,less,find,touch,echo,chmod,chown,df,du,ps,kill"
 
-  mkdir -p /root/.ssh
-  chmod 0700 /root/.ssh
+	mkdir -p /root/.ssh
+	chmod 0700 /root/.ssh
 
-  # Generate a new pair of RSA keys using OpenSSL
-  openssl genpkey -algorithm RSA -out /root/.ssh/id_rsa_openssl.pem -pkeyopt rsa_keygen_bits:4096 > /dev/null 2>&1
-  openssl rsa -pubout -in /root/.ssh/id_rsa_openssl.pem -out /root/.ssh/id_rsa_openssl.pub.pem > /dev/null 2>&1
+	# Generate a new pair of RSA keys using OpenSSL
+	openssl genpkey -algorithm RSA -out /root/.ssh/id_rsa_openssl.pem -pkeyopt rsa_keygen_bits:4096 > /dev/null 2>&1
+	openssl rsa -pubout -in /root/.ssh/id_rsa_openssl.pem -out /root/.ssh/id_rsa_openssl.pub.pem > /dev/null 2>&1
 
-  # Convert the OpenSSL keys to the SSH format (PEM)
-  openssl rsa -in /root/.ssh/id_rsa_openssl.pem -out id_rsa > /dev/null 2>&1
-  ssh-keygen -f /root/.ssh/id_rsa_openssl.pub.pem -i -mPKCS8 > id_rsa.pub
+	# Convert the OpenSSL keys to the SSH format (PEM)
+	openssl rsa -in /root/.ssh/id_rsa_openssl.pem -out id_rsa > /dev/null 2>&1
+	ssh-keygen -f /root/.ssh/id_rsa_openssl.pub.pem -i -mPKCS8 > id_rsa.pub
 
-  # Restricting permissions
-  chmod 600 /root/.ssh/id_rsa_openssl.pem
-  chmod 600 /root/.ssh/id_rsa_openssl.pub.pem
-  chmod 600 /root/.ssh/id_rsa
-  chmod 600 /root/.ssh/id_rsa.pub
+	# Restricting permissions
+	chmod 600 /root/.ssh/id_rsa_openssl.pem
+	chmod 600 /root/.ssh/id_rsa_openssl.pub.pem
+	chmod 600 /root/.ssh/id_rsa
+	chmod 600 /root/.ssh/id_rsa.pub
 
-  local escaped_admin_username
-  local escaped_admin_password
+	local escaped_admin_username
+	local escaped_admin_password
 
-  escaped_admin_username=$(escape_string "${ADMIN_USERNAME}")
-  escaped_admin_password=$(escape_string "${ADMIN_PASSWORD}")
+	escaped_admin_username=$(escape_string "${ADMIN_USERNAME}")
+	escaped_admin_password=$(escape_string "${ADMIN_PASSWORD}")
 
-  local ENCRYPTED_CREDENTIALS_BASE64
-  ENCRYPTED_CREDENTIALS_BASE64=$(encrypt_message "{\"username\": \"$escaped_admin_username\", \"password\": \"$escaped_admin_password\"}")
+	local ENCRYPTED_CREDENTIALS_BASE64
+	ENCRYPTED_CREDENTIALS_BASE64=$(encrypt_message "{\"username\": \"$escaped_admin_username\", \"password\": \"$escaped_admin_password\"}")
 
-  local ENCRYPTED_CREDENTIALS_BASE64_SHA256SUM
-  ENCRYPTED_CREDENTIALS_BASE64_SHA256SUM=$(generate_sha256sum "$ENCRYPTED_CREDENTIALS_BASE64")
+	local ENCRYPTED_CREDENTIALS_BASE64_SHA256SUM
+	ENCRYPTED_CREDENTIALS_BASE64_SHA256SUM=$(generate_sha256sum "$ENCRYPTED_CREDENTIALS_BASE64")
 
-  echo "# Credentials Section - Start" >> /root/.bashrc
-  echo "export ENCRYPTED_CREDENTIALS=\"$ENCRYPTED_CREDENTIALS_BASE64\"" >> /root/.bashrc
-  echo "export ENCRYPTED_CREDENTIALS_SHA256SUM=\"$ENCRYPTED_CREDENTIALS_BASE64_SHA256SUM\"" >> /root/.bashrc
-  echo "# Credentials Section - End" >> /root/.bashrc
+	echo "# Credentials Section - Start" >> /root/.bashrc
+	echo "export ENCRYPTED_CREDENTIALS=\"$ENCRYPTED_CREDENTIALS_BASE64\"" >> /root/.bashrc
+	echo "export ENCRYPTED_CREDENTIALS_SHA256SUM=\"$ENCRYPTED_CREDENTIALS_BASE64_SHA256SUM\"" >> /root/.bashrc
+	echo "# Credentials Section - End" >> /root/.bashrc
 
-  if [ ! "$AUTO_SIGNIN" == "TRUE" ]; then
-    rm -f /root/.ssh/id_rsa
-    rm -f /root/.ssh/id_rsa_openssl.pem
-  fi
+	if [ ! "$AUTO_SIGNIN" == "TRUE" ]; then
+		rm -f /root/.ssh/id_rsa
+		rm -f /root/.ssh/id_rsa_openssl.pem
+	fi
 
-  set +ex
+	set +ex
 EOF
 
 RUN <<-EOF
@@ -872,23 +872,23 @@ RUN <<-EOF
 	mv /root/funttastic/client/resources /root/shared/funttastic/client/
 	ln -s /root/shared/funttastic/client/resources /root/funttastic/client/resources
 
-  mv /root/hummingbot/gateway/db /root/shared/hummingbot/gateway/
-  mv /root/hummingbot/gateway/conf /root/shared/hummingbot/gateway/
-  mv /root/hummingbot/gateway/logs /root/shared/hummingbot/gateway/
-  ln -s /root/shared/hummingbot/gateway/db /root/hummingbot/gateway/db
-  ln -s /root/shared/hummingbot/gateway/conf /root/hummingbot/gateway/conf
-  ln -s /root/shared/hummingbot/gateway/logs /root/hummingbot/gateway/logs
+	mv /root/hummingbot/gateway/db /root/shared/hummingbot/gateway/
+	mv /root/hummingbot/gateway/conf /root/shared/hummingbot/gateway/
+	mv /root/hummingbot/gateway/logs /root/shared/hummingbot/gateway/
+	ln -s /root/shared/hummingbot/gateway/db /root/hummingbot/gateway/db
+	ln -s /root/shared/hummingbot/gateway/conf /root/hummingbot/gateway/conf
+	ln -s /root/shared/hummingbot/gateway/logs /root/hummingbot/gateway/logs
 
-  mv /root/hummingbot/client/conf /root/shared/hummingbot/client/
-  mv /root/hummingbot/client/logs /root/shared/hummingbot/client/
-  mv /root/hummingbot/client/data /root/shared/hummingbot/client/
-  mv /root/hummingbot/client/scripts /root/shared/hummingbot/client/
-  mv /root/hummingbot/client/pmm_scripts /root/shared/hummingbot/client/
-  ln -s /root/shared/hummingbot/client/conf /root/hummingbot/client/conf
-  ln -s /root/shared/hummingbot/client/logs /root/hummingbot/client/logs
-  ln -s /root/shared/hummingbot/client/data /root/hummingbot/client/data
-  ln -s /root/shared/hummingbot/client/scripts /root/hummingbot/client/scripts
-  ln -s /root/shared/hummingbot/client/pmm_scripts /root/hummingbot/client/pmm_scripts
+	mv /root/hummingbot/client/conf /root/shared/hummingbot/client/
+	mv /root/hummingbot/client/logs /root/shared/hummingbot/client/
+	mv /root/hummingbot/client/data /root/shared/hummingbot/client/
+	mv /root/hummingbot/client/scripts /root/shared/hummingbot/client/
+	mv /root/hummingbot/client/pmm_scripts /root/shared/hummingbot/client/
+	ln -s /root/shared/hummingbot/client/conf /root/hummingbot/client/conf
+	ln -s /root/shared/hummingbot/client/logs /root/hummingbot/client/logs
+	ln -s /root/shared/hummingbot/client/data /root/hummingbot/client/data
+	ln -s /root/shared/hummingbot/client/scripts /root/hummingbot/client/scripts
+	ln -s /root/shared/hummingbot/client/pmm_scripts /root/hummingbot/client/pmm_scripts
 
 	set +ex
 EOF
