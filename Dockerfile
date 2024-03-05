@@ -643,10 +643,10 @@ decrypt_message() {
 }
 
 generate_sha256sum() {
-	local encrypted_message_base64=$1
+	local message=$1
 
-	# Generate a SHA256 hash of the encrypted Base64 message
-	local hash_value=$(echo -n "$encrypted_message_base64" | sha256sum | awk '{print $1}')
+#	local hash_value=$(echo -n "$message" | openssl dgst -sha256)
+	local hash_value=$(echo -n "$message" | sha256sum | awk '{print $1}')
 
 	echo "$hash_value"
 }
@@ -687,101 +687,49 @@ extract_credentials() {
 	echo "$value"
 }
 
-#fix_credentials_exports() {
-#	local encrypted_message_base64=$1
-#	local encrypted_message_base64_sha256sum=$1
-#
-#	if [ -n "$encrypted_message_base64" ]; then
-#		if grep -q "export ENCRYPTED_CREDENTIALS=" /root/.bashrc; then
-#			if grep -q "export ENCRYPTED_CREDENTIALS=\"\"" /root/.bashrc; then
-#				sed -i '/export ENCRYPTED_CREDENTIALS=""/c\export ENCRYPTED_CREDENTIALS="'$encrypted_message_base64'"' /root/.bashrc
-#			fi
-#		else
-#			echo "export ENCRYPTED_CREDENTIALS=\"$encrypted_message_base64\"" >> /root/.bashrc
-#		fi
-#	fi
-#
-#	if [ -n "$encrypted_message_base64_sha256sum" ]; then
-#		if grep -q "export ENCRYPTED_CREDENTIALS_SHA256SUM=" /root/.bashrc; then
-#			if grep -q "export ENCRYPTED_CREDENTIALS_SHA256SUM=\"\"" /root/.bashrc; then
-#				sed -i '/export ENCRYPTED_CREDENTIALS_SHA256SUM=""/c\export ENCRYPTED_CREDENTIALS_SHA256SUM="'$encrypted_message_base64_sha256sum'"' /root/.bashrc
-#			fi
-#		else
-#			echo "export ENCRYPTED_CREDENTIALS_SHA256SUM=\"$encrypted_message_base64_sha256sum\"" >> /root/.bashrc
-#		fi
-#	fi
-#}
+get_credentials() {
+	echo
+	read -p "   Username: " username
+	username=$(escape_string "$username")
+
+	read -s -p "   Password: " password
+	password=$(escape_string "$password")
+
+	credentials_json="{ \"username\": \"$username\", \"password\": \"$password\" }"
+
+	echo $credentials_json
+}
 
 authenticate() {
-	local username="$1"
-	local password="$2"
-
-	get_credentials() {
-		if [ -z "$username" ]; then
-			echo
-			read -p "Username: " username
-		fi
-
-		if [ -z "$password" ]; then
-			read -s -p "Password: " password
-		fi
-	}
-
 	if [ ! -f "/root/.ssh/id_rsa" ]; then
-		get_credentials
+		if [ -n "$NON_ENCRYPTED_CREDENTIALS_SHA256SUM" ]; then
+			local non_encrypted_informed_credentials_json
+			local non_encrypted_informed_credentials_json_sha256sum
+
+			non_encrypted_informed_credentials_json=$(get_credentials)
+			non_encrypted_informed_credentials_json_sha256sum=$(generate_sha256sum "$non_encrypted_informed_credentials_json")
+
+			if [ "$non_encrypted_informed_credentials_json_sha256sum" == "$NON_ENCRYPTED_CREDENTIALS_SHA256SUM" ]; then
+				echo $non_encrypted_informed_credentials_json
+			else
+				>&2 echo "Error: Authentication failed. Invalid username or password."
+				return 1
+			fi
+		else
+			>&2 echo "Error: Authentication failed. No stored credentials hash found."
+			return 1
+		fi
 	else
 		if [ -n "$ENCRYPTED_CREDENTIALS" ]; then
-			local decrypted_message
-			local json
+			local decrypted_stored_credentials_json
 
-			json=$(decrypt_message "$ENCRYPTED_CREDENTIALS")
+			decrypted_stored_credentials_json=$(decrypt_message "$ENCRYPTED_CREDENTIALS")
 
-			username=$(extract_credentials "username" "$json")
-			password=$(extract_credentials "password" "$json")
+			echo $decrypted_stored_credentials_json
 		else
-			get_credentials
-		fi
-	fi
-
-	local json
-	local encrypted_message_base64
-	local encrypted_message_base64_sha256sum
-
-	if [ ! -f "/root/.ssh/id_rsa" ]; then
-		local escaped_username
-		local escaped_password
-
-		escaped_username=$(escape_string "$username")
-		escaped_password=$(escape_string "$password")
-
-		json="{ \"username\": \"$escaped_username\", \"password\": \"$escaped_password\" }"
-	else
-		json="{ \"username\": \"$username\", \"password\": \"$password\" }"
-	fi
-
-	encrypted_message_base64=$(encrypt_message "$json")
-	encrypted_message_base64_sha256sum=$(generate_sha256sum "$encrypted_message")
-
-	if [ -n "$ENCRYPTED_CREDENTIALS_SHA256SUM" ]; then
-		if [ "$encrypted_message_base64_sha256sum" == "$ENCRYPTED_CREDENTIALS_SHA256SUM" ]; then
-			echo $json
-		else
-			>&2 echo "Error: Authentication failed. Invalid username or password."
+			>&2 echo "Error: Authentication failed. No stored encrypted credentials found."
 			return 1
 		fi
-	elif [ -n "$ENCRYPTED_CREDENTIALS" ]; then
-		local stored_encrypted_message_base64_sha256sum
-		stored_encrypted_message_base64_sha256sum=$(generate_sha256sum "$ENCRYPTED_CREDENTIALS")
-
-		if [ "$encrypted_message_base64_sha256sum" == "$stored_encrypted_message_base64_sha256sum" ]; then
-			echo $json
-		else
-			>&2 echo "Error: Authentication failed. Invalid username or password."
-			return 1
-		fi
-	else
-		>&2 echo "Error: Authentication failed. No stored credentials found."
-		return 1
 	fi
 }
 
@@ -848,12 +796,16 @@ RUN <<-EOF
 	escaped_admin_username=$(escape_string "${ADMIN_USERNAME}")
 	escaped_admin_password=$(escape_string "${ADMIN_PASSWORD}")
 
-	ENCRYPTED_CREDENTIALS_BASE64=$(encrypt_message "{ \"username\": \"$escaped_admin_username\", \"password\": \"$escaped_admin_password\" }")
-	ENCRYPTED_CREDENTIALS_BASE64_SHA256SUM=$(generate_sha256sum "$ENCRYPTED_CREDENTIALS_BASE64")
+	credentials_json="{ \"username\": \"$escaped_admin_username\", \"password\": \"$escaped_admin_password\" }"
 
-	echo "# Credentials Section - Start" >> /root/.bashrc
+	ENCRYPTED_CREDENTIALS_BASE64=$(encrypt_message "$credentials_json")
+
+	# Necessary because the cipher generated with OpenSSL is not always the same
+	NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM=$(generate_sha256sum "$credentials_json")
+
+	echo "# Credentials Section - Begin" >> /root/.bashrc
 	echo "export ENCRYPTED_CREDENTIALS=\"$ENCRYPTED_CREDENTIALS_BASE64\"" >> /root/.bashrc
-	echo "export ENCRYPTED_CREDENTIALS_SHA256SUM=\"$ENCRYPTED_CREDENTIALS_BASE64_SHA256SUM\"" >> /root/.bashrc
+	echo "export NON_ENCRYPTED_CREDENTIALS_SHA256SUM=\"$NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM\"" >> /root/.bashrc
 	echo "# Credentials Section - End" >> /root/.bashrc
 
 	if [ ! "$AUTO_SIGNIN" == "TRUE" ]; then
