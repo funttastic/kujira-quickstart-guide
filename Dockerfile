@@ -653,9 +653,22 @@ generate_sha256sum() {
 
 escape_string() {
 	local string=$1
-	local escaped_string="${string//\"/\\\"}"
+	local escaped_string=""
+#	local ord
+	local symbols='$#&|;()<>*!?[]\/\"\`'
 
-	echo "${escaped_string//[^a-zA-Z0-9 ,.\-_]/}"
+	for ((i=0; i<${#string}; i++)); do
+		character="${string:i:1}"
+		if [[ $symbols =~ "$character" ]]; then
+#			ord=$(printf '%d' "'$character")
+#			escaped_string+="\\$ord"
+			escaped_string+="\\$character"
+		else
+			escaped_string+="$character"
+		fi
+	done
+
+	echo "$escaped_string"
 }
 
 extract_credentials() {
@@ -719,6 +732,8 @@ authenticate() {
 	else
 		if [ -n "$ENCRYPTED_CREDENTIALS" ]; then
 			local decrypted_message
+			local json
+
 			json=$(decrypt_message "$ENCRYPTED_CREDENTIALS")
 
 			username=$(extract_credentials "username" "$json")
@@ -728,16 +743,21 @@ authenticate() {
 		fi
 	fi
 
-	local escaped_username
-	local escaped_password
 	local json
 	local encrypted_message_base64
 	local encrypted_message_base64_sha256sum
 
-	escaped_username=$(escape_string "$username")
-	escaped_password=$(escape_string "$password")
+	if [ ! -f "/root/.ssh/id_rsa" ]; then
+		local escaped_username
+		local escaped_password
 
-	json="{ \"username\": \"$escaped_username\", \"password\": \"$escaped_password\"}"
+		escaped_username=$(escape_string "$username")
+		escaped_password=$(escape_string "$password")
+
+		json="{ \"username\": \"$escaped_username\", \"password\": \"$escaped_password\" }"
+	else
+		json="{ \"username\": \"$username\", \"password\": \"$password\" }"
+	fi
 
 	encrypted_message_base64=$(encrypt_message "$json")
 	encrypted_message_base64_sha256sum=$(generate_sha256sum "$encrypted_message")
@@ -828,7 +848,7 @@ RUN <<-EOF
 	escaped_admin_username=$(escape_string "${ADMIN_USERNAME}")
 	escaped_admin_password=$(escape_string "${ADMIN_PASSWORD}")
 
-	ENCRYPTED_CREDENTIALS_BASE64=$(encrypt_message "{\"username\": \"$escaped_admin_username\", \"password\": \"$escaped_admin_password\"}")
+	ENCRYPTED_CREDENTIALS_BASE64=$(encrypt_message "{ \"username\": \"$escaped_admin_username\", \"password\": \"$escaped_admin_password\" }")
 	ENCRYPTED_CREDENTIALS_BASE64_SHA256SUM=$(generate_sha256sum "$ENCRYPTED_CREDENTIALS_BASE64")
 
 	echo "# Credentials Section - Start" >> /root/.bashrc
