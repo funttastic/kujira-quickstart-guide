@@ -478,14 +478,14 @@ start() {
 	fi
 
 	if [[ $# -eq 0 ]]; then
-		start_all
+		start_all "$username" "$password"
 		return
 	fi
 
 	while [[ $# -gt 0 ]]; do
 		case "$1" in
 			--start_all)
-				start_all
+				start_all "$username" "$password"
 				return
 				;;
 			--start_fun_frontend)
