@@ -22,8 +22,6 @@ ARG HB_GATEWAY_REPOSITORY_URL=${HB_GATEWAY_REPOSITORY_URL:-https://github.com/Te
 ARG HB_GATEWAY_REPOSITORY_BRANCH=${HB_GATEWAY_REPOSITORY_BRANCH:-community}
 ARG HB_GATEWAY_COMMAND
 ARG HB_GATEWAY_PORT
-ARG HB_GATEWAY_PASSPHRASE=${ADMIN_PASSWORD}
-ARG GATEWAY_PASSPHRASE=$HB_GATEWAY_PASSPHRASE
 
 ARG HB_CLIENT_REPOSITORY_URL=${HB_CLIENT_REPOSITORY_URL:-https://github.com/Team-Kujira/hummingbot.git}
 ARG HB_CLIENT_REPOSITORY_BRANCH=${HB_CLIENT_REPOSITORY_BRANCH:-community}
@@ -487,6 +485,8 @@ start() {
 	if [[ -n "$username" && -n "$password"  ]]; then
 		credentials=$(authenticate "$username" "$password")
 	elif [ -f "/root/.temp_credentials" ]; then
+			# This condition is only for the first start.
+
 			username=$(grep "username" "/root/.temp_credentials" | cut -d'=' -f2)
 			password=$(grep "password" "/root/.temp_credentials" | cut -d'=' -f2)
 
