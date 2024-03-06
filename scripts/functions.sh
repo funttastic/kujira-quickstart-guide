@@ -2021,7 +2021,7 @@ post_installation() {
 	fi
 
 	if [ "$HB_CLIENT_ATTACH" == "TRUE" ]; then
-		docker exec -it "$CONTAINER_NAME" bash -c "source /root/.bashrc && start_hb_client"
+		docker attach "$CONTAINER_NAME"
 	fi
 }
 

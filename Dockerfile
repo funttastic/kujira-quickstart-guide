@@ -457,6 +457,7 @@ start_all() {
 	start_filebrowser
 	start_fun_client
 	start_hb_gateway "$password"
+	start_hb_client
 	keep
 }
 
