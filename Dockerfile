@@ -148,8 +148,6 @@ RUN <<-EOF
 		echo "export FILEBROWSER_COMMAND=\"$FILEBROWSER_COMMAND\"" >> ~/.bashrc
 	fi
 
-	echo "export FIRST_START='source /root/.bashrc && start \$(echo \$(get_credentials_first_start username /root/.temp_credentials)) \$(echo \$(get_credentials_first_start password /root/.temp_credentials)) && rm -f /root/.temp_credentials'" >> .bashrc
-
 	echo -e "\n" >> ~/.bashrc
 
 	set +ex
@@ -467,10 +465,35 @@ start() {
 	local username="$1"
 	local password="$2"
 
+	args_to_check=("--start_all" "--start_fun_frontend" "--start_filebrowser" "--start_fun_client" "--start_hb_gateway" "--start_hb_client")
+
+	for arg in "${args_to_check[@]}"; do
+		if [[ "$username" == "$arg" ]]; then
+			username=""
+			break
+		fi
+	done
+
+	for arg in "${args_to_check[@]}"; do
+		if [[ "$password" == "$arg" ]]; then
+			password=""
+			break
+		fi
+	done
+
 	source ~/.bashrc
 
 	if [[ -n "$username" && -n "$password"  ]]; then
 		credentials=$(authenticate "$username" "$password")
+	elif [ -f "/root/.temp_credentials" ]; then
+			username=$(grep "username" "/root/.temp_credentials" | cut -d'=' -f2)
+			password=$(grep "password" "/root/.temp_credentials" | cut -d'=' -f2)
+
+			credentials=$(authenticate "$username" "$password")
+
+			if [ -n "$credentials" ]; then
+				rm -f /root/.temp_credentials
+			fi
 	else
 		credentials=$(authenticate)
 	fi
@@ -483,7 +506,13 @@ start() {
 		password=$(extract_credentials "password" "$credentials")
 	fi
 
-	if [[ $# -eq 0 ]]; then
+	if [[ "$*" != *"--start_all"* && \
+				"$*" != *"--start_fun_frontend"* && \
+				"$*" != *"--start_filebrowser"* && \
+				"$*" != *"--start_fun_client"* && \
+				"$*" != *"--start_hb_gateway"* && \
+				"$*" != *"--start_hb_client"* ]]
+	then
 		start_all "$username" "$password"
 		return
 	fi
@@ -689,15 +718,6 @@ extract_credentials() {
 	else
 		value=""
 	fi
-
-	echo "$value"
-}
-
-get_credentials_first_start() {
-	type="$1"
-	file="$2"
-
-	value=$(grep "$type" "$file" | cut -d'=' -f2)
 
 	echo "$value"
 }

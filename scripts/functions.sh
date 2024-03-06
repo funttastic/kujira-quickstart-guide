@@ -2023,10 +2023,6 @@ post_installation() {
 	if [ "$HB_CLIENT_ATTACH" == "TRUE" ]; then
 		docker exec -it "$CONTAINER_NAME" bash -c "source /root/.bashrc && start_hb_client"
 	fi
-
-	if [ "$AUTO_SIGNIN" == "FALSE" ]; then
-		docker exec -it "$CONTAINER_NAME" bash -c 'eval $FIRST_START'
-	fi
 }
 
 installation() {
