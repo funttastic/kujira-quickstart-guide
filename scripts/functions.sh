@@ -972,7 +972,6 @@ install_menu() {
   	#  ENTRYPOINT=${ENTRYPOINT:-"--entrypoint=\"source /root/.bashrc && start\""}
   	OPEN_IN_BROWSER=${OPEN_IN_BROWSER:-"TRUE"}
   	LOCK_APT=${LOCK_APT:-"TRUE"}
-  	AUTO_SIGNIN=${AUTO_SIGNIN:-"TRUE"}
 
   	if image_exists "$IMAGE_NAME"; then
   		docker_prune_selectively "$IMAGE_NAME"
@@ -2023,6 +2022,10 @@ post_installation() {
 
 	if [ "$HB_CLIENT_ATTACH" == "TRUE" ]; then
 		docker exec -it "$CONTAINER_NAME" bash -c "source /root/.bashrc && start_hb_client"
+	fi
+
+	if [ "$AUTO_SIGNIN" == "FALSE" ]; then
+		docker exec -it "$CONTAINER_NAME" bash -c 'eval $FIRST_START'
 	fi
 }
 

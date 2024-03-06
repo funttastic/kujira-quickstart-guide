@@ -148,6 +148,8 @@ RUN <<-EOF
 		echo "export FILEBROWSER_COMMAND=\"$FILEBROWSER_COMMAND\"" >> ~/.bashrc
 	fi
 
+	echo "export FIRST_START='source /root/.bashrc && start \$(echo \$(get_credentials_first_start username /root/.temp_credentials)) \$(echo \$(get_credentials_first_start password /root/.temp_credentials)) && rm -f /root/.temp_credentials'" >> .bashrc
+
 	echo -e "\n" >> ~/.bashrc
 
 	set +ex
@@ -462,12 +464,16 @@ start_all() {
 
 start() {
 	local credentials
-	local username
-	local password
+	local username="$1"
+	local password="$2"
 
 	source ~/.bashrc
 
-	credentials=$(authenticate)
+	if [[ -n "$username" && -n "$password"  ]]; then
+		credentials=$(authenticate "$username" "$password")
+	else
+		credentials=$(authenticate)
+	fi
 
 	if echo "$credentials" | grep -iq "error"; then
 		echo "$credentials" >&2
@@ -687,26 +693,50 @@ extract_credentials() {
 	echo "$value"
 }
 
-get_credentials() {
-	echo
-	read -p "   Username: " username
-	username=$(escape_string "$username")
+get_credentials_first_start() {
+	type="$1"
+	file="$2"
 
-	read -s -p "   Password: " password
-	password=$(escape_string "$password")
+	value=$(grep "$type" "$file" | cut -d'=' -f2)
+
+	echo "$value"
+}
+
+get_credentials() {
+	local username="$1"
+	local password="$2"
+	local credentials_json
+
+	if [ -z "$username" ]; then
+		read -rp "Username: " username
+		username=$(escape_string "$username")
+	fi
+
+	if [ -z "$password" ]; then
+		read -rs -p "Password: " password
+		password=$(escape_string "$password")
+	fi
 
 	credentials_json="{ \"username\": \"$username\", \"password\": \"$password\" }"
 
-	echo $credentials_json
+	echo "$credentials_json"
 }
 
 authenticate() {
+	local username="$1"
+	local password="$2"
+
 	if [ ! -f "/root/.ssh/id_rsa" ]; then
 		if [ -n "$NON_ENCRYPTED_CREDENTIALS_SHA256SUM" ]; then
 			local non_encrypted_informed_credentials_json
 			local non_encrypted_informed_credentials_json_sha256sum
 
-			non_encrypted_informed_credentials_json=$(get_credentials)
+			if [[ -n "$username" && -n "$password"  ]]; then
+				non_encrypted_informed_credentials_json=$(get_credentials "$username" "$password")
+			else
+				non_encrypted_informed_credentials_json=$(get_credentials)
+			fi
+
 			non_encrypted_informed_credentials_json_sha256sum=$(generate_sha256sum "$non_encrypted_informed_credentials_json")
 
 			if [ "$non_encrypted_informed_credentials_json_sha256sum" == "$NON_ENCRYPTED_CREDENTIALS_SHA256SUM" ]; then
@@ -807,6 +837,11 @@ RUN <<-EOF
 	echo "export ENCRYPTED_CREDENTIALS=\"$ENCRYPTED_CREDENTIALS_BASE64\"" >> /root/.bashrc
 	echo "export NON_ENCRYPTED_CREDENTIALS_SHA256SUM=\"$NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM\"" >> /root/.bashrc
 	echo "# Credentials Section - End" >> /root/.bashrc
+
+	# Necessary because the CMD instruction does not work with variables of type ARG, only of type ENV
+	# We cannot convert the ADMIN_USERNAME and ADMIN_PASSWORD variables to ENV for security reasons
+	echo "username=$ADMIN_USERNAME" > /root/.temp_credentials
+	echo "password=$ADMIN_PASSWORD" >> /root/.temp_credentials
 
 	if [ ! "$AUTO_SIGNIN" == "TRUE" ]; then
 		rm -f /root/.ssh/id_rsa
