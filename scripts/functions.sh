@@ -21,7 +21,7 @@ ID="default"
 # Inside the container
 CERTIFICATES_FOLDER="/root/shared/common/certificates"
 
-function select_ssh_key() {
+select_ssh_key() {
 	local keys=()
 	local key_paths=()
 	for key in ~/.ssh/*; do
@@ -154,6 +154,17 @@ waiting() {
 		tput cuu 1
 		tput ed
 	done
+}
+
+file_exists_in_container() {
+  container=$1
+  file=$2
+
+  if docker exec "$container" [ -f "$file" ]; then
+    return 0
+  else
+    return 1
+  fi
 }
 
 pre_installation_password_encryption() {
@@ -1262,7 +1273,6 @@ set_urls() {
 
 restart_container() {
 	local container_name=${1:-$CONTAINER_NAME}
-	local post_restart_command=$2
 
 	if [ "$container_name" == "back" ]; then
 		return 0
@@ -1279,8 +1289,24 @@ restart_container() {
 	echo
 	echo "      Starting: $(docker start "$container_name" 2>&1)"
 
-	if [ -n "$post_restart_command" ]; then
-		eval "$post_restart_command"
+	if container_is_running "$container_name"; then
+		if ! file_exists_in_container "$container_name" "/root/.ssh/id_rsa"; then
+			while true; do
+      	echo
+      	echo "   Automatic login is disabled, you will need to enter the username"
+      	echo "   and password defined during installation to start the services:"
+      	echo
+      	read -rp "   Username: " ADMIN_USERNAME
+      	read -rsp "   Password: " ADMIN_PASSWORD
+      	echo
+
+      	if [[ -n "$ADMIN_USERNAME" && -n "$ADMIN_PASSWORD" ]]; then
+      		break
+      	fi
+      done
+
+			docker exec -it "$CONTAINER_NAME" bash -c "source /root/.bashrc && start $ADMIN_USERNAME $ADMIN_PASSWORD"
+		fi
 	fi
 }
 
