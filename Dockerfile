@@ -747,7 +747,7 @@ authenticate() {
 	local username="$1"
 	local password="$2"
 
-	if [ ! -f "/root/.ssh/id_rsa" ]; then
+	if [ ! -f "/root/.ssh/id_rsa" ] || { [[ -n "$username" ]] && [[ -n "$password" ]]; }; then
 		if [ -n "$NON_ENCRYPTED_CREDENTIALS_SHA256SUM" ]; then
 			local non_encrypted_informed_credentials_json
 			local non_encrypted_informed_credentials_json_sha256sum
