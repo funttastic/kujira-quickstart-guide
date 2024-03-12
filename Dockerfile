@@ -572,11 +572,11 @@ kill_processes_and_subprocesses() {
 }
 
 stop_fun_frontend() {
-	kill_processes_and_subprocesses "start_fun_frontend"
+	kill_processes_and_subprocesses "vite"
 }
 
 stop_filebrowser() {
-	kill_processes_and_subprocesses "start_filebrowser"
+	kill_processes_and_subprocesses "filebrowser"
 }
 
 stop_fun_client() {
