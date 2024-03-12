@@ -580,15 +580,15 @@ stop_filebrowser() {
 }
 
 stop_fun_client() {
-	kill_processes_and_subprocesses "start_fun_client"
+	kill_processes_and_subprocesses "app|python"
 }
 
 stop_hb_gateway() {
-	kill_processes_and_subprocesses "start_hb_gateway"
+	kill_processes_and_subprocesses "yarn|start"
 }
 
 stop_hb_client() {
-	kill_processes_and_subprocesses "start_hb_client"
+	kill_processes_and_subprocesses "hummingbot|python"
 }
 
 stop_all() {

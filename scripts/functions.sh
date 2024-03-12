@@ -999,7 +999,7 @@ install_menu() {
   	echo "   |                                       ** TIPS **                                       |"
   	echo "   |________________________________________________________________________________________|"
   	echo "   |                                     |                                                  |"
-  	echo "   |   ℹ️   After the installation,       |   ℹ️   Quitting Hummingbot Client                 |"
+  	echo "   |   ℹ️   After the installation,      |   ℹ️   Quitting Hummingbot Client                |"
   	echo "   |                                     |                                                  |"
   	echo "   |   to view and edit configuration    |   If you need to close the 'Hummingbot Client'   |"
   	echo "   |   files, use the Frontend at        |   interface without shutting down the entire     |"
