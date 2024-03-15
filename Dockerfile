@@ -426,7 +426,13 @@ start_filebrowser() {
 }
 
 start_fun_client() {
-	eval $FUN_CLIENT_COMMAND
+	local password="$1"
+
+  export PASSWORD="$password"
+
+  eval $FUN_CLIENT_COMMAND
+
+  unset PASSWORD
 }
 
 start_hb_gateway() {
@@ -453,7 +459,7 @@ start_all() {
 
 	start_fun_frontend
 	start_filebrowser
-	start_fun_client
+	start_fun_client "$password"
 	start_hb_gateway "$password"
 	start_hb_client
 	keep
@@ -814,17 +820,14 @@ RUN <<-EOF
 
 	# Fun Client
 	conda activate funttastic
-	sed -i "s/<password>/"$ADMIN_PASSWORD"/g" funttastic/client/resources/configuration/production.yml
 	python funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $ADMIN_PASSWORD --cert-path funttastic/client/resources/certificates
 
 	# Fun Frontend
-	sed -i "s/password: '.*'/password: '$ADMIN_PASSWORD'/" funttastic/frontend/src/mock/data/authData.ts
-	sed -i "s/accountUserName: '.*'/accountUserName: '$ADMIN_USERNAME'/" funttastic/frontend/src/mock/data/authData.ts
 
 	# Filebrowser
 	cd filebrowser
 	filebrowser users add $ADMIN_USERNAME $ADMIN_PASSWORD --perm.admin
-	filebrowser users update $ADMIN_USERNAME --commands="ls,git,tree,curl,rm,mkdir,pwd,cp,mv,cat,less,find,touch,echo,chmod,chown,df,du,ps,kill"
+#	filebrowser users update $ADMIN_USERNAME --commands="ls,git,tree,curl,rm,mkdir,pwd,cp,mv,cat,less,find,touch,echo,chmod,chown,df,du,ps,kill"
 
 	mkdir -p /root/.ssh
 	chmod 0700 /root/.ssh
