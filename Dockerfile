@@ -62,7 +62,8 @@ RUN <<-EOF
 		openssh-server \
 		build-essential \
 		ca-certificates \
-		postgresql-server-dev-all
+		postgresql-server-dev-all \
+		tmux
 
 	set +ex
 EOF
@@ -81,13 +82,6 @@ RUN <<-EOF
 		echo "export FRONTEND_PORT=$FRONTEND_PORT" >> ~/.bashrc
 	fi
 
-	if [ -z "$FUN_FRONTEND_COMMAND" ]
-	then
-		echo "export FUN_FRONTEND_COMMAND=\"cd /root/funttastic/frontend && yarn start --host > /dev/null 2>&1 &\"" >> ~/.bashrc
-	else
-		echo "export FUN_FRONTEND_COMMAND=\"$FUN_FRONTEND_COMMAND\"" >> ~/.bashrc
-	fi
-
 	# Funttastic Client server environment variables
 
 	if [ -z "$FUN_CLIENT_PORT" ]
@@ -95,13 +89,6 @@ RUN <<-EOF
 		echo 'export FUN_CLIENT_PORT=50001' >> ~/.bashrc
 	else
 		echo "export FUN_CLIENT_PORT=$FUN_CLIENT_PORT" >> ~/.bashrc
-	fi
-
-	if [ -z "$FUN_CLIENT_COMMAND" ]
-	then
-		echo "export FUN_CLIENT_COMMAND=\"conda activate funttastic && cd /root/funttastic/client && python app.py > /dev/null 2>&1 &\"" >> ~/.bashrc
-	else
-		echo "export FUN_CLIENT_COMMAND=\"$FUN_CLIENT_COMMAND\"" >> ~/.bashrc
 	fi
 
 	# HB Gateway environment variables
@@ -113,21 +100,7 @@ RUN <<-EOF
 		echo "export HB_GATEWAY_PORT=$HB_GATEWAY_PORT" >> ~/.bashrc
 	fi
 
-	if [ -z "$HB_GATEWAY_COMMAND" ]
-	then
-		echo "export HB_GATEWAY_COMMAND=\"cd /root/hummingbot/gateway && yarn start > /dev/null 2>&1 &\"" >> ~/.bashrc
-	else
-		echo "export HB_GATEWAY_COMMAND=\"$HB_GATEWAY_COMMAND\"" >> ~/.bashrc
-	fi
-
 	# HB Client environment variables
-
-	if [ -z "$HB_CLIENT_COMMAND" ]
-	then
-		echo "export HB_CLIENT_COMMAND=\"conda activate hummingbot && cd /root/hummingbot/client && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log\"" >> ~/.bashrc
-	else
-		echo "export HB_CLIENT_COMMAND=\"$HB_CLIENT_COMMAND\"" >> ~/.bashrc
-	fi
 
 	# FileBrowser environment variables
 
@@ -138,13 +111,6 @@ RUN <<-EOF
 		echo "export FILEBROWSER_PORT=$FILEBROWSER_PORT" >> ~/.bashrc
 	fi
 	echo 'export VITE_FILEBROWSER_PORT=$FILEBROWSER_PORT' >> ~/.bashrc
-
-	if [ -z "$FILEBROWSER_COMMAND" ]
-	then
-		echo "export FILEBROWSER_COMMAND=\"cd /root/filebrowser && filebrowser --address=0.0.0.0 -p \$FILEBROWSER_PORT -r ../shared > /dev/null 2>&1 &\"" >> ~/.bashrc
-	else
-		echo "export FILEBROWSER_COMMAND=\"$FILEBROWSER_COMMAND\"" >> ~/.bashrc
-	fi
 
 	echo -e "\n" >> ~/.bashrc
 
@@ -418,39 +384,74 @@ cat <<'SCRIPT' > shared/scripts/functions.sh
 #!/bin/bash
 
 start_fun_frontend() {
-	eval $FUN_FRONTEND_COMMAND
+  local session="fun-frontend"
+
+  if [ "$(is_session_running "$session")" = "FALSE" ]; then
+		tmux new-session -d -s "$session"
+
+		tmux send-keys -t "$session" "cd /root/funttastic/frontend" C-m
+		tmux send-keys -t "$session" "APP=fun-frontend yarn start --host" C-m
+	fi
 }
 
 start_filebrowser() {
-	eval $FILEBROWSER_COMMAND
+  local session="filebrowser"
+
+  if [ "$(is_session_running "$session")" = "FALSE" ]; then
+		tmux new-session -d -s "$session"
+
+		tmux send-keys -t "$session" "cd /root/filebrowser" C-m
+		tmux send-keys -t "$session" "APP=filebrowser filebrowser --address=0.0.0.0 -p \$FILEBROWSER_PORT -r ../shared" C-m
+	fi
 }
 
 start_fun_client() {
-	local password="$1"
+  local password="$1"
+  local session="fun-client"
 
-  export PASSWORD="$password"
+  if [ "$(is_session_running "$session")" = "FALSE" ]; then
+		tmux new-session -d -s "$session"
 
-  eval $FUN_CLIENT_COMMAND
-
-  unset PASSWORD
+		tmux set-environment -t "$session" PASSWORD "$password"
+		tmux send-keys -t "$session" "export PASSWORD=$(tmux show-environment PASSWORD | cut -d= -f2)" C-m
+		tmux send-keys -t "$session" "conda activate funttastic" C-m
+		tmux send-keys -t "$session" "cd /root/funttastic/client" C-m
+		tmux send-keys -t "$session" "APP=fun-client python app.py" C-m
+		tmux set-environment -t "$session" -u PASSWORD
+	fi
 }
 
 start_hb_gateway() {
-	local password="$1"
+  local password="$1"
+  local session="hb-gateway"
 
-	export GATEWAY_PASSPHRASE="$password"
+  if [ "$(is_session_running "$session")" = "FALSE" ]; then
+		tmux new-session -d -s "$session"
 
-	eval $HB_GATEWAY_COMMAND
-
-	unset GATEWAY_PASSPHRASE
+		tmux set-environment -t "$session" GATEWAY_PASSPHRASE "$password"
+		tmux send-keys -t "$session" "export GATEWAY_PASSPHRASE=$(tmux show-environment GATEWAY_PASSPHRASE | cut -d= -f2)" C-m
+		tmux send-keys -t "$session" "cd /root/hummingbot/gateway" C-m
+		tmux send-keys -t "$session" "APP=hb-gateway yarn start" C-m
+		tmux set-environment -t "$session" -u GATEWAY_PASSPHRASE
+	fi
 }
 
 start_hb_client() {
-	eval $HB_CLIENT_COMMAND
+	local session="hb-client"
+
+	if [ "$(is_session_running "$session")" = "FALSE" ]; then
+		tmux new-session -d -s "$session"
+
+		tmux send-keys -t "$session" "conda activate hummingbot" C-m
+		tmux send-keys -t "$session" "cd /root/hummingbot/client" C-m
+		tmux send-keys -t "$session" "APP=hb-client python bin/hummingbot_quickstart.py; exit" C-m
+	fi
 }
 
 keep() {
-	tail -f /dev/null
+	if [ "$(is_process_running "keep")" = "FALSE" ]; then
+    APP=keep tail -f /dev/null
+  fi
 }
 
 start_all() {
@@ -462,13 +463,12 @@ start_all() {
 	start_fun_client "$password"
 	start_hb_gateway "$password"
 	start_hb_client
-	keep
 }
 
 start() {
 	local credentials
-	local username="$1"
-	local password="$2"
+	local username="${1:-$ADMIN_USERNAME}"
+	local password="${1:-$ADMIN_PASSWORD}"
 
 	args_to_check=("--start_all" "--start_fun_frontend" "--start_filebrowser" "--start_fun_client" "--start_hb_gateway" "--start_hb_client")
 
@@ -491,16 +491,16 @@ start() {
 	if [[ -n "$username" && -n "$password"  ]]; then
 		credentials=$(authenticate "$username" "$password")
 	elif [ -f "/root/.temp_credentials" ]; then
-			# This condition is only for the first start.
+		# This condition is only for the first start.
 
-			username=$(grep "username" "/root/.temp_credentials" | cut -d'=' -f2)
-			password=$(grep "password" "/root/.temp_credentials" | cut -d'=' -f2)
+		username=$(grep "username" "/root/.temp_credentials" | cut -d'=' -f2)
+		password=$(grep "password" "/root/.temp_credentials" | cut -d'=' -f2)
 
-			credentials=$(authenticate "$username" "$password")
+		credentials=$(authenticate "$username" "$password")
 
-			if [ -n "$credentials" ]; then
-				rm -f /root/.temp_credentials
-			fi
+		if [ -n "$credentials" ]; then
+			rm -f /root/.temp_credentials
+		fi
 	else
 		credentials=$(authenticate)
 	fi
@@ -513,8 +513,7 @@ start() {
 		password=$(extract_credentials "password" "$credentials")
 	fi
 
-	if [[ "$*" != *"--start_all"* && \
-				"$*" != *"--start_fun_frontend"* && \
+	if [[ "$*" != *"--start_fun_frontend"* && \
 				"$*" != *"--start_filebrowser"* && \
 				"$*" != *"--start_fun_client"* && \
 				"$*" != *"--start_hb_gateway"* && \
@@ -556,11 +555,36 @@ start() {
 	done
 }
 
-kill_processes_and_subprocesses() {
-	local search_pattern="$1"
+is_session_running() {
+	local session="$1"
+
+	tmux has-session -t "$session" 2>/dev/null
+
+	if [ $? -eq 0 ]; then
+		echo "TRUE"
+	else
+		echo "FALSE"
+	fi
+}
+
+is_process_running() {
+	local app="$1"
 	local target_pids parent_pids child_pids
 
-	target_pids=$(pgrep -f "$search_pattern" || true)
+	target_pids=$(grep -l "\bAPP=$app\b" /proc/*/environ | cut -d/ -f3 || true)
+
+	if [ ! -z "$target_pids" ]; then
+		echo "TRUE"
+	else
+		echo "FALSE"
+	fi
+}
+
+kill_processes_and_subprocesses() {
+	local app="$1"
+	local target_pids parent_pids child_pids
+
+	target_pids=$(grep -l "\bAPP=$app\b" /proc/*/environ | cut -d/ -f3 || true)
 
 	if [ ! -z "$target_pids" ]; then
 		parent_pids=$(echo "$target_pids" | grep -o -E '([0-9]+)' | tr "\n" " ")
@@ -578,23 +602,23 @@ kill_processes_and_subprocesses() {
 }
 
 stop_fun_frontend() {
-	kill_processes_and_subprocesses "vite"
+  tmux kill-session -t "fun-frontend"
 }
 
 stop_filebrowser() {
-	kill_processes_and_subprocesses "filebrowser"
+  tmux kill-session -t "filebrowser"
 }
 
 stop_fun_client() {
-	kill_processes_and_subprocesses "app|python"
+  tmux kill-session -t "fun-client"
 }
 
 stop_hb_gateway() {
-	kill_processes_and_subprocesses "yarn|start"
+  tmux kill-session -t "hb-gateway"
 }
 
 stop_hb_client() {
-	kill_processes_and_subprocesses "hummingbot|python"
+  tmux kill-session -t "hb-client"
 }
 
 stop_all() {
@@ -646,11 +670,11 @@ stop() {
 }
 
 status() {
-	local fun_frontend_status=$(pgrep -f 'fun.*frontend.*vite' >/dev/null && echo 'running' || echo 'stopped')
-	local filebrowser_status=$(pgrep -f 'filebrowser.*' >/dev/null && echo 'running' || echo 'stopped')
-	local fun_client_status=$(pgrep -f 'python.*app.py' >/dev/null && echo 'running' || echo 'stopped')
-	local hb_client_status=$(pgrep -f 'python.*hummingbot_quickstart.py' >/dev/null && echo 'running' || echo 'stopped')
-	local hb_gateway_status=$(pgrep -f 'node.*yarn.*start' >/dev/null && echo 'running' || echo 'stopped')
+	local fun_frontend_status=$(tmux has-session -t "fun-frontend" 2>/dev/null && echo "running" || echo "stopped")
+	local filebrowser_status=$(tmux has-session -t "filebrowser" 2>/dev/null && echo "running" || echo "stopped")
+	local fun_client_status=$(tmux has-session -t "fun-client" 2>/dev/null && echo "running" || echo "stopped")
+	local hb_client_status=$(tmux has-session -t "hb-client" 2>/dev/null && echo "running" || echo "stopped")
+	local hb_gateway_status=$(tmux has-session -t "hb-gateway" 2>/dev/null && echo "running" || echo "stopped")
 
 	output=$(cat << OUTPUT
 {
@@ -935,4 +959,4 @@ RUN <<-EOF
 	set +ex
 EOF
 
-CMD ["/bin/bash", "-c", "source /root/.bashrc && start"]
+CMD ["/bin/bash", "-c", "source /root/.bashrc && keep"]
