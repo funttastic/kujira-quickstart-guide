@@ -1305,7 +1305,7 @@ restart_container() {
       	fi
       done
 
-			docker exec -it "$CONTAINER_NAME" bash -c "source /root/.bashrc && start $ADMIN_USERNAME $ADMIN_PASSWORD"
+			docker exec -it -e ADMIN_USERNAME="$ADMIN_USERNAME" -e ADMIN_PASSWORD="$ADMIN_PASSWORD" "$CONTAINER_NAME" bash -c "source /root/.bashrc && start"
 		fi
 	fi
 }
@@ -1616,7 +1616,7 @@ open_on_web_browser() {
 }
 
 open_hb_client() {
-	docker exec -it "$CONTAINER_NAME" bash -c "source /root/.bashrc && start_hb_client"
+	docker exec -it "$CONTAINER_NAME" bash -c 'source /root/.bashrc && (start_hb_client; tmux a -t "hb-client")'
 }
 
 add_indentation() {
@@ -1718,7 +1718,6 @@ actions_submenu() {
 			;;
 		6)
 			open_hb_client
-			restart_all_services
 			clear
       show_menu_options
 			;;
