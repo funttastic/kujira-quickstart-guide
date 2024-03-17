@@ -997,19 +997,19 @@ install_menu() {
   fi
 
   if [ -z "$CUSTOMIZE" ]; then
-  	echo "   |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|"
-  	echo "   |                                       ** TIPS **                                       |"
-  	echo "   |________________________________________________________________________________________|"
-  	echo "   |                                     |                                                  |"
-  	echo "   |   ℹ️   After the installation,      |   ℹ️   Quitting Hummingbot Client                |"
-  	echo "   |                                     |                                                  |"
-  	echo "   |   to view and edit configuration    |   If you need to close the 'Hummingbot Client'   |"
-  	echo "   |   files, use the Frontend at        |   interface without shutting down the entire     |"
-  	echo "   |                                     |   container, close the terminal window or tab    |"
-  	echo "   |      https://localhost:50000        |   or use the command below:                      |"
-  	echo "   |                                     |                                                  |"
-  	echo "   |                                     |            [Ctrl+p] and then [Ctrl+q]            |"
-  	echo "   |_____________________________________|__________________________________________________|"
+  	echo "   |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|"
+  	echo "   |               ** TIPS **            |"
+  	echo "   |_____________________________________|"
+  	echo "   |                                     |"
+  	echo "   |   ℹ️   After the installation,      |"
+  	echo "   |                                     |"
+  	echo "   |   to view and edit configuration    |"
+  	echo "   |   files, use the Frontend at        |"
+  	echo "   |                                     |"
+  	echo "   |      https://localhost:50000        |"
+  	echo "   |                                     |"
+  	echo "   |                                     |"
+  	echo "   |_____________________________________|"
   	echo
   fi
 
