@@ -1306,6 +1306,12 @@ restart_container() {
       done
 
 			start_all_services
+
+      if [ $? -eq 0 ]; then
+				return 0
+      else
+				return 1
+      fi
 		fi
 	fi
 }
@@ -1775,12 +1781,18 @@ main_menu() {
 		2)
 			get_container_name
 			restart_all_services
-			if container_is_running "$CONTAINER_NAME"; then
-				echo
-				echo "      ✅ Restarting is complete."
-				echo
-				waiting 4 "   "
-			fi
+
+      if [ $? -eq 0 ]; then
+          echo
+					echo "      ✅ Restarting is complete."
+					echo
+					waiting 3 "   "
+      else
+          echo
+					echo "      ❌ Failed to restart."
+					echo
+					waiting 3 "   "
+      fi
 			break
 			;;
 		3)
@@ -2050,11 +2062,13 @@ docker_create_container() {
 }
 
 post_installation() {
-	if [ "$OPEN_IN_BROWSER" == "TRUE" ]; then
+	waiting 3
+
+	if [ "$OPEN_IN_BROWSER" = "TRUE" ]; then
 		open_on_web_browser "$FUN_FRONTEND_URL"
 	fi
 
-	if [ "$HB_CLIENT_ATTACH" == "TRUE" ]; then
+	if [ "$HB_CLIENT_ATTACH" = "TRUE" ]; then
 		open_hb_client
 	fi
 }
