@@ -63,7 +63,8 @@ RUN <<-EOF
 		build-essential \
 		ca-certificates \
 		postgresql-server-dev-all \
-		tmux
+		tmux \
+		jq
 
 	set +ex
 EOF
@@ -773,13 +774,10 @@ escape_string() {
 }
 
 extract_from_json() {
-	local key=$1
-	local json_string=$2
-	local value
+	local path=$1
+	local json=$2
 
-	value=$(echo "$json_string" | sed -n "s/.*\"$key\":[\s]*\"\([^\"]*\)\".*/\1/p")
-
-	echo "$value"
+	echo $json | /usr/bin/jq -r ".$path"
 }
 
 get_credentials() {
@@ -797,7 +795,7 @@ get_credentials() {
 		password=$(escape_string "$password")
 	fi
 
-	credentials_json="{ \"username\": \"$username\", \"password\": \"$password\" }"
+	credentials_json="{\"username\":\"$username\",\"password\":\"$password\"}"
 
 	echo "$credentials_json"
 }
@@ -903,7 +901,7 @@ RUN <<-EOF
 	escaped_admin_username=$(escape_string "${ADMIN_USERNAME}")
 	escaped_admin_password=$(escape_string "${ADMIN_PASSWORD}")
 
-	credentials_json="{ \"username\": \"$escaped_admin_username\", \"password\": \"$escaped_admin_password\" }"
+	credentials_json="{\"username\":\"$escaped_admin_username\",\"password\":\"$escaped_admin_password\"}"
 
 	ENCRYPTED_CREDENTIALS_BASE64=$(encrypt_message "$credentials_json")
 
