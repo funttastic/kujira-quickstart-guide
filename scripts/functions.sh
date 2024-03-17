@@ -1305,9 +1305,13 @@ restart_container() {
       	fi
       done
 
-			docker exec -it -e ADMIN_USERNAME="$ADMIN_USERNAME" -e ADMIN_PASSWORD="$ADMIN_PASSWORD" "$CONTAINER_NAME" bash -c "source /root/.bashrc && start"
+			start_all_services
 		fi
 	fi
+}
+
+start_all_services() {
+	docker exec -it -e ADMIN_USERNAME="$ADMIN_USERNAME" -e ADMIN_PASSWORD="$ADMIN_PASSWORD" "$CONTAINER_NAME" bash -c "source /root/.bashrc && start"
 }
 
 restart_all_services() {
@@ -2051,7 +2055,7 @@ post_installation() {
 	fi
 
 	if [ "$HB_CLIENT_ATTACH" == "TRUE" ]; then
-		docker attach "$CONTAINER_NAME"
+		open_hb_client
 	fi
 }
 

@@ -82,6 +82,30 @@ RUN <<-EOF
 		echo "export FRONTEND_PORT=$FRONTEND_PORT" >> ~/.bashrc
 	fi
 
+	if [ -z "$FUN_FRONTEND_COMMAND" ]
+	then
+		echo "export FUN_FRONTEND_COMMAND=\"APP=fun-frontend yarn start --host\"" >> ~/.bashrc
+	else
+		echo "export FUN_FRONTEND_COMMAND=\"$FUN_FRONTEND_COMMAND\"" >> ~/.bashrc
+	fi
+
+	# FileBrowser environment variables
+
+  if [ -z "$FILEBROWSER_PORT" ]
+  then
+    echo 'export FILEBROWSER_PORT=50002' >> ~/.bashrc
+  else
+    echo "export FILEBROWSER_PORT=$FILEBROWSER_PORT" >> ~/.bashrc
+  fi
+  echo 'export VITE_FILEBROWSER_PORT=$FILEBROWSER_PORT' >> ~/.bashrc
+
+  if [ -z "$FILEBROWSER_COMMAND" ]
+  then
+    echo "export FILEBROWSER_COMMAND=\"APP=filebrowser filebrowser --address=0.0.0.0 -p \$FILEBROWSER_PORT -r ../shared\"" >> ~/.bashrc
+  else
+    echo "export FILEBROWSER_COMMAND=\"$FILEBROWSER_COMMAND\"" >> ~/.bashrc
+  fi
+
 	# Funttastic Client server environment variables
 
 	if [ -z "$FUN_CLIENT_PORT" ]
@@ -89,6 +113,13 @@ RUN <<-EOF
 		echo 'export FUN_CLIENT_PORT=50001' >> ~/.bashrc
 	else
 		echo "export FUN_CLIENT_PORT=$FUN_CLIENT_PORT" >> ~/.bashrc
+	fi
+
+	if [ -z "$FUN_CLIENT_COMMAND" ]
+	then
+		echo "export FUN_CLIENT_COMMAND=\"APP=fun-client python app.py\"" >> ~/.bashrc
+	else
+		echo "export FUN_CLIENT_COMMAND=\"$FUN_CLIENT_COMMAND\"" >> ~/.bashrc
 	fi
 
 	# HB Gateway environment variables
@@ -100,17 +131,21 @@ RUN <<-EOF
 		echo "export HB_GATEWAY_PORT=$HB_GATEWAY_PORT" >> ~/.bashrc
 	fi
 
+	if [ -z "$HB_GATEWAY_COMMAND" ]
+	then
+		echo "export HB_GATEWAY_COMMAND=\"APP=hb-gateway yarn start\"" >> ~/.bashrc
+	else
+		echo "export HB_GATEWAY_COMMAND=\"$HB_GATEWAY_COMMAND\"" >> ~/.bashrc
+	fi
+
 	# HB Client environment variables
 
-	# FileBrowser environment variables
-
-	if [ -z "$FILEBROWSER_PORT" ]
+	if [ -z "$HB_CLIENT_COMMAND" ]
 	then
-		echo 'export FILEBROWSER_PORT=50002' >> ~/.bashrc
+		echo "export HB_CLIENT_COMMAND=\"APP=hb-client python bin/hummingbot_quickstart.py; exit\"" >> ~/.bashrc
 	else
-		echo "export FILEBROWSER_PORT=$FILEBROWSER_PORT" >> ~/.bashrc
+		echo "export HB_CLIENT_COMMAND=\"$HB_CLIENT_COMMAND\"" >> ~/.bashrc
 	fi
-	echo 'export VITE_FILEBROWSER_PORT=$FILEBROWSER_PORT' >> ~/.bashrc
 
 	echo -e "\n" >> ~/.bashrc
 
@@ -390,7 +425,7 @@ start_fun_frontend() {
 		tmux new-session -d -s "$session"
 
 		tmux send-keys -t "$session" "cd /root/funttastic/frontend" C-m
-		tmux send-keys -t "$session" "APP=fun-frontend yarn start --host" C-m
+		tmux send-keys -t "$session" "$FUN_FRONTEND_COMMAND" C-m
 	fi
 }
 
@@ -401,7 +436,7 @@ start_filebrowser() {
 		tmux new-session -d -s "$session"
 
 		tmux send-keys -t "$session" "cd /root/filebrowser" C-m
-		tmux send-keys -t "$session" "APP=filebrowser filebrowser --address=0.0.0.0 -p \$FILEBROWSER_PORT -r ../shared" C-m
+		tmux send-keys -t "$session" "$FILEBROWSER_COMMAND" C-m
 	fi
 }
 
@@ -416,7 +451,7 @@ start_fun_client() {
 		tmux send-keys -t "$session" "export PASSWORD=$(tmux show-environment PASSWORD | cut -d= -f2)" C-m
 		tmux send-keys -t "$session" "conda activate funttastic" C-m
 		tmux send-keys -t "$session" "cd /root/funttastic/client" C-m
-		tmux send-keys -t "$session" "APP=fun-client python app.py" C-m
+		tmux send-keys -t "$session" "$FUN_CLIENT_COMMAND" C-m
 		tmux set-environment -t "$session" -u PASSWORD
 	fi
 }
@@ -431,7 +466,7 @@ start_hb_gateway() {
 		tmux set-environment -t "$session" GATEWAY_PASSPHRASE "$password"
 		tmux send-keys -t "$session" "export GATEWAY_PASSPHRASE=$(tmux show-environment GATEWAY_PASSPHRASE | cut -d= -f2)" C-m
 		tmux send-keys -t "$session" "cd /root/hummingbot/gateway" C-m
-		tmux send-keys -t "$session" "APP=hb-gateway yarn start" C-m
+		tmux send-keys -t "$session" "$HB_GATEWAY_COMMAND" C-m
 		tmux set-environment -t "$session" -u GATEWAY_PASSPHRASE
 	fi
 }
@@ -444,7 +479,7 @@ start_hb_client() {
 
 		tmux send-keys -t "$session" "conda activate hummingbot" C-m
 		tmux send-keys -t "$session" "cd /root/hummingbot/client" C-m
-		tmux send-keys -t "$session" "APP=hb-client python bin/hummingbot_quickstart.py; exit" C-m
+		tmux send-keys -t "$session" "$HB_CLIENT_COMMAND" C-m
 	fi
 }
 
@@ -959,4 +994,4 @@ RUN <<-EOF
 	set +ex
 EOF
 
-CMD ["/bin/bash", "-c", "source /root/.bashrc && keep"]
+CMD ["/bin/bash", "-c", "source /root/.bashrc && start && keep"]
