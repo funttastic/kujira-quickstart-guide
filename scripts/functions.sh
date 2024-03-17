@@ -21,6 +21,8 @@ ID="default"
 # Inside the container
 CERTIFICATES_FOLDER="/root/shared/common/certificates"
 
+TOKEN=""
+
 select_ssh_key() {
 	local keys=()
 	local key_paths=()
@@ -1333,6 +1335,7 @@ fun_client_send_request() {
 	local certificates_folder=""
 	declare -g RAW_RESPONSE
 	declare -g RESPONSE
+	declare -g TOKEN
 
 	while [[ $# -gt 0 ]]; do
 		case "$1" in
@@ -1376,6 +1379,7 @@ fun_client_send_request() {
     --key \"$certificates_folder/client_key.pem\" \
     --cacert \"$certificates_folder/ca_cert.pem\" \
     --header \"Content-Type: application/json\" \
+    --header \"Authorization: Bearer $TOKEN\" \
     -d '$payload' \
     \"$host:$port$url\""
 
@@ -1391,7 +1395,52 @@ fun_client_send_request() {
 	fi
 }
 
+extract_from_json() {
+	local key=$1
+	local json_string=$2
+	local value
+
+	value=$(echo "$json_string" | sed -n "s/.*\"$key\":[\s]*\"\([^\"]*\)\".*/\1/p")
+
+	echo "$value"
+}
+
+authenticate() {
+	local username="${1:-$ADMIN_USERNAME}"
+	local password="${2:-$ADMIN_PASSWORD}"
+
+	RAW_RESPONSE=$(docker exec -it "$CONTAINER_NAME" bash -c "source /root/.bashrc && authenticate '$username' '$password'")
+
+	echo $RAW_RESPONSE
+}
+
+fun_client_auth_sign_in() {
+	local credentials
+	local username
+	local password
+	declare -g RAW_RESPONSE
+	declare -g RESPONSE
+	declare -g TOKEN
+
+	credentials=$(authenticate)
+
+	username=$(extract_from_json "username" "$credentials")
+	password=$(extract_from_json "password" "$credentials")
+
+	fun_client_send_request \
+		--method "POST" \
+		--url "/auth/signIn" \
+		--payload '{
+			"username": "'"$username"'",
+			"password": "'"$password"'"
+		}'
+
+	TOKEN=$(extract_from_json "token" "$RAW_RESPONSE")
+}
+
 fun_client_strategy_start() {
+	fun_client_auth_sign_in
+
 	local strategy=""
 	local version=""
 	local id=""
@@ -1421,6 +1470,8 @@ fun_client_strategy_start() {
 }
 
 fun_client_strategy_stop() {
+	fun_client_auth_sign_in
+
 	local strategy=""
 	local version=""
 	local id=""
@@ -1450,6 +1501,8 @@ fun_client_strategy_stop() {
 }
 
 fun_client_strategy_status() {
+	fun_client_auth_sign_in
+
 	local strategy=""
 	local version=""
 	local id=""
@@ -1479,6 +1532,8 @@ fun_client_strategy_status() {
 }
 
 fun_client_wallet() {
+	fun_client_auth_sign_in
+
 	local method="$1"
 	local strategy=""
 	local version=""
@@ -1556,7 +1611,7 @@ fun_client_wallet() {
 			"accountNumber": '"$account_number"'
 		}'
 
-		url="/wallet/add"
+		url="/hummingbot/gateway/wallet/add"
 	elif [ "$method" == "DELETE" ]; then
 		while true; do
 			echo
@@ -1586,10 +1641,10 @@ fun_client_wallet() {
 
 		payload='{
 			"chain": "'"$chain"'",
-			"address": "'"$public_key"'",
+			"address": "'"$public_key"'"
 		}'
 
-		url="/wallet/remove"
+		url="/hummingbot/gateway/wallet/remove"
 	fi
 
 	if [[ ! "$mnemonic" == "back" && ! "$public_key" == "back" ]]; then

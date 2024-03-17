@@ -503,7 +503,7 @@ start_all() {
 start() {
 	local credentials
 	local username="${1:-$ADMIN_USERNAME}"
-	local password="${1:-$ADMIN_PASSWORD}"
+	local password="${2:-$ADMIN_PASSWORD}"
 
 	args_to_check=("--start_all" "--start_fun_frontend" "--start_filebrowser" "--start_fun_client" "--start_hb_gateway" "--start_hb_client")
 
@@ -544,8 +544,8 @@ start() {
 		echo "$credentials" >&2
 		return 1
 	else
-		username=$(extract_credentials "username" "$credentials")
-		password=$(extract_credentials "password" "$credentials")
+		username=$(extract_from_json "username" "$credentials")
+		password=$(extract_from_json "password" "$credentials")
 	fi
 
 	if [[ "$*" != *"--start_fun_frontend"* && \
@@ -772,18 +772,12 @@ escape_string() {
 	echo "$escaped_string"
 }
 
-extract_credentials() {
+extract_from_json() {
 	local key=$1
 	local json_string=$2
 	local value
 
-	if [ "$key" = "username" ]; then
-		value=$(echo $json_string | sed -n 's/.*"username": "\([^"]*\)".*/\1/p')
-	elif [ "$key" = "password" ]; then
-		value=$(echo $json_string | sed -n 's/.*"password": "\([^"]*\)".*/\1/p')
-	else
-		value=""
-	fi
+	value=$(echo "$json_string" | sed -n "s/.*\"$key\":[\s]*\"\([^\"]*\)\".*/\1/p")
 
 	echo "$value"
 }
