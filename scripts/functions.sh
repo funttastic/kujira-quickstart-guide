@@ -1320,10 +1320,22 @@ restart_container() {
 
 start_all_services() {
 	docker exec -it -e ADMIN_USERNAME="$ADMIN_USERNAME" -e ADMIN_PASSWORD="$ADMIN_PASSWORD" "$CONTAINER_NAME" bash -c "source /root/.bashrc && start"
+
+	if [ $? -eq 0 ]; then
+		return 0
+	else
+		return 1
+	fi
 }
 
 restart_all_services() {
 	restart_container "$CONTAINER_NAME"
+
+	if [ $? -eq 0 ]; then
+		return 0
+	else
+		return 1
+	fi
 }
 
 fun_client_send_request() {

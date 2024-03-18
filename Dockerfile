@@ -543,7 +543,7 @@ start() {
 		credentials=$(authenticate)
 	fi
 
-	if echo "$credentials" | grep -iq "error"; then
+	if [ -z "$credentials" ] || echo "$credentials" | grep -iq "error"; then
 		echo "$credentials" >&2
 		return 1
 	else
