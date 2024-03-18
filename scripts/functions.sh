@@ -171,7 +171,7 @@ file_exists_in_container() {
 
 pre_installation_password_encryption() {
 	password_encryption_warning() {
-		show_title "PASSWORD & USERNAME SETTING PROCESS"
+		show_title "USERNAME & PASSWORD SETTINGS"
 		echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 		echo "   |                                                               |"
 		echo "   |  ⚠️  Attention! Answer the following question carefully!       |"
@@ -246,14 +246,14 @@ pre_installation_password_encryption() {
 }
 
 pre_installation_define_passphrase() {
-	show_title "PASSWORD & USERNAME SETTING PROCESS"
+	show_title "USERNAME & PASSWORD SETTINGS"
 	echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 	echo "   |                                                                 |"
-	echo "   |  ⚠️  It's important that your data remains secure, so we need    |"
-	echo "   |     to set a password and an username.                          |"
+	echo "   |  ⚠️  It's important that your data remains secure, so we need   |"
+	echo "   |     to set a username and a password.                           |"
 	echo "   |                                                                 |"
-	echo "   |  See the table presented at the end of the password definition  |"
-	echo "   |  process, where the password and username will be used.         |"
+	echo "   |  See the table presented at the end of the process              |"
+	echo "   |     where the username and password will be used.               |"
 	echo "   |                                                                 |"
 	echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 	echo
@@ -308,15 +308,16 @@ pre_installation_define_passphrase() {
 
 	pre_installation_password_encryption
 
-	show_title "PASSWORD & USERNAME SETTING PROCESS"
+	show_title "USERNAME & PASSWORD SETTINGS"
 	echo "   ________________________________________________________________"
 	echo "   | SERVICE OR APPLICATION |  NEEDS USERNAME  |  NEEDS PASSWORD  |"
 	echo "   |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|"
-	echo "   |  Funttastic UI         |       Yes        |        Yes       |"
+	echo "   |  Funttastic Frontend   |       Yes        |        Yes       |"
 	echo "   |  FileBrowser           |       Yes        |        Yes       |"
-	echo "   |  Hummingbot Client     |        No        |        Yes       |"
-	echo "   |  Hummingbot Gateway    |        No        |        Yes       |"
-	echo "   |  SSL Certificates      |        No        |        Yes       |"
+	echo "   |  Funttastic Client     |       Yes        |        Yes       |"
+	echo "   |  Hummingbot Gateway    |       No         |        Yes       |"
+	echo "   |  Hummingbot Client     |       No         |        Yes       |"
+	echo "   |  SSL Certificates      |       No         |        Yes       |"
 	echo "   |______________________________________________________________|"
 
 	echo
@@ -1825,12 +1826,12 @@ actions_menu() {
 }
 
 main_menu() {
-	show_title "WELCOME TO FUNTTASTIC CLIENT SETUP"
+	show_title "WELCOME TO FUNTTASTIC SETUP"
 	echo "   CHOOSE WHICH ACTION YOU WOULD LIKE TO DO:"
 	echo
 	echo "   [1] INSTALL"
 	echo "   [2] RESTART"
-	echo "   [3] CLIENT"
+	echo "   [3] ACTIONS"
 	echo
 	echo "   [exit] EXIT"
 	echo
