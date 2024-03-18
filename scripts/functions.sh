@@ -315,7 +315,7 @@ pre_installation_define_passphrase() {
 	echo "   |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|"
 	echo "   |  Funttastic Frontend   |       Yes        |        Yes       |"
 	echo "   |  FileBrowser           |       Yes        |        Yes       |"
-	echo "   |  Funttastic Client     |       Yes        |        Yes       |"
+	echo "   |  Funttastic Client     |       No         |        Yes       |"
 	echo "   |  Hummingbot Gateway    |       No         |        Yes       |"
 	echo "   |  Hummingbot Client     |       No         |        Yes       |"
 	echo "   |  SSL Certificates      |       No         |        Yes       |"
