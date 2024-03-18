@@ -849,7 +849,7 @@ authenticate() {
 	fi
 }
 
-log-all () {
+log_all () {
 	tail -f \
 		~/shared/logs/tmux/fun-frontend.log \
 		~/shared/logs/tmux/filebrowser.log \
