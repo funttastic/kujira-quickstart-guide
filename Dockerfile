@@ -92,20 +92,20 @@ RUN <<-EOF
 
 	# FileBrowser environment variables
 
-  if [ -z "$FILEBROWSER_PORT" ]
-  then
-    echo 'export FILEBROWSER_PORT=50002' >> ~/.bashrc
-  else
-    echo "export FILEBROWSER_PORT=$FILEBROWSER_PORT" >> ~/.bashrc
-  fi
-  echo 'export VITE_FILEBROWSER_PORT=$FILEBROWSER_PORT' >> ~/.bashrc
+	if [ -z "$FILEBROWSER_PORT" ]
+	then
+		echo 'export FILEBROWSER_PORT=50002' >> ~/.bashrc
+	else
+		echo "export FILEBROWSER_PORT=$FILEBROWSER_PORT" >> ~/.bashrc
+	fi
+	echo 'export VITE_FILEBROWSER_PORT=$FILEBROWSER_PORT' >> ~/.bashrc
 
-  if [ -z "$FILEBROWSER_COMMAND" ]
-  then
-    echo "export FILEBROWSER_COMMAND=\"APP=filebrowser filebrowser --address=0.0.0.0 -p \$FILEBROWSER_PORT -r ../shared\"" >> ~/.bashrc
-  else
-    echo "export FILEBROWSER_COMMAND=\"$FILEBROWSER_COMMAND\"" >> ~/.bashrc
-  fi
+	if [ -z "$FILEBROWSER_COMMAND" ]
+	then
+		echo "export FILEBROWSER_COMMAND=\"APP=filebrowser filebrowser --address=0.0.0.0 -p \$FILEBROWSER_PORT -r ../shared\"" >> ~/.bashrc
+	else
+		echo "export FILEBROWSER_COMMAND=\"$FILEBROWSER_COMMAND\"" >> ~/.bashrc
+	fi
 
 	# Funttastic Client server environment variables
 
@@ -420,9 +420,9 @@ cat <<'SCRIPT' > shared/scripts/functions.sh
 #!/bin/bash
 
 start_fun_frontend() {
-  local session="fun-frontend"
+	local session="fun-frontend"
 
-  if [ "$(is_session_running "$session")" = "FALSE" ]; then
+	if [ "$(is_session_running "$session")" = "FALSE" ]; then
 		tmux new-session -d -s "$session"
 
 		tmux send-keys -t "$session" "cd /root/funttastic/frontend" C-m
@@ -431,9 +431,9 @@ start_fun_frontend() {
 }
 
 start_filebrowser() {
-  local session="filebrowser"
+	local session="filebrowser"
 
-  if [ "$(is_session_running "$session")" = "FALSE" ]; then
+	if [ "$(is_session_running "$session")" = "FALSE" ]; then
 		tmux new-session -d -s "$session"
 
 		tmux send-keys -t "$session" "cd /root/filebrowser" C-m
@@ -442,33 +442,35 @@ start_filebrowser() {
 }
 
 start_fun_client() {
-  local password="$1"
-  local session="fun-client"
+	local password="$1"
+	local session="fun-client"
 
-  if [ "$(is_session_running "$session")" = "FALSE" ]; then
+	if [ "$(is_session_running "$session")" = "FALSE" ]; then
 		tmux new-session -d -s "$session"
 
-		tmux set-environment -t "$session" PASSWORD "$password"
-		tmux send-keys -t "$session" "export PASSWORD=$(tmux show-environment PASSWORD | cut -d= -f2)" C-m
+#		tmux set-environment -t "$session" PASSWORD "$password"
+#		tmux send-keys -t "$session" "export PASSWORD=\"$(tmux show-environment PASSWORD | cut -d= -f2)\"" C-m
+		tmux send-keys -t "$session" "export PASSWORD=\"$password\"" C-m
 		tmux send-keys -t "$session" "conda activate funttastic" C-m
 		tmux send-keys -t "$session" "cd /root/funttastic/client" C-m
 		tmux send-keys -t "$session" "$FUN_CLIENT_COMMAND" C-m
-		tmux set-environment -t "$session" -u PASSWORD
+#		tmux set-environment -t "$session" -u PASSWORD
 	fi
 }
 
 start_hb_gateway() {
-  local password="$1"
-  local session="hb-gateway"
+	local password="$1"
+	local session="hb-gateway"
 
-  if [ "$(is_session_running "$session")" = "FALSE" ]; then
+	if [ "$(is_session_running "$session")" = "FALSE" ]; then
 		tmux new-session -d -s "$session"
 
-		tmux set-environment -t "$session" GATEWAY_PASSPHRASE "$password"
-		tmux send-keys -t "$session" "export GATEWAY_PASSPHRASE=$(tmux show-environment GATEWAY_PASSPHRASE | cut -d= -f2)" C-m
+#		tmux set-environment -t "$session" GATEWAY_PASSPHRASE "$password"
+#		tmux send-keys -t "$session" "export GATEWAY_PASSPHRASE=\"$(tmux show-environment GATEWAY_PASSPHRASE | cut -d= -f2)\"" C-m
+		tmux send-keys -t "$session" "export GATEWAY_PASSPHRASE=\"$password\"" C-m
 		tmux send-keys -t "$session" "cd /root/hummingbot/gateway" C-m
 		tmux send-keys -t "$session" "$HB_GATEWAY_COMMAND" C-m
-		tmux set-environment -t "$session" -u GATEWAY_PASSPHRASE
+#		tmux set-environment -t "$session" -u GATEWAY_PASSPHRASE
 	fi
 }
 
@@ -486,8 +488,8 @@ start_hb_client() {
 
 keep() {
 	if [ "$(is_process_running "keep")" = "FALSE" ]; then
-    APP=keep tail -f /dev/null
-  fi
+		APP=keep tail -f /dev/null
+	fi
 }
 
 start_all() {
@@ -638,23 +640,23 @@ kill_processes_and_subprocesses() {
 }
 
 stop_fun_frontend() {
-  tmux kill-session -t "fun-frontend"
+	tmux kill-session -t "fun-frontend"
 }
 
 stop_filebrowser() {
-  tmux kill-session -t "filebrowser"
+	tmux kill-session -t "filebrowser"
 }
 
 stop_fun_client() {
-  tmux kill-session -t "fun-client"
+	tmux kill-session -t "fun-client"
 }
 
 stop_hb_gateway() {
-  tmux kill-session -t "hb-gateway"
+	tmux kill-session -t "hb-gateway"
 }
 
 stop_hb_client() {
-  tmux kill-session -t "hb-client"
+	tmux kill-session -t "hb-client"
 }
 
 stop_all() {
