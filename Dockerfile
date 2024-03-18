@@ -64,7 +64,8 @@ RUN <<-EOF
 		ca-certificates \
 		postgresql-server-dev-all \
 		tmux \
-		jq
+		jq \
+		multitail
 
 	set +ex
 EOF
@@ -414,6 +415,11 @@ EOF
 RUN <<-EOF
 set -ex
 
+mkdir -p shared/logs/tmux
+ln -s /root/funttastic/client/resources/logs /root/shared/logs/fun-client
+ln -s /root/hummingbot/gateway/logs /root/shared/logs/hb-gateway
+ln -s /root/hummingbot/client/logs /root/shared/logs/hb-client
+
 mkdir -p shared/scripts
 
 cat <<'SCRIPT' > shared/scripts/functions.sh
@@ -423,7 +429,7 @@ start_fun_frontend() {
 	local session="fun-frontend"
 
 	if [ "$(is_session_running "$session")" = "FALSE" ]; then
-		tmux new-session -d -s "$session"
+		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> ~/shared/logs/tmux/$session.log"
 
 		tmux send-keys -t "$session" "cd /root/funttastic/frontend" C-m
 		tmux send-keys -t "$session" "$FUN_FRONTEND_COMMAND" C-m
@@ -434,7 +440,7 @@ start_filebrowser() {
 	local session="filebrowser"
 
 	if [ "$(is_session_running "$session")" = "FALSE" ]; then
-		tmux new-session -d -s "$session"
+		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> ~/shared/logs/tmux/$session.log"
 
 		tmux send-keys -t "$session" "cd /root/filebrowser" C-m
 		tmux send-keys -t "$session" "$FILEBROWSER_COMMAND" C-m
@@ -446,7 +452,7 @@ start_fun_client() {
 	local session="fun-client"
 
 	if [ "$(is_session_running "$session")" = "FALSE" ]; then
-		tmux new-session -d -s "$session"
+		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> ~/shared/logs/tmux/$session.log"
 
 #		tmux set-environment -t "$session" PASSWORD "$password"
 #		tmux send-keys -t "$session" "export PASSWORD=\"$(tmux show-environment PASSWORD | cut -d= -f2)\"" C-m
@@ -463,7 +469,7 @@ start_hb_gateway() {
 	local session="hb-gateway"
 
 	if [ "$(is_session_running "$session")" = "FALSE" ]; then
-		tmux new-session -d -s "$session"
+		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> ~/shared/logs/tmux/$session.log"
 
 #		tmux set-environment -t "$session" GATEWAY_PASSPHRASE "$password"
 #		tmux send-keys -t "$session" "export GATEWAY_PASSPHRASE=\"$(tmux show-environment GATEWAY_PASSPHRASE | cut -d= -f2)\"" C-m
@@ -478,7 +484,7 @@ start_hb_client() {
 	local session="hb-client"
 
 	if [ "$(is_session_running "$session")" = "FALSE" ]; then
-		tmux new-session -d -s "$session"
+		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> ~/shared/logs/tmux/$session.log"
 
 		tmux send-keys -t "$session" "conda activate hummingbot" C-m
 		tmux send-keys -t "$session" "cd /root/hummingbot/client" C-m
@@ -841,6 +847,18 @@ authenticate() {
 			return 1
 		fi
 	fi
+}
+
+function log_all () {
+	tail -f \
+		~/shared/logs/tmux/fun-frontend.log \
+		~/shared/logs/tmux/filebrowser.log \
+		~/shared/logs/tmux/fun-client.log \
+		~/shared/logs/tmux/hb-gateway.log \
+		~/shared/logs/tmux/hb-client.log \
+		~/shared/logs/fun-client/all.log \
+		~/shared/logs/hb-gateway/* \
+		~/shared/logs/hb-client/*
 }
 
 SCRIPT
