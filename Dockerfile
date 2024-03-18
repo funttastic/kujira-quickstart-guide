@@ -415,12 +415,12 @@ EOF
 RUN <<-EOF
 set -ex
 
-mkdir -p shared/logs/tmux
+mkdir -p /root/shared/logs/tmux
 ln -s /root/funttastic/client/resources/logs /root/shared/logs/fun-client
 ln -s /root/hummingbot/gateway/logs /root/shared/logs/hb-gateway
 ln -s /root/hummingbot/client/logs /root/shared/logs/hb-client
 
-mkdir -p shared/scripts
+mkdir -p /root/shared/scripts
 
 cat <<'SCRIPT' > shared/scripts/functions.sh
 #!/bin/bash
