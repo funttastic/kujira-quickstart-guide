@@ -13,6 +13,7 @@ MIN_PASSPHRASE_LENGTH=4
 ENTRYPOINT=""
 NETWORK="bridge"
 DEFAULT_WAITING_TIME=3
+DEFAULT_BRANCH="development"
 
 STRATEGY="pure_market_making"
 VERSION="1.0.0"
@@ -53,7 +54,7 @@ select_ssh_key() {
 
 	while true; do
 		echo
-		echo "   Select one of these keys or enter the absolute path of a key"
+		echo "   Select one of these keys or enter the absolute path of the key"
 		echo
 		read -rp "   >>> " REPLY
 
@@ -139,7 +140,7 @@ show_title() {
 
 exit_application() {
 	show_title "LEAVING THE SCRIPT"
-	echo "      Feel free to come back whenever you want."
+	echo "      Thanks for using our software!"
 	echo
 	more_information
 	echo
@@ -213,7 +214,7 @@ pre_installation_password_encryption() {
 		return
 
   	while true; do
-  		echo "   ℹ️  To encrypt the password and username, we can use an SSH key "
+  		echo "   ℹ️  To encrypt the username and password, we can use an SSH key "
   		echo "      pair that you already have."
   		echo
   		echo "   Do you want to use an existing SSH key pair?"
@@ -250,9 +251,9 @@ pre_installation_define_passphrase() {
 	echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 	echo "   |                                                                 |"
 	echo "   |  ⚠️  It's important that your data remains secure, so we need   |"
-	echo "   |     to set a username and a password.                           |"
+	echo "   |     to set a username and password.                             |"
 	echo "   |                                                                 |"
-	echo "   |  See the table presented at the end of the process              |"
+	echo "   |  See the table presented at the end of the process to see       |"
 	echo "   |     where the username and password will be used.               |"
 	echo "   |                                                                 |"
 	echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -340,7 +341,7 @@ pre_installation_fun_frontend() {
 
 	FUN_FRONTEND_URL="http://localhost:$FUN_FRONTEND_PORT"
 	FUN_FRONTEND_REPOSITORY_URL="https://github.com/funttastic/fun-hb-frontend.git"
-	FUN_FRONTEND_REPOSITORY_BRANCH="development"
+	FUN_FRONTEND_REPOSITORY_BRANCH="$DEFAULT_BRANCH"
 }
 
 pre_installation_filebrowser() {
@@ -951,7 +952,7 @@ install_menu() {
   	FUN_FRONTEND_PORT=${FUN_FRONTEND_PORT:-50000}
   	FUN_FRONTEND_URL="$LOCAL_HOST_URL_PREFIX:$FUN_FRONTEND_PORT"
   	FUN_FRONTEND_REPOSITORY_URL=${FUN_FRONTEND_REPOSITORY_URL:-"https://github.com/funttastic/fun-hb-frontend.git"}
-  	FUN_FRONTEND_REPOSITORY_BRANCH=${FUN_FRONTEND_REPOSITORY_BRANCH:-"development"}
+  	FUN_FRONTEND_REPOSITORY_BRANCH=${FUN_FRONTEND_REPOSITORY_BRANCH:-"$DEFAULT_BRANCH"}
 
   	# Filebrowser Settings
   	FILEBROWSER_PORT=${FILEBROWSER_PORT:-50002}
@@ -960,18 +961,18 @@ install_menu() {
   	# Funttastic Client Settings
   	FUN_CLIENT_PORT=${FUN_CLIENT_PORT:-50001}
   	FUN_CLIENT_REPOSITORY_URL=${FUN_CLIENT_REPOSITORY_URL:-"https://github.com/funttastic/fun-hb-client.git"}
-  	FUN_CLIENT_REPOSITORY_BRANCH=${FUN_CLIENT_REPOSITORY_BRANCH:-"development"}
+  	FUN_CLIENT_REPOSITORY_BRANCH=${FUN_CLIENT_REPOSITORY_BRANCH:-"$DEFAULT_BRANCH"}
   	FUN_CLIENT_AUTO_START=${FUN_CLIENT_AUTO_START:-"TRUE"}
 
   	# Hummingbot Client Settings
   	HB_CLIENT_REPOSITORY_URL=${HB_CLIENT_REPOSITORY_URL:-"https://github.com/Team-Kujira/hummingbot.git"}
-  	HB_CLIENT_REPOSITORY_BRANCH=${HB_CLIENT_REPOSITORY_BRANCH:-"development"}
+  	HB_CLIENT_REPOSITORY_BRANCH=${HB_CLIENT_REPOSITORY_BRANCH:-"$DEFAULT_BRANCH"}
   	HB_CLIENT_ATTACH=${HB_CLIENT_ATTACH:-"TRUE"}
 
   	# Hummingbot Gateway Settings
   	HB_GATEWAY_PORT=${HB_GATEWAY_PORT:-15888}
   	HB_GATEWAY_REPOSITORY_URL=${HB_GATEWAY_REPOSITORY_URL:-"https://github.com/Team-Kujira/gateway.git"}
-  	HB_GATEWAY_REPOSITORY_BRANCH=${HB_GATEWAY_REPOSITORY_BRANCH:-"development"}
+  	HB_GATEWAY_REPOSITORY_BRANCH=${HB_GATEWAY_REPOSITORY_BRANCH:-"$DEFAULT_BRANCH"}
   	HB_GATEWAY_AUTO_START=${HB_GATEWAY_AUTO_START:-"TRUE"}
   	HB_GATEWAY_AUTO_START_EVERY_TIME=${HB_GATEWAY_AUTO_START_EVERY_TIME:-"TRUE"}
   	EXPOSE_HB_GATEWAY_PORT=${EXPOSE_HB_GATEWAY_PORT:-"FALSE"}
