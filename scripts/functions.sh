@@ -424,7 +424,7 @@ pre_installation_image_and_container() {
 		done
 	else
 		echo
-		echo "      A new image/installation will be done..."
+		echo "      A new image/installation will be created..."
 
 		BUILD_CACHE="--no-cache"
 
@@ -510,7 +510,7 @@ pre_installation_image_and_container() {
 
 	handle_container_name_conflict() {
 		echo
-		echo "      ⚠️  An container with the name \"$CONTAINER_NAME\", which you defined, already exists!"
+		echo "      ⚠️  A container with the name \"$CONTAINER_NAME\", which you defined, already exists!"
 		echo
 		echo "      To ensure that no crashes occur while creating this new container, choose one"
 		echo "      of the options below."
@@ -596,7 +596,7 @@ pre_installation_fun_client() {
 	fi
 
 	echo
-	echo "   Enter the url from the repository to be cloned"
+	echo "   Enter the repository's url for cloning"
 	read -rp "   (default = \"https://github.com/funttastic/fun-hb-client.git\") >>> " RESPONSE
 
 	if [ "$RESPONSE" == "" ]; then
@@ -606,10 +606,10 @@ pre_installation_fun_client() {
 	fi
 
 	echo
-	read -rp "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
+	read -rp "   Enter the repository's branch for cloning (default = \"$DEFAULT_BRANCH\") >>> " RESPONSE
 
 	if [ "$RESPONSE" == "" ]; then
-		FUN_CLIENT_REPOSITORY_BRANCH="community"
+		FUN_CLIENT_REPOSITORY_BRANCH="$DEFAULT_BRANCH"
 	else
 		FUN_CLIENT_REPOSITORY_BRANCH="$RESPONSE"
 	fi
@@ -622,7 +622,7 @@ pre_installation_hb_client() {
 
 	if [ "$BUILD_CACHE" == "--no-cache" ]; then
 		echo
-		echo "   Enter the url from the repository to be cloned"
+		echo "   Enter the repository's url for cloning"
 		read -rp "   (default = \"https://github.com/Team-Kujira/hummingbot.git\") >>> " RESPONSE
 
 		if [ "$RESPONSE" == "" ]; then
@@ -632,10 +632,10 @@ pre_installation_hb_client() {
 		fi
 
 		echo
-		read -rp "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
+		read -rp "   Enter the repository's branch for cloning (default = \"$DEFAULT_BRANCH\") >>> " RESPONSE
 
 		if [ "$RESPONSE" == "" ]; then
-			HB_CLIENT_REPOSITORY_BRANCH="community"
+			HB_CLIENT_REPOSITORY_BRANCH="$DEFAULT_BRANCH"
 		else
 			HB_CLIENT_REPOSITORY_BRANCH="$RESPONSE"
 		fi
@@ -662,7 +662,7 @@ pre_installation_hb_gateway() {
 
 	if [[ "$RESPONSE" == "N" || "$RESPONSE" == "n" || "$RESPONSE" == "No" || "$RESPONSE" == "no" || "$RESPONSE" == "" ]]; then
 		echo
-		echo "   ℹ️  The Gateway port will not be exposed from the instance, only Funttastic Client and"
+		echo "   ℹ️  The Gateway port will not be exposed from the instance, only the Funttastic Client and"
 		echo "       Hummingbot Client will be able to make calls to it from within the container."
 
 		EXPOSE_HB_GATEWAY_PORT="FALSE"
@@ -680,7 +680,7 @@ pre_installation_hb_gateway() {
 	fi
 
 	echo
-	echo "   Enter the url from the repository to be cloned"
+	echo "   Enter the repository's url for cloning"
 	read -rp "   (default = \"https://github.com/Team-Kujira/gateway.git\") >>> " RESPONSE
 
 	if [ "$RESPONSE" == "" ]; then
@@ -690,10 +690,10 @@ pre_installation_hb_gateway() {
 	fi
 
 	echo
-	read -rp "   Enter the branch from the repository to be cloned (default = \"community\") >>> " RESPONSE
+	read -rp "   Enter the repository's branch for cloning (default = \"$DEFAULT_BRANCH\") >>> " RESPONSE
 
 	if [ "$RESPONSE" == "" ]; then
-		HB_GATEWAY_REPOSITORY_BRANCH="community"
+		HB_GATEWAY_REPOSITORY_BRANCH="$DEFAULT_BRANCH"
 	else
 		HB_GATEWAY_REPOSITORY_BRANCH="$RESPONSE"
 	fi
@@ -733,8 +733,8 @@ pre_installation_change_post_installation_commands() {
 		echo "   CHOOSE WHICH SERVICE WHOSE COMMAND YOU WOULD LIKE TO CHANGE:"
 		echo
 		echo "   [1] CHANGE ALL APPS COMMANDS"
-		echo "   [2] FUNTTASTIC CLIENT SERVER COMMAND"
-		echo "   [3] FUNTTASTIC CLIENT FRONTEND COMMAND"
+		echo "   [2] FUNTTASTIC CLIENT COMMAND"
+		echo "   [3] FUNTTASTIC FRONTEND COMMAND"
 		echo "   [4] HUMMINGBOT CLIENT COMMAND"
 		echo "   [5] HUMMINGBOT GATEWAY COMMAND"
 		echo "   [6] FILEBROWSER COMMAND"
@@ -777,20 +777,20 @@ pre_installation_change_post_installation_commands() {
 			fi
 		}
 
-		local default_fun_client_server_command="conda activate funttastic && cd /root/funttastic/client && python app.py > /dev/null 2>&1 &"
-		local default_fun_client_frontend_command="cd /root/funttastic/frontend && yarn start --host > /dev/null 2>&1 &"
-		local default_hummingbot_client_command="conda activate hummingbot && cd /root/hummingbot/client && python bin/hummingbot_quickstart.py 2>> ./logs/errors.log"
-		local default_hummingbot_gateway_command="cd /root/hummingbot/gateway && yarn start > /dev/null 2>&1 &"
-		local default_filebrowser_command="cd /root/filebrowser && filebrowser --address=0.0.0.0 -p \$FILEBROWSER_PORT -r ../shared > /dev/null 2>&1 &"
+		local default_fun_client_command="APP=fun-client python app.py"
+		local default_fun_frontend_command="APP=fun-frontend yarn start --host"
+		local default_hummingbot_client_command="APP=hb-client python bin/hummingbot_quickstart.py"
+		local default_hummingbot_gateway_command="APP=hb-gateway yarn start"
+		local default_filebrowser_command="APP=filebrowser filebrowser --address=0.0.0.0 -p \$FILEBROWSER_PORT -r ../shared"
 
 		while true; do
 			case $APP_COMMAND in
 			1)
 				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
-				set_app_post_installation_command "$default_fun_client_server_command" "Funttastic Client Server" "FUN_CLIENT_COMMAND"
+				set_app_post_installation_command "$default_fun_client_command" "Funttastic Client" "FUN_CLIENT_COMMAND"
 
 				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
-				set_app_post_installation_command "$default_fun_client_frontend_command" "Funttastic Client Frontend" "FUN_FRONTEND_COMMAND"
+				set_app_post_installation_command "$default_fun_frontend_command" "Funttastic Frontend" "FUN_FRONTEND_COMMAND"
 
 				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
 				set_app_post_installation_command "$default_hummingbot_client_command" "Hummingbot Client" "HB_CLIENT_COMMAND"
@@ -806,11 +806,11 @@ pre_installation_change_post_installation_commands() {
 				echo
 
 				if [ -n "$FUN_CLIENT_COMMAND" ]; then
-					echo "      Funttastic Client Server: $FUN_CLIENT_COMMAND"
+					echo "      Funttastic Client: $FUN_CLIENT_COMMAND"
 					echo
 				fi
 				if [ -n "$FUN_FRONTEND_COMMAND" ]; then
-					echo "      Funttastic Client Frontend: $FUN_FRONTEND_COMMAND"
+					echo "      Funttastic Frontend: $FUN_FRONTEND_COMMAND"
 					echo
 				fi
 				if [ -n "$HB_GATEWAY_COMMAND" ]; then
@@ -830,12 +830,12 @@ pre_installation_change_post_installation_commands() {
 				;;
 			2)
 				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
-				set_app_post_installation_command "$default_fun_client_server_command" "Funttastic Client Server" "FUN_CLIENT_COMMAND" 3
+				set_app_post_installation_command "$default_fun_client_command" "Funttastic Client" "FUN_CLIENT_COMMAND" 3
 				break
 				;;
 			3)
 				show_title "CUSTOMIZING POST-INSTALLATION COMMANDS"
-				set_app_post_installation_command "$default_fun_client_frontend_command" "Funttastic Client Frontend" "FUN_FRONTEND_COMMAND" 3
+				set_app_post_installation_command "$default_fun_frontend_command" "Funttastic Frontend" "FUN_FRONTEND_COMMAND" 3
 				break
 				;;
 			4)
@@ -870,11 +870,11 @@ pre_installation_open_apps_in_browser() {
 	default_values_info
 
 	echo
-	echo "   Do you want to open the management app in the browser after the installation is complete?"
+	echo "   Do you want to open the Funttastic Client in the browser after the installation is complete?"
 	echo
 	echo "   It will open:"
 	echo
-	echo "      > FUNTTASTIC CLIENT FRONTEND [$FUN_FRONTEND_URL]"
+	echo "      > FUNTTASTIC FRONTEND [$FUN_FRONTEND_URL]"
 	echo
 	read -rp "   [\"Y/n\"] >>> " RESPONSE
 
@@ -1008,7 +1008,7 @@ install_menu() {
   	echo "   |   to view and edit configuration    |"
   	echo "   |   files, use the Frontend at        |"
   	echo "   |                                     |"
-  	echo "   |      https://localhost:50000        |"
+  	echo "   |      https://localhost:$FUN_FRONTEND_PORT        |"
   	echo "   |                                     |"
   	echo "   |                                     |"
   	echo "   |_____________________________________|"
@@ -1030,7 +1030,7 @@ install_menu() {
   		DEFINED_ENTRYPOINT="$ENTRYPOINT"
   	fi
 
-  	show_title "SETTINGS CONFIRMATION"
+  	show_title "FINAL SETTINGS"
 
   	echo
   	echo "   ℹ️  Confirm below if the common settings are correct:"
@@ -1043,12 +1043,12 @@ install_menu() {
   	if [ "$BUILD_CACHE" == "--no-cache" ]; then
   		printf "%25s %3s\n" "Lock APT:" "$LOCK_APT"
   	fi
-  	printf "%25s %3s\n" "Open Management App:" "$OPEN_IN_BROWSER"
+  	printf "%25s %3s\n" "Open Funttastic Frontend on finish:" "$OPEN_IN_BROWSER"
   	echo
 
   	if [ "$BUILD_CACHE" == "--no-cache" ]; then
   		echo
-      echo "   ℹ️  Confirm below if the Funttastic Client Server settings are correct:"
+      echo "   ℹ️  Confirm below if the Funttastic Client settings are correct:"
       echo
   		printf "%25s %5s\n" "Repository url:" "$FUN_CLIENT_REPOSITORY_URL"
   		printf "%25s %5s\n" "Repository branch:" "$FUN_CLIENT_REPOSITORY_BRANCH"
@@ -1057,7 +1057,7 @@ install_menu() {
   	fi
 
   	echo
-  	echo "   ℹ️  Confirm below if the Funttastic Client Fronted settings are correct:"
+  	echo "   ℹ️  Confirm below if the Funttastic Frontend settings are correct:"
   	echo
   	if [ "$BUILD_CACHE" == "--no-cache" ]; then
   		printf "%25s %5s\n" "Repository url:" "$FUN_FRONTEND_REPOSITORY_URL"
@@ -1074,7 +1074,7 @@ install_menu() {
   		printf "%25s %5s\n" "Repository url:" "$HB_CLIENT_REPOSITORY_URL"
   		printf "%25s %5s\n" "Repository branch:" "$HB_CLIENT_REPOSITORY_BRANCH"
   	fi
-  	printf "%25s %3s\n" "See UI On Finish:" "$HB_CLIENT_ATTACH"
+  	printf "%25s %3s\n" "Open on finish:" "$HB_CLIENT_ATTACH"
 
 		if [[ "$BUILD_CACHE" == "--no-cache" || "$EXPOSE_HB_GATEWAY_PORT" == "TRUE" ]]; then
 			echo
@@ -1104,10 +1104,10 @@ install_menu() {
 				echo
 
 				if [ -n "$FUN_CLIENT_COMMAND" ]; then
-					printf "%42s %s\n" "Funttastic Client Server Command:" "$FUN_CLIENT_COMMAND"
+					printf "%42s %s\n" "Funttastic Client Command:" "$FUN_CLIENT_COMMAND"
 				fi
 				if [ -n "$FUN_FRONTEND_COMMAND" ]; then
-					printf "%42s %s\n" "Funttastic Client Frontend Command:" "$FUN_FRONTEND_COMMAND"
+					printf "%42s %s\n" "Funttastic Frontend Command:" "$FUN_FRONTEND_COMMAND"
 				fi
 				if [ -n "$HB_GATEWAY_COMMAND" ]; then
 					printf "%42s %s\n" "Hummingbot Gateway Command:" "$HB_GATEWAY_COMMAND"
@@ -1724,7 +1724,7 @@ actions_submenu() {
 		echo "   [4] ADD WALLET"
 		echo "   [5] REMOVE WALLET"
 		echo "   [6] OPEN HUMMINGBOT CLIENT"
-		echo "   [7] OPEN FUNTTASTIC CLIENT"
+		echo "   [7] OPEN FUNTTASTIC FRONTEND"
 		echo
 		echo "   [back] RETURN TO MAIN MENU"
 		echo "   [exit] STOP SCRIPT EXECUTION"
@@ -2155,8 +2155,8 @@ execute_installation() {
 		echo
 		echo "   Installing:"
 		echo
-		echo "     > Funttastic Client Server"
-		echo "     > Funttastic Client Frontend"
+		echo "     > Funttastic Client"
+		echo "     > Funttastic Frontend"
 		echo "     > Hummingbot Client"
 		echo "     > Hummingbot Gateway"
 		echo "     > FileBrowser"
