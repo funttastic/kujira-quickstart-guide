@@ -38,7 +38,7 @@ The easiest way is to use our helper script:
 
 > ./configure
 
-and go to the "Dispatch Actions", then "Add Wallet".
+and go to the "Actions", then "Add Wallet".
 
 You will need to inform your mnemonic, then your wallet will be encrypted and saved in this folder:
 
