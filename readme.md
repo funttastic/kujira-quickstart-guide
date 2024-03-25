@@ -80,7 +80,7 @@ You are enabling telegram, we recommend changing to `true` the following:
 >
 > telegram.listen_commands
 
-Add your telegram token: to
+Add your telegram token to:
 
 > telegram.token
 
