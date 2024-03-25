@@ -1,26 +1,28 @@
 # Funttastic + Kujira + Hummingbot
 
 ## Hummingbot Installation Guide
+
 It's very recommended to watch this video from the Hummingbot Foundation and their installation guide:
+
 - <a href="https://docs.hummingbot.org/installation/" target="_blank">Hummingbot Docs</a>
 - <a href="https://www.youtube.com/watch?v=t3Su_F_SY_0" target="_blank">Hummingbot Guide (Video Tutorial)</a>
 - <a href="https://www.youtube.com/watch?v=NubBPj3N0RE" target="_blank">Kujira Connector for Hummingbot (Video Demonstration)</a>
 
 ## Prerequisites:
-- *nix OS (Linux, Unix, macOS) or <a href="https://learn.microsoft.com/en-us/windows/wsl/install" target="_blank">WSL</a> (for Windows)
+
+- \*nix OS (Linux, Unix, macOS) or <a href="https://learn.microsoft.com/en-us/windows/wsl/install" target="_blank">WSL</a> (for Windows)
 - <a href="https://docs.docker.com/engine/install/" target="_blank">Docker</a>
 - <a href="https://www.coingecko.com/en/api/pricing" target="_blank">CoinGecko API Key</a>
-    - You will need a CoinGecko API key so the trading bot can get up-to-date information about tokens and markets, such as the current prices. Access the link to create a demo account and get a free API key.
+  - You will need a CoinGecko API key so the trading bot can get up-to-date information about tokens and markets, such as the current prices. Access the link to create a demo account and get a free API key.
 - Kujira wallet and mnemonic
-    - You will need a Kujira wallet and its mnemonic. You can create a new wallet using wallet apps like: <a href="https://www.keplr.app/download" target="_blank">Keplr</a>, <a href="https://sonar.kujira.network/" target="_blank">Sonar</a>, <a href="https://setup-station.terra.money/" target="_blank">Station</a>, <a href="https://www.leapwallet.io/download" target="_blank">Leap</a> and <a href="https://www.xdefi.io/" target="_blank">XDEFI Wallet</a>.
+  - You will need a Kujira wallet and its mnemonic. You can create a new wallet using wallet apps like: <a href="https://www.keplr.app/download" target="_blank">Keplr</a>, <a href="https://sonar.kujira.network/" target="_blank">Sonar</a>, <a href="https://setup-station.terra.money/" target="_blank">Station</a>, <a href="https://www.leapwallet.io/download" target="_blank">Leap</a> and <a href="https://www.xdefi.io/" target="_blank">XDEFI Wallet</a>.
 - (Optional) <a href="https://core.telegram.org/bots/features#botfather" target="_blank">Telegram bot</a>
-    - You can operate your bot through Telegram, for that you need to <a href="https://core.telegram.org/bots/features#botfather" target="_blank">create a bot</a> and a new channel.
-    - You will need the telegram bot token and the channel chat id.
+  - You can operate your bot through Telegram, for that you need to <a href="https://core.telegram.org/bots/features#botfather" target="_blank">create a bot</a> and a new channel.
+  - You will need the telegram bot token and the channel chat id.
 
 ## Installation
 
-### Video
-<a href="https://youtu.be/F-8GJS1h5RA" target="_blank">![Video Tutorial](assets/images/Funttastic_Kujira_Hummingbot.png)</a>
+<img src="assets/images/Funttastic_Kujira_Hummingbot.png">
 
 ### Code
 
@@ -109,41 +111,7 @@ Then you can use the following command there:
 After that you should receive some Kujira tokens on your balance.
 
 ## How to contact us
+
 If you need more info you can contact us here:
 
 > <a href="https://funttastic.com/discord" target="_blank">https://funttastic.com/discord</a>
-
-<details>
-  <summary>
-    <span style="font-size:22px; font-weight:bold">CoinGecko</span>
-  </summary>
-  
-  <details>
-  <summary>
-    <span style="font-size:16px;">How to create a free API key?</span>
-  </summary>
-
-  <span style="font-size:14px;">Step 1: ...</span>
-  <br><br>
-  <span style="font-size:14px;">Step 2: ...</span>
-  <br><br>
-  <span style="font-size:14px;">Step 3: ...</span>
-  <br><br>
-  <span style="font-size:14px;">Step 4: ...</span>
-  </details>
-
-  <details>
-  <summary>
-    <span style="font-size:16px;">How to use my API key?</span>
-  </summary>
-
-  <span style="font-size:14px;">Step 1: ...</span>
-  <br><br>
-  <span style="font-size:14px;">Step 2: ...</span>
-  <br><br>
-  <span style="font-size:14px;">Step 3: ...</span>
-  <br><br>
-  <span style="font-size:14px;">Step 4: ...</span>
-  </details>
-
-</details>
