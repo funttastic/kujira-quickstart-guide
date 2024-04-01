@@ -855,7 +855,6 @@ log_all () {
 		~/shared/logs/tmux/filebrowser.log \
 		~/shared/logs/tmux/fun-client.log \
 		~/shared/logs/tmux/hb-gateway.log \
-		~/shared/logs/tmux/hb-client.log \
 		~/shared/logs/fun-client/all.log \
 		~/shared/logs/hb-gateway/* \
 		~/shared/logs/hb-client/*
