@@ -173,11 +173,11 @@ file_exists_in_container() {
 pre_installation_password_encryption() {
 	password_encryption_warning() {
 		show_title "USERNAME & PASSWORD SETTINGS"
-		echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+		echo "   +---------------------------------------------------------------+"
 		echo "   |                                                               |"
 		echo "   |  ⚠️  Attention! Answer the following question carefully!       |"
 		echo "   |                                                               |"
-		echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+		echo "   +---------------------------------------------------------------+"
 		echo
 	}
 
@@ -248,15 +248,15 @@ pre_installation_password_encryption() {
 
 pre_installation_define_passphrase() {
 	show_title "USERNAME & PASSWORD SETTINGS"
-	echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+	echo "   +-----------------------------------------------------------------+"
 	echo "   |                                                                 |"
-	echo "   |  ⚠️  It's important that your data remains secure, so we need   |"
+	echo "   |  ⚠️  It's important that your data remains secure, so we need    |"
 	echo "   |     to set a username and password.                             |"
 	echo "   |                                                                 |"
 	echo "   |  See the table presented at the end of the process to see       |"
 	echo "   |     where the username and password will be used.               |"
 	echo "   |                                                                 |"
-	echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+	echo "   +-----------------------------------------------------------------+"
 	echo
 
 	echo "   Let's get started!"
@@ -310,16 +310,16 @@ pre_installation_define_passphrase() {
 	pre_installation_password_encryption
 
 	show_title "USERNAME & PASSWORD SETTINGS"
-	echo "   ________________________________________________________________"
+	echo "   +------------------------+------------------+------------------+"
 	echo "   | SERVICE OR APPLICATION |  NEEDS USERNAME  |  NEEDS PASSWORD  |"
-	echo "   |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|"
+	echo "   +------------------------+------------------+------------------+"
 	echo "   |  Funttastic Frontend   |       Yes        |        Yes       |"
 	echo "   |  FileBrowser           |       Yes        |        Yes       |"
 	echo "   |  Funttastic Client     |       No         |        Yes       |"
 	echo "   |  Hummingbot Gateway    |       No         |        Yes       |"
 	echo "   |  Hummingbot Client     |       No         |        Yes       |"
 	echo "   |  SSL Certificates      |       No         |        Yes       |"
-	echo "   |______________________________________________________________|"
+	echo "   +------------------------+------------------+------------------+"
 
 	echo
 	read -s -n1 -rp "   Alright, I got it! Press any key to continue >>> "
@@ -999,19 +999,18 @@ install_menu() {
   fi
 
   if [ -z "$CUSTOMIZE" ]; then
-  	echo "   |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|"
-  	echo "   |               ** TIPS **            |"
-  	echo "   |_____________________________________|"
+  	echo "   +-------------------------------------+"
+  	echo "   |              ** TIP **              |"
+  	echo "   +-------------------------------------+"
   	echo "   |                                     |"
-  	echo "   |   ℹ️   After the installation,      |"
+  	echo "   |   ℹ️   After the installation,       |"
   	echo "   |                                     |"
   	echo "   |   to view and edit configuration    |"
   	echo "   |   files, use the Frontend at        |"
   	echo "   |                                     |"
   	echo "   |      https://localhost:$FUN_FRONTEND_PORT        |"
   	echo "   |                                     |"
-  	echo "   |                                     |"
-  	echo "   |_____________________________________|"
+  	echo "   +-------------------------------------+"
   	echo
   fi
 
@@ -2081,7 +2080,7 @@ docker_create_image() {
 
 		if grep -iq "ERROR" <<< "$BUILT" || ! image_exists "$IMAGE_NAME"; then
 				echo
-				echo "   |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|"
+				echo "   +---------------------------------------------------------+"
 				echo "   |  ❌  An error occurred while building the Docker image. |"
 				echo "   |                                                         |"
 				echo "   |  This can occur for several reasons. Please try again!  |"
@@ -2090,7 +2089,7 @@ docker_create_image() {
 				echo "   |  log and report it on our Discord server:               |"
 				echo "   |                                                         |"
 				echo "   |      http://www.funttastic.com/discord                  |"
-				echo "   |_________________________________________________________|"
+				echo "   +---------------------------------------------------------+"
 				echo
 				echo
 				read -s -n1 -rp "   Press any key to return to the main menu >>> "
