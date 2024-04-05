@@ -860,6 +860,41 @@ log_all () {
 		~/shared/logs/hb-client/*
 }
 
+quick-deploy-fun-hb-client () {
+	set -ex
+
+	local branch="$1"
+
+	cd /root/funttastic/client || { echo "Failed to open the repository folder..."; return 1; }
+
+	unlink /root/funttastic/client/resources
+
+	git reset
+
+	git stash
+
+	if [ -n "$branch" ]; then
+		current_branch_name=$(git rev-parse --abbrev-ref HEAD)
+
+		if [ ! "$branch" == "$current_branch_name" ]; then
+    	git switch "$current_branch_name"
+    fi
+	fi
+
+	git fetch --all
+	git pull
+
+	rm -rf /root/funttastic/client/resources
+
+	ln -s /root/shared/funttastic/client/resources /root/funttastic/client/resources
+
+	git stash apply
+
+	cd ~ || return
+
+	set +ex
+}
+
 SCRIPT
 
 chmod +x shared/scripts/functions.sh
