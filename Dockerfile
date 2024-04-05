@@ -860,7 +860,7 @@ log_all () {
 		~/shared/logs/hb-client/*
 }
 
-quick-deploy-fun-hb-client () {
+quick_deploy_fun_hb_client () {
 	set -ex
 
 	local branch="$1"
