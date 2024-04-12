@@ -77,11 +77,11 @@ RUN <<-EOF
 
 	# Funttastic Client Frontend environment variables
 
-	if [ -z "$FRONTEND_PORT" ]
+	if [ -z "$FUN_FRONTEND_PORT" ]
 	then
-		echo 'export FRONTEND_PORT=50000' >> ~/.bashrc
+		echo 'export FUN_FRONTEND_PORT=50000' >> ~/.bashrc
 	else
-		echo "export FRONTEND_PORT=$FRONTEND_PORT" >> ~/.bashrc
+		echo "export FUN_FRONTEND_PORT=$FUN_FRONTEND_PORT" >> ~/.bashrc
 	fi
 
 	if [ -z "$FUN_FRONTEND_COMMAND" ]
