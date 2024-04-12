@@ -979,7 +979,7 @@ install_menu() {
 
   	# Common Settings
   	ADMIN_USERNAME=${ADMIN_USERNAME:-"admin"}
-  	IMAGE_NAME="fun-kuji-hb"
+  	IMAGE_NAME=${IMAGE_NAME:-"fun-kuji-hb"}
   	CONTAINER_NAME="$IMAGE_NAME"
   	BUILD_CACHE=${BUILD_CACHE:-"--no-cache"}
   	TAG=${TAG:-"latest"}
