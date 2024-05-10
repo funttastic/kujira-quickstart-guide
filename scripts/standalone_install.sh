@@ -4,6 +4,9 @@
 # source standalone_install.sh
 #	standalone_install --username=<username> --password=<password> --auto_sign_in=<auto_sign_in> --lock-apt=<lock_apt> --fun-frontend-repository-url=<fun_frontend_repository_url> --fun-frontend-repository-branch=<fun_frontend_repository_branch> --fun-frontend-command=<fun_frontend_command> --fun-frontend-port=<fun_frontend_port> --fun-client-repository-url=<fun_client_repository_url> --fun-client-repository-branch=<fun_client_repository_branch> --fun-client-command=<fun_client_command> --fun-client-port=<fun_client_port> --hb-gateway-repository-url=<hb_gateway_repository_url> --hb-gateway-repository-branch=<hb_gateway_repository_branch> --hb-gateway-command=<hb_gateway_command> --hb-gateway-port=<hb_gateway_port> --hb-client-repository-url=<hb_client_repository_url> --hb-client-repository-branch=<hb_client_repository_branch> --hb-client-command=<hb_client_command> --filebrowser-command=<filebrowser_command> --filebrowser-port=<filebrowser_port>
 
+# To test it, you can create a docker ubuntu container as following:
+# docker run -d --name standalone-fun-kuji-hb -p 50000:50000 -p 50001:50001 -p 50002:50002 -p 15888:15888 ubuntu tail -f /dev/null
+
 standalone_install() {
 	set -ex
 
