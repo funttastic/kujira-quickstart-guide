@@ -2,13 +2,23 @@
 
 # Usage:
 # source standalone_install.sh
-#	standalone_install --username=<username> --password=<password> --auto_sign_in=<auto_sign_in> --lock-apt=<lock_apt> --fun-frontend-repository-url=<fun_frontend_repository_url> --fun-frontend-repository-branch=<fun_frontend_repository_branch> --fun-frontend-command=<fun_frontend_command> --fun-frontend-port=<fun_frontend_port> --fun-client-repository-url=<fun_client_repository_url> --fun-client-repository-branch=<fun_client_repository_branch> --fun-client-command=<fun_client_command> --fun-client-port=<fun_client_port> --hb-gateway-repository-url=<hb_gateway_repository_url> --hb-gateway-repository-branch=<hb_gateway_repository_branch> --hb-gateway-command=<hb_gateway_command> --hb-gateway-port=<hb_gateway_port> --hb-client-repository-url=<hb_client_repository_url> --hb-client-repository-branch=<hb_client_repository_branch> --hb-client-command=<hb_client_command> --filebrowser-command=<filebrowser_command> --filebrowser-port=<filebrowser_port>
+#	bash -l standalone_install --username=<username> --password=<password> --auto_sign_in=<auto_sign_in> --lock-apt=<lock_apt> --fun-frontend-repository-url=<fun_frontend_repository_url> --fun-frontend-repository-branch=<fun_frontend_repository_branch> --fun-frontend-command=<fun_frontend_command> --fun-frontend-port=<fun_frontend_port> --fun-client-repository-url=<fun_client_repository_url> --fun-client-repository-branch=<fun_client_repository_branch> --fun-client-command=<fun_client_command> --fun-client-port=<fun_client_port> --hb-gateway-repository-url=<hb_gateway_repository_url> --hb-gateway-repository-branch=<hb_gateway_repository_branch> --hb-gateway-command=<hb_gateway_command> --hb-gateway-port=<hb_gateway_port> --hb-client-repository-url=<hb_client_repository_url> --hb-client-repository-branch=<hb_client_repository_branch> --hb-client-command=<hb_client_command> --filebrowser-command=<filebrowser_command> --filebrowser-port=<filebrowser_port>
 
 # To test it, you can create a docker ubuntu container as following:
-# docker run -d --name standalone-fun-kuji-hb -p 50000:50000 -p 50001:50001 -p 50002:50002 -p 15888:15888 ubuntu tail -f /dev/null
+
+#container_name=standalone-fun-kuji-hb
+#docker rm -f $container_name
+#docker run -d --name $container_name -p 50000:50000 -p 50001:50001 -p 50002:50002 -p 15888:15888 ubuntu tail -f /dev/null
+#docker exec -it $container_name mkdir /root/temporary
+#docker cp ./scripts/standalone_install.sh $container_name:/root/temporary/standalone_install.sh
+#docker exec -it $container_name chmod +x /root/temporary/standalone_install.sh
+#docker exec -it $container_name bash -c "source /root/temporary/standalone_install.sh && standalone_install --username=<username> --password=<password>  --fun-frontend-port=50000 --fun-client-port=50001 --filebrowser-port=50002 --hb-gateway-port=15888 --auto-sign-in=TRUE --lock-apt=FALSE"
+
 
 standalone_install() {
 	set -ex
+
+	sed -i 's/^\([[:space:]]*\[ -z "\$PS1" \] && return\)/#\1/' /root/.bashrc
 
 	local username=""
 	local password=""
@@ -184,7 +194,7 @@ standalone_install() {
 		jq \
 		multitail
 
-		#--------------------------------------------------
+	#--------------------------------------------------
 
 	echo -e "\n" >> ~/.bashrc
 
@@ -261,6 +271,37 @@ standalone_install() {
 	else
 		echo "export HB_CLIENT_COMMAND=\"$HB_CLIENT_COMMAND\"" >> ~/.bashrc
 	fi
+
+	echo -e "\n" >> ~/.bashrc
+
+	#--------------------------------------------------
+
+	echo -e "\n" >> ~/.bashrc
+
+	# Temporary section:
+	echo "export DEBIAN_FRONTEND=\"$DEBIAN_FRONTEND\"" >> ~/.bashrc
+	echo "export TZ=\"$TZ\"" >> ~/.bashrc
+	echo "export ADMIN_USERNAME=\"$ADMIN_USERNAME\"" >> ~/.bashrc
+	echo "export ADMIN_PASSWORD=\"$ADMIN_PASSWORD\"" >> ~/.bashrc
+	echo "export AUTO_SIGNIN=\"$AUTO_SIGNIN\"" >> ~/.bashrc
+	echo "export LOCK_APT=\"$LOCK_APT\"" >> ~/.bashrc
+	echo "export FUN_FRONTEND_REPOSITORY_URL=\"$FUN_FRONTEND_REPOSITORY_URL\"" >> ~/.bashrc
+	echo "export FUN_FRONTEND_REPOSITORY_BRANCH=\"$FUN_FRONTEND_REPOSITORY_BRANCH\"" >> ~/.bashrc
+	echo "export FUN_FRONTEND_COMMAND=\"$FUN_FRONTEND_COMMAND\"" >> ~/.bashrc
+	echo "export FUN_FRONTEND_PORT=\"$FUN_FRONTEND_PORT\"" >> ~/.bashrc
+	echo "export FUN_CLIENT_REPOSITORY_URL=\"$FUN_CLIENT_REPOSITORY_URL\"" >> ~/.bashrc
+	echo "export FUN_CLIENT_REPOSITORY_BRANCH=\"$FUN_CLIENT_REPOSITORY_BRANCH\"" >> ~/.bashrc
+	echo "export FUN_CLIENT_COMMAND=\"$FUN_CLIENT_COMMAND\"" >> ~/.bashrc
+	echo "export FUN_CLIENT_PORT=\"$FUN_CLIENT_PORT\"" >> ~/.bashrc
+	echo "export HB_GATEWAY_REPOSITORY_URL=\"$HB_GATEWAY_REPOSITORY_URL\"" >> ~/.bashrc
+	echo "export HB_GATEWAY_REPOSITORY_BRANCH=\"$HB_GATEWAY_REPOSITORY_BRANCH\"" >> ~/.bashrc
+	echo "export HB_GATEWAY_COMMAND=\"$HB_GATEWAY_COMMAND\"" >> ~/.bashrc
+	echo "export HB_GATEWAY_PORT=\"$HB_GATEWAY_PORT\"" >> ~/.bashrc
+	echo "export HB_CLIENT_REPOSITORY_URL=\"$HB_CLIENT_REPOSITORY_URL\"" >> ~/.bashrc
+	echo "export HB_CLIENT_REPOSITORY_BRANCH=\"$HB_CLIENT_REPOSITORY_BRANCH\"" >> ~/.bashrc
+	echo "export HB_CLIENT_COMMAND=\"$HB_CLIENT_COMMAND\"" >> ~/.bashrc
+	echo "export FILEBROWSER_COMMAND=\"$FILEBROWSER_COMMAND\"" >> ~/.bashrc
+	echo "export FILEBROWSER_PORT=\"$FILEBROWSER_PORT\"" >> ~/.bashrc
 
 	echo -e "\n" >> ~/.bashrc
 
@@ -385,21 +426,21 @@ standalone_install() {
 	#--------------------------------------------------
 
 	curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
-  	rm -f get.sh
+	rm -f get.sh
 
-  	mkdir -p filebrowser/branding/img
-  	cd filebrowser
+	mkdir -p filebrowser/branding/img
+	cd filebrowser
 
-  	filebrowser config init
-  	filebrowser config set --branding.name "Funttastic"
-  	filebrowser config set --branding.theme "dark"
-  	filebrowser config set --branding.files /root/filebrowser/branding
-  	filebrowser config set --port $FILEBROWSER_PORT
-  	filebrowser config set --baseurl /
+	filebrowser config init
+	filebrowser config set --branding.name "Funttastic"
+	filebrowser config set --branding.theme "dark"
+	filebrowser config set --branding.files /root/filebrowser/branding
+	filebrowser config set --port $FILEBROWSER_PORT
+	filebrowser config set --baseurl /
 
-  	cp /root/funttastic/frontend/resources/assets/funttastic/logo/logo.svg branding/img/logo.svg
+	cp /root/funttastic/frontend/resources/assets/funttastic/logo/logo.svg branding/img/logo.svg
 
-  	cat <<'CSS' > branding/custom.css
+	cat <<'CSS' > branding/custom.css
 html {
 		scrollbar-width: none;
 }
