@@ -399,8 +399,8 @@ standalone_install() {
 
 	source /root/.bashrc
 
-	mkdir -p funttastic/client
-	cd funttastic/client
+	mkdir -p /root/funttastic/client
+	cd /root/funttastic/client
 
 	git clone -b $FUN_CLIENT_REPOSITORY_BRANCH $FUN_CLIENT_REPOSITORY_URL .
 
@@ -416,8 +416,8 @@ standalone_install() {
 
 	source /root/.bashrc
 
-	mkdir -p funttastic/frontend
-	cd funttastic/frontend
+	mkdir -p /root/funttastic/frontend
+	cd /root/funttastic/frontend
 
 	git clone -b $FUN_FRONTEND_REPOSITORY_BRANCH $FUN_FRONTEND_REPOSITORY_URL .
 
@@ -428,8 +428,8 @@ standalone_install() {
 	curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
 	rm -f get.sh
 
-	mkdir -p filebrowser/branding/img
-	cd filebrowser
+	mkdir -p /root/filebrowser/branding/img
+	cd /root/filebrowser
 
 	filebrowser config init
 	filebrowser config set --branding.name "Funttastic"
@@ -458,8 +458,8 @@ CSS
 
 	source /root/.bashrc
 
-	mkdir -p hummingbot/gateway
-	cd hummingbot/gateway
+	mkdir -p /root/hummingbot/gateway
+	cd /root/hummingbot/gateway
 
 	git clone -b $HB_GATEWAY_REPOSITORY_BRANCH $HB_GATEWAY_REPOSITORY_URL .
 
@@ -480,8 +480,8 @@ CSS
 
 	source /root/.bashrc
 
-	mkdir -p hummingbot/client
-	cd hummingbot/client
+	mkdir -p /root/hummingbot/client
+	cd /root/hummingbot/client
 
 	git clone -b $HB_CLIENT_REPOSITORY_BRANCH $HB_CLIENT_REPOSITORY_URL .
 
@@ -520,12 +520,12 @@ CSS
 
 	conda activate funttastic
 
-	ln -rfs funttastic/client/resources/certificates/* hummingbot/gateway/certs
-	ln -rfs funttastic/client/resources/certificates/* hummingbot/client/certs
+	ln -rfs /root/funttastic/client/resources/certificates/* /root/hummingbot/gateway/certs
+	ln -rfs /root/funttastic/client/resources/certificates/* /root/hummingbot/client/certs
 
-	sed -i -e "/server:/,/port: [0-9]*/ s/port: [0-9]*/port: $FUN_CLIENT_PORT/" funttastic/client/resources/configuration/production.yml
-	sed -i -e '/logging:/,/use_telegram:/ s/use_telegram:.*/use_telegram: false/' -e '/telegram:/,/enabled:/ s/enabled:.*/enabled: false/' -e '/telegram:/,/listen_commands:/ s/listen_commands:.*/listen_commands: false/' funttastic/client/resources/configuration/production.yml
-	sed -i -e '/telegram:/,/enabled:/ s/enabled:.*/enabled: false/' -e '/telegram:/,/listen_commands:/ s/listen_commands:.*/listen_commands: false/' funttastic/client/resources/configuration/common.yml
+	sed -i -e "/server:/,/port: [0-9]*/ s/port: [0-9]*/port: $FUN_CLIENT_PORT/" /root/funttastic/client/resources/configuration/production.yml
+	sed -i -e '/logging:/,/use_telegram:/ s/use_telegram:.*/use_telegram: false/' -e '/telegram:/,/enabled:/ s/enabled:.*/enabled: false/' -e '/telegram:/,/listen_commands:/ s/listen_commands:.*/listen_commands: false/' /root/funttastic/client/resources/configuration/production.yml
+	sed -i -e '/telegram:/,/enabled:/ s/enabled:.*/enabled: false/' -e '/telegram:/,/listen_commands:/ s/listen_commands:.*/listen_commands: false/' /root/funttastic/client/resources/configuration/common.yml
 
 	#--------------------------------------------------
 
@@ -536,14 +536,14 @@ CSS
 
   mkdir -p /root/shared/scripts
 
-  cat <<'SCRIPT' > shared/scripts/functions.sh
+  cat <<'SCRIPT' > /root/shared/scripts/functions.sh
 #!/bin/bash
 
 start_fun_frontend() {
 	local session="fun-frontend"
 
 	if [ "$(is_session_running "$session")" = "FALSE" ]; then
-		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> ~/shared/logs/tmux/$session.log"
+		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> /root/shared/logs/tmux/$session.log"
 
 		tmux send-keys -t "$session" "cd /root/funttastic/frontend" C-m
 		tmux send-keys -t "$session" "$FUN_FRONTEND_COMMAND" C-m
@@ -554,7 +554,7 @@ start_filebrowser() {
 	local session="filebrowser"
 
 	if [ "$(is_session_running "$session")" = "FALSE" ]; then
-		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> ~/shared/logs/tmux/$session.log"
+		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> /root/shared/logs/tmux/$session.log"
 
 		tmux send-keys -t "$session" "cd /root/filebrowser" C-m
 		tmux send-keys -t "$session" "$FILEBROWSER_COMMAND" C-m
@@ -566,7 +566,7 @@ start_fun_client() {
 	local session="fun-client"
 
 	if [ "$(is_session_running "$session")" = "FALSE" ]; then
-		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> ~/shared/logs/tmux/$session.log"
+		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> /root/shared/logs/tmux/$session.log"
 
 #		tmux set-environment -t "$session" PASSWORD "$password"
 #		tmux send-keys -t "$session" "export PASSWORD=\"$(tmux show-environment PASSWORD | cut -d= -f2)\"" C-m
@@ -583,7 +583,7 @@ start_hb_gateway() {
 	local session="hb-gateway"
 
 	if [ "$(is_session_running "$session")" = "FALSE" ]; then
-		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> ~/shared/logs/tmux/$session.log"
+		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> /root/shared/logs/tmux/$session.log"
 
 #		tmux set-environment -t "$session" GATEWAY_PASSPHRASE "$password"
 #		tmux send-keys -t "$session" "export GATEWAY_PASSPHRASE=\"$(tmux show-environment GATEWAY_PASSPHRASE | cut -d= -f2)\"" C-m
@@ -598,7 +598,7 @@ start_hb_client() {
 	local session="hb-client"
 
 	if [ "$(is_session_running "$session")" = "FALSE" ]; then
-		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> ~/shared/logs/tmux/$session.log"
+		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> /root/shared/logs/tmux/$session.log"
 
 		tmux send-keys -t "$session" "conda activate hummingbot" C-m
 		tmux send-keys -t "$session" "cd /root/hummingbot/client" C-m
@@ -644,7 +644,7 @@ start() {
 		fi
 	done
 
-	source ~/.bashrc
+	source /root/.bashrc
 
 	if [[ -n "$username" && -n "$password"  ]]; then
 		credentials=$(authenticate "$username" "$password")
@@ -1011,9 +1011,9 @@ quick_deploy_fun_hb_client () {
 
 SCRIPT
 
-	chmod +x shared/scripts/functions.sh
+	chmod +x /root/shared/scripts/functions.sh
 
-	cat <<'SCRIPT' > shared/scripts/initialize.sh
+	cat <<'SCRIPT' > /root/shared/scripts/initialize.sh
 #!/bin/bash
 
 source /root/shared/scripts/functions.sh
@@ -1032,16 +1032,16 @@ SCRIPT
 
 	# HB Client
 	conda activate hummingbot
-	python funttastic/client/resources/scripts/generate_hb_client_password_verification_file.py -p "$ADMIN_PASSWORD" -d hummingbot/client/conf
+	python /root/funttastic/client/resources/scripts/generate_hb_client_password_verification_file.py -p "$ADMIN_PASSWORD" -d /root/hummingbot/client/conf
 
 	# Fun Client
 	conda activate funttastic
-	python funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $ADMIN_PASSWORD --cert-path funttastic/client/resources/certificates
+	python /root/funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $ADMIN_PASSWORD --cert-path /root/funttastic/client/resources/certificates
 
 	# Fun Frontend
 
 	# Filebrowser
-	cd filebrowser
+	cd /root/filebrowser
 	filebrowser users add $ADMIN_USERNAME $ADMIN_PASSWORD --perm.admin
 #	filebrowser users update $ADMIN_USERNAME --commands="ls,git,tree,curl,rm,mkdir,pwd,cp,mv,cat,less,find,touch,echo,chmod,chown,df,du,ps,kill"
 
