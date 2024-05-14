@@ -134,38 +134,38 @@ standalone_install() {
 
 	#--------------------------------------------------
 
-	export DEBIAN_FRONTEND=noninteractive
-  export TZ="Etc/GMT"
+	export DEBIAN_FRONTEND=${debian_frontend:-noninteractive}
+  export TZ=${timezone:-"Etc/GMT"}
 
 	set +x
   export ADMIN_USERNAME=$username
   export ADMIN_PASSWORD=$password
   set -x
 
-  export AUTO_SIGNIN=${auto_sign_in:-"FALSE"}
+  export AUTO_SIGNIN=${auto_sign_in:-"TRUE"}
   export LOCK_APT=${lock_apt:-"TRUE"}
 
   export FUN_FRONTEND_REPOSITORY_URL="${fun_frontend_repository_url:-https://github.com/funttastic/fun-hb-frontend.git}"
   export FUN_FRONTEND_REPOSITORY_BRANCH="${fun_frontend_repository_branch:-production}"
-  export FUN_FRONTEND_COMMAND="${fun_frontend_command}"
-  export FUN_FRONTEND_PORT="${fun_frontend_port}"
+  export FUN_FRONTEND_COMMAND="${fun_frontend_command:-APP=fun-frontend yarn start --host}"
+  export FUN_FRONTEND_PORT="${fun_frontend_port:-50000}"
 
 	export FUN_CLIENT_REPOSITORY_URL="${fun_client_repository_url:-https://github.com/funttastic/fun-hb-client.git}"
   export FUN_CLIENT_REPOSITORY_BRANCH="${fun_client_repository_branch:-production}"
-  export FUN_CLIENT_COMMAND="${fun_client_command}"
-  export FUN_CLIENT_PORT="${fun_client_port}"
+  export FUN_CLIENT_COMMAND="${fun_client_command:-APP=fun-client python app.py}"
+  export FUN_CLIENT_PORT="${fun_client_port:-50001}"
 
   export HB_GATEWAY_REPOSITORY_URL=${hb_gateway_repository_url:-https://github.com/Team-Kujira/gateway.git}
   export HB_GATEWAY_REPOSITORY_BRANCH=${hb_gateway_repository_branch:-production}
-  export HB_GATEWAY_COMMAND=${hb_gateway_command}
-  export HB_GATEWAY_PORT=${hb_gateway_port}
+  export HB_GATEWAY_COMMAND=${hb_gateway_command:-APP=hb-gateway yarn start}
+  export HB_GATEWAY_PORT=${hb_gateway_port:-15888}
 
   export HB_CLIENT_REPOSITORY_URL=${hb_client_repository_url:-https://github.com/Team-Kujira/hummingbot.git}
   export HB_CLIENT_REPOSITORY_BRANCH=${hb_client_repository_branch:-production}
-  export HB_CLIENT_COMMAND=${hb_client_command}
+  export HB_CLIENT_COMMAND=${hb_client_command:-APP=hb-client python bin/hummingbot_quickstart.py; exit}
 
-  export FILEBROWSER_COMMAND=${filebrowser_command}
-  export FILEBROWSER_PORT=${filebrowser_port}
+  export FILEBROWSER_COMMAND=${filebrowser_command:-APP=filebrowser filebrowser --address=0.0.0.0 -p \$FILEBROWSER_PORT -r ../shared}
+  export FILEBROWSER_PORT=${filebrowser_port:-50002}
 
   #--------------------------------------------------
 
