@@ -142,7 +142,7 @@ standalone_install() {
   export ADMIN_PASSWORD=$password
   set -x
 
-  export AUTO_SIGNIN=$auto_sign_in
+  export AUTO_SIGNIN=${auto_sign_in:-"FALSE"}
   export LOCK_APT=${lock_apt:-"TRUE"}
 
   export FUN_FRONTEND_REPOSITORY_URL="${fun_frontend_repository_url:-https://github.com/funttastic/fun-hb-frontend.git}"
@@ -200,6 +200,9 @@ standalone_install() {
 
 	# Funttastic Client Frontend environment variables
 
+	echo "export FUN_FRONTEND_REPOSITORY_URL=\"$FUN_FRONTEND_REPOSITORY_URL\"" >> ~/.bashrc
+	echo "export FUN_FRONTEND_REPOSITORY_BRANCH=\"$FUN_FRONTEND_REPOSITORY_BRANCH\"" >> ~/.bashrc
+
 	if [ -z "$FUN_FRONTEND_PORT" ]
 	then
 		echo 'export FUN_FRONTEND_PORT=50000' >> ~/.bashrc
@@ -233,6 +236,9 @@ standalone_install() {
 
 	# Funttastic Client server environment variables
 
+	echo "export FUN_CLIENT_REPOSITORY_URL=\"$FUN_CLIENT_REPOSITORY_URL\"" >> ~/.bashrc
+	echo "export FUN_CLIENT_REPOSITORY_BRANCH=\"$FUN_CLIENT_REPOSITORY_BRANCH\"" >> ~/.bashrc
+
 	if [ -z "$FUN_CLIENT_PORT" ]
 	then
 		echo 'export FUN_CLIENT_PORT=50001' >> ~/.bashrc
@@ -249,6 +255,9 @@ standalone_install() {
 
 	# HB Gateway environment variables
 
+	echo "export HB_GATEWAY_REPOSITORY_URL=\"$HB_GATEWAY_REPOSITORY_URL\"" >> ~/.bashrc
+	echo "export HB_GATEWAY_REPOSITORY_BRANCH=\"$HB_GATEWAY_REPOSITORY_BRANCH\"" >> ~/.bashrc
+
 	if [ -z "$HB_GATEWAY_PORT" ]
 	then
 		echo 'export HB_GATEWAY_PORT=15888' >> ~/.bashrc
@@ -264,6 +273,9 @@ standalone_install() {
 	fi
 
 	# HB Client environment variables
+
+	echo "export HB_CLIENT_REPOSITORY_URL=\"$HB_CLIENT_REPOSITORY_URL\"" >> ~/.bashrc
+	echo "export HB_CLIENT_REPOSITORY_BRANCH=\"$HB_CLIENT_REPOSITORY_BRANCH\"" >> ~/.bashrc
 
 	if [ -z "$HB_CLIENT_COMMAND" ]
 	then
@@ -285,23 +297,6 @@ standalone_install() {
 	echo "export ADMIN_PASSWORD=\"$ADMIN_PASSWORD\"" >> ~/.bashrc
 	echo "export AUTO_SIGNIN=\"$AUTO_SIGNIN\"" >> ~/.bashrc
 	echo "export LOCK_APT=\"$LOCK_APT\"" >> ~/.bashrc
-	echo "export FUN_FRONTEND_REPOSITORY_URL=\"$FUN_FRONTEND_REPOSITORY_URL\"" >> ~/.bashrc
-	echo "export FUN_FRONTEND_REPOSITORY_BRANCH=\"$FUN_FRONTEND_REPOSITORY_BRANCH\"" >> ~/.bashrc
-	echo "export FUN_FRONTEND_COMMAND=\"$FUN_FRONTEND_COMMAND\"" >> ~/.bashrc
-	echo "export FUN_FRONTEND_PORT=\"$FUN_FRONTEND_PORT\"" >> ~/.bashrc
-	echo "export FUN_CLIENT_REPOSITORY_URL=\"$FUN_CLIENT_REPOSITORY_URL\"" >> ~/.bashrc
-	echo "export FUN_CLIENT_REPOSITORY_BRANCH=\"$FUN_CLIENT_REPOSITORY_BRANCH\"" >> ~/.bashrc
-	echo "export FUN_CLIENT_COMMAND=\"$FUN_CLIENT_COMMAND\"" >> ~/.bashrc
-	echo "export FUN_CLIENT_PORT=\"$FUN_CLIENT_PORT\"" >> ~/.bashrc
-	echo "export HB_GATEWAY_REPOSITORY_URL=\"$HB_GATEWAY_REPOSITORY_URL\"" >> ~/.bashrc
-	echo "export HB_GATEWAY_REPOSITORY_BRANCH=\"$HB_GATEWAY_REPOSITORY_BRANCH\"" >> ~/.bashrc
-	echo "export HB_GATEWAY_COMMAND=\"$HB_GATEWAY_COMMAND\"" >> ~/.bashrc
-	echo "export HB_GATEWAY_PORT=\"$HB_GATEWAY_PORT\"" >> ~/.bashrc
-	echo "export HB_CLIENT_REPOSITORY_URL=\"$HB_CLIENT_REPOSITORY_URL\"" >> ~/.bashrc
-	echo "export HB_CLIENT_REPOSITORY_BRANCH=\"$HB_CLIENT_REPOSITORY_BRANCH\"" >> ~/.bashrc
-	echo "export HB_CLIENT_COMMAND=\"$HB_CLIENT_COMMAND\"" >> ~/.bashrc
-	echo "export FILEBROWSER_COMMAND=\"$FILEBROWSER_COMMAND\"" >> ~/.bashrc
-	echo "export FILEBROWSER_PORT=\"$FILEBROWSER_PORT\"" >> ~/.bashrc
 
 	echo -e "\n" >> ~/.bashrc
 
