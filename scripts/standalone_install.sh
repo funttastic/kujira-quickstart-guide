@@ -6,14 +6,31 @@
 
 # To test it, you can create a docker ubuntu container as following:
 
+#image_name=ubuntu
 #container_name=standalone-fun-kuji-hb
+#
 #docker rm -f $container_name
-#docker run -d --name $container_name -p 50000:50000 -p 50001:50001 -p 50002:50002 -p 15888:15888 ubuntu tail -f /dev/null
+#
+#docker run \
+#
+#	-dit \
+#	--log-opt max-size=10m \
+#	--log-opt max-file=5 \
+#	--name $container_name \
+#	--network "bridge" \
+#	--mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
+#	-p "50000":"50000" \
+#	-p "50001":"50001" \
+#	-p "50002":"50002" \
+#	-p "15888":"15888" \
+#	-p "50022":"22" \
+#	$image_name:latest \
+#	tail -f /dev/null
+#
 #docker exec -it $container_name mkdir /root/temporary
 #docker cp ./scripts/standalone_install.sh $container_name:/root/temporary/standalone_install.sh
 #docker exec -it $container_name chmod +x /root/temporary/standalone_install.sh
-#docker exec -it $container_name bash -c "source /root/temporary/standalone_install.sh && standalone_install --username=<username> --password=<password>  --fun-frontend-port=50000 --fun-client-port=50001 --filebrowser-port=50002 --hb-gateway-port=15888 --auto-sign-in=TRUE --lock-apt=FALSE"
-
+#docker exec -it $container_name bash -c "source /root/temporary/standalone_install.sh && standalone_install --username=<username> --password=<password> --auto-sign-in=TRUE --lock-apt=FALSE"
 
 standalone_install() {
 	set -ex
@@ -129,6 +146,8 @@ standalone_install() {
 	cd /root
 
 	chsh -s /bin/bash
+  rm /usr/bin/sh
+  ln -s /bin/bash /usr/bin/sh
 
 	echo "SHELL: $SHELL"
 
