@@ -191,27 +191,28 @@ standalone_install() {
 	apt-get update
 
 	apt-get install --no-install-recommends -y \
-		git \
-		gcc \
-		vim \
-		less \
-		tree \
+		build-essential \
+		ca-certificates \
 		curl \
+		gcc \
+		git \
+		jq \
+		less \
+		multitail \
+		nginx \
+		libsecret-1-0 \
+		libssl-dev \
+		libusb-1.0 \
+		pkg-config \
 		psmisc \
+		openssh-server \
+		postgresql-server-dev-all \
 		python3 \
 		python3-pip \
 		python3-dev \
-		libusb-1.0 \
-		libssl-dev \
-		pkg-config \
-		libsecret-1-0 \
-		openssh-server \
-		build-essential \
-		ca-certificates \
-		postgresql-server-dev-all \
 		tmux \
-		jq \
-		multitail
+		tree \
+		vim
 
 	#--------------------------------------------------
 
@@ -309,11 +310,8 @@ standalone_install() {
 
 	echo -e "\n" >> ~/.bashrc
 
-	# Temporary section:
 	echo "export DEBIAN_FRONTEND=\"$DEBIAN_FRONTEND\"" >> ~/.bashrc
 	echo "export TZ=\"$TZ\"" >> ~/.bashrc
-	echo "export ADMIN_USERNAME=\"$ADMIN_USERNAME\"" >> ~/.bashrc
-	echo "export ADMIN_PASSWORD=\"$ADMIN_PASSWORD\"" >> ~/.bashrc
 	echo "export AUTO_SIGNIN=\"$AUTO_SIGNIN\"" >> ~/.bashrc
 	echo "export LOCK_APT=\"$LOCK_APT\"" >> ~/.bashrc
 
@@ -408,6 +406,11 @@ standalone_install() {
 	npm cache clean --force
 
 	rm -rf /root/.cache
+
+	#--------------------------------------------------
+
+		cat <<'NGINX' > /etc/nginx/sites-available/funttastic
+NGINX
 
 	#--------------------------------------------------
 
