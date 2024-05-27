@@ -39,6 +39,9 @@ standalone_install() {
 
 	local username=""
 	local password=""
+	local email=""
+
+	local domain=""
 
 	local auto_sign_in=""
 	local lock_apt=""
@@ -77,6 +80,16 @@ standalone_install() {
 			--password=*)
 				set +x
 				password="${1#*=}"
+				set -x
+				;;
+			--email=*)
+				set +x
+				email="${1#*=}"
+				set -x
+				;;
+			--domain=*)
+				set +x
+				domain="${1#*=}"
 				set -x
 				;;
 			--auto-sign-in=*)
@@ -161,6 +174,10 @@ standalone_install() {
   export ADMIN_PASSWORD=$password
   set -x
 
+  export ADMIN_EMAIL=${ADMIN_EMAIL:-""}
+
+  export DOMAIN=${DOMAIN:-hostname}
+
   export AUTO_SIGNIN=${auto_sign_in:-"TRUE"}
   export LOCK_APT=${lock_apt:-"TRUE"}
 
@@ -193,6 +210,7 @@ standalone_install() {
 	apt-get install --no-install-recommends -y \
 		build-essential \
 		ca-certificates \
+		certbot \
 		curl \
 		gcc \
 		git \
@@ -208,8 +226,10 @@ standalone_install() {
 		openssh-server \
 		postgresql-server-dev-all \
 		python3 \
-		python3-pip \
+		python3-certbot-apache \
+		python3-certbot-nginx \
 		python3-dev \
+		python3-pip \
 		tmux \
 		tree \
 		vim
@@ -325,6 +345,27 @@ standalone_install() {
 
 	#--------------------------------------------------
 
+	cat <<'NGINX' > "/etc/nginx/sites-available/funttastic"
+NGINX
+
+	#--------------------------------------------------
+
+	certbot --nginx
+	certbot certonly --standalone -d $DOMAIN --non-interactive --agree-tos -m $ADMIN_EMAIL
+
+	ln -s "/etc/letsencrypt/live/$DOMAIN/chain.pem" /root/shared/common/certificates/ca_cert.pem
+	ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /root/shared/common/certificates/ca_key.pem
+	ln -s "/etc/letsencrypt/live/$DOMAIN/cert.pem" /root/shared/common/certificates/client_cert.pem
+	ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /root/shared/common/certificates/client_key.pem
+	ln -s "/etc/letsencrypt/live/$DOMAIN/cert.pem" /root/shared/common/certificates/server_cert.pem
+	ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /root/shared/common/certificates/server_key.pem
+
+	(crontab -l 2>/dev/null; echo "0 0 */30 * * /usr/bin/certbot renew --quiet") | crontab -
+
+	service cron start
+
+	#--------------------------------------------------
+
 	ARCHITECTURE="$(uname -m)"
 
 	case $(uname | tr '[:upper:]' '[:lower:]') in
@@ -406,11 +447,6 @@ standalone_install() {
 	npm cache clean --force
 
 	rm -rf /root/.cache
-
-	#--------------------------------------------------
-
-		cat <<'NGINX' > /etc/nginx/sites-available/funttastic
-NGINX
 
 	#--------------------------------------------------
 
@@ -556,6 +592,16 @@ CSS
   cat <<'SCRIPT' > /root/shared/scripts/functions.sh
 #!/bin/bash
 
+start_nginx() {
+	local session="nginx"
+
+	if [ "$(is_session_running "$session")" = "FALSE" ]; then
+		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> /root/shared/logs/tmux/$session.log"
+
+		tmux send-keys -t "$session" "nginx -g \"daemon off;\"" C-m
+	fi
+}
+
 start_fun_frontend() {
 	local session="fun-frontend"
 
@@ -633,6 +679,7 @@ start_all() {
 	local username="$1"
 	local password="$2"
 
+	start_nginx
 	start_fun_frontend
 	start_filebrowser
 	start_fun_client "$password"
@@ -702,6 +749,10 @@ start() {
 		case "$1" in
 			--start_all)
 				start_all "$username" "$password"
+				return
+				;;
+			--start_nginx)
+				start_nginx
 				return
 				;;
 			--start_fun_frontend)
@@ -776,6 +827,10 @@ kill_processes_and_subprocesses() {
 	fi
 }
 
+stop_nginx() {
+	tmux kill-session -t "nginx"
+}
+
 stop_fun_frontend() {
 	tmux kill-session -t "fun-frontend"
 }
@@ -797,6 +852,7 @@ stop_hb_client() {
 }
 
 stop_all() {
+	stop_nginx
 	stop_fun_frontend
 	stop_filebrowser
 	stop_fun_client
@@ -816,6 +872,10 @@ stop() {
 		case "$1" in
 			--stop_all)
 				stop_all
+				return
+				;;
+			--stop_nginx)
+				stop_nginx
 				return
 				;;
 			--stop_fun_frontend)
