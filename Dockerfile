@@ -266,9 +266,12 @@ RUN <<-EOF
 
 	git clone -b $FUN_CLIENT_REPOSITORY_BRANCH $FUN_CLIENT_REPOSITORY_URL .
 
-	conda env create -f environment.yml
-
+#  conda env create -f environment.yml
+	conda create --name funttastic python=3.11
 	conda activate funttastic
+	conda install pip -y
+
+	pip install -r requirements.txt
 
 	mkdir -p resources/certificates
 	cp resources/configuration/production.example.yml resources/configuration/production.yml
