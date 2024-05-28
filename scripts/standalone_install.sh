@@ -27,11 +27,11 @@
 #	$image_name:latest \
 #	tail -f /dev/null
 #
-#docker exec -it $container_name mkdir ~/temporary
-#docker cp ./scripts/standalone_install.sh $container_name:~/temporary/standalone_install.sh
-#docker exec -it $container_name chmod +x ~/temporary/standalone_install.sh
-#docker exec -it $container_name chmod 777 ~/temporary/standalone_install.sh
-#docker exec -it $container_name bash -c "source ~/temporary/standalone_install.sh && standalone_install --username=<username> --password=<password> --auto-sign-in=TRUE --lock-apt=FALSE"
+#docker exec -it $container_name mkdir /home/$USER/temporary
+#docker cp ./scripts/standalone_install.sh $container_name:/home/$USER/temporary/standalone_install.sh
+#docker exec -it $container_name chmod +x /home/$USER/temporary/standalone_install.sh
+#docker exec -it $container_name chmod 777 /home/$USER/temporary/standalone_install.sh
+#docker exec -it $container_name bash -c "source /home/$USER/temporary/standalone_install.sh && standalone_install --username=<username> --password=<password> --auto-sign-in=TRUE --lock-apt=FALSE"
 
 standalone_install() {
 	set -ex
@@ -42,7 +42,7 @@ standalone_install() {
 
 	sudo -u $USER -i <<USER
 		env
-		source ~/.bashrc
+		source /home/$USER/.bashrc
 		source /root/temporary/standalone_install.sh
 		# Forward the arguments to the install function
 		install "${args[@]}"
@@ -381,6 +381,16 @@ pre_install() {
 
 	cat <<'NGINX' > "/etc/nginx/sites-available/funttastic"
 NGINX
+}
+
+install() {
+	set -ex
+
+	cd /home/$USER
+
+	sed -i 's/^\([[:space:]]*\[ -z "\$PS1" \] && return\)/#\1/' /home/$USER/.bashrc
+
+	source /home/$USER/.bashrc
 
 	#--------------------------------------------------
 
@@ -413,40 +423,40 @@ NGINX
 			;;
 	esac
 
-	echo "export ARCHITECTURE=$ARCHITECTURE" >> ~/.bashrc
-	echo "export OS=$OS" >> ~/.bashrc
-	echo "export FILE_EXTENSION=$FILE_EXTENSION" >> ~/.bashrc
-	echo "export IS_RASPBERRY=$IS_RASPBERRY" >> ~/.bashrc
+	echo "export ARCHITECTURE=$ARCHITECTURE" >> /home/$USER/.bashrc
+	echo "export OS=$OS" >> /home/$USER/.bashrc
+	echo "export FILE_EXTENSION=$FILE_EXTENSION" >> /home/$USER/.bashrc
+	echo "export IS_RASPBERRY=$IS_RASPBERRY" >> /home/$USER/.bashrc
 
 	if [ "$ARCHITECTURE" == "aarch64" ]
 	then
-		echo "export ARCHITECTURE_SUFFIX=\"-$ARCHITECTURE\"" >> ~/.bashrc
+		echo "export ARCHITECTURE_SUFFIX=\"-$ARCHITECTURE\"" >> /home/$USER/.bashrc
 		MINICONDA_VERSION="Mambaforge-$(uname)-$(uname -m).sh"
 		MINICONDA_URL="https://github.com/conda-forge/miniforge/releases/latest/download/$MINICONDA_VERSION"
-		ln -s ~/mambaforge ~/miniconda3
+		ln -s /home/$USER/mambaforge /home/$USER/miniconda3
 	else
 		MINICONDA_VERSION="Miniconda3-py38_4.10.3-$OS-$ARCHITECTURE.$FILE_EXTENSION"
 		MINICONDA_URL="https://repo.anaconda.com/miniconda/$MINICONDA_VERSION"
 	fi
 
-	curl -L "$MINICONDA_URL" -o "~/miniconda.$MINICONDA_EXTENSION"
-	/bin/bash "~/miniconda.$MINICONDA_EXTENSION" -b
-	rm "~/miniconda.$MINICONDA_EXTENSION"
+	curl -L "$MINICONDA_URL" -o "/home/$USER/miniconda.$MINICONDA_EXTENSION"
+	/bin/bash "/home/$USER/miniconda.$MINICONDA_EXTENSION" -b
+	rm "/home/$USER/miniconda.$MINICONDA_EXTENSION"
 
-	echo 'export PATH=~/miniconda3/bin:$PATH' >> ~/.bashrc
-	source ~/.bashrc
+	echo 'export PATH=/home/$USER/miniconda3/bin:$PATH' >> /home/$USER/.bashrc
+	source /home/$USER/.bashrc
 
 	conda update -n base -c conda-forge conda -y
 	conda clean -tipy
 
-	echo "export MINICONDA_VERSION=$MINICONDA_VERSION" >> ~/.bashrc
-	echo "export MINICONDA_URL=$MINICONDA_URL" >> ~/.bashrc
+	echo "export MINICONDA_VERSION=$MINICONDA_VERSION" >> /home/$USER/.bashrc
+	echo "export MINICONDA_URL=$MINICONDA_URL" >> /home/$USER/.bashrc
 
 	conda init --all
 
 	#--------------------------------------------------
 
-	source ~/.bashrc
+	source /home/$USER/.bashrc
 
 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 
@@ -464,20 +474,12 @@ NGINX
 	npm install --global yarn
 	npm cache clean --force
 
-	rm -rf ~/.cache
-}
-
-install() {
-	set -ex
-
-	cd ~
-
-	source ~/.bashrc
+	rm -rf /home/$USER/.cache
 
 	#--------------------------------------------------
 
-	mkdir -p ~/funttastic/client
-	cd ~/funttastic/client
+	mkdir -p /home/$USER/funttastic/client
+	cd /home/$USER/funttastic/client
 
 	git clone -b $FUN_CLIENT_REPOSITORY_BRANCH $FUN_CLIENT_REPOSITORY_URL .
 
@@ -490,10 +492,10 @@ install() {
 
 	#--------------------------------------------------
 
-	source ~/.bashrc
+	source /home/$USER/.bashrc
 
-	mkdir -p ~/funttastic/frontend
-	cd ~/funttastic/frontend
+	mkdir -p /home/$USER/funttastic/frontend
+	cd /home/$USER/funttastic/frontend
 
 	git clone -b $FUN_FRONTEND_REPOSITORY_BRANCH $FUN_FRONTEND_REPOSITORY_URL .
 
@@ -504,17 +506,17 @@ install() {
 	curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
 	rm -f get.sh
 
-	mkdir -p ~/filebrowser/branding/img
-	cd ~/filebrowser
+	mkdir -p /home/$USER/filebrowser/branding/img
+	cd /home/$USER/filebrowser
 
 	filebrowser config init
 	filebrowser config set --branding.name "Funttastic"
 	filebrowser config set --branding.theme "dark"
-	filebrowser config set --branding.files ~/filebrowser/branding
+	filebrowser config set --branding.files /home/$USER/filebrowser/branding
 	filebrowser config set --port $FILEBROWSER_PORT
 	filebrowser config set --baseurl /
 
-	cp ~/funttastic/frontend/resources/assets/funttastic/logo/logo.svg branding/img/logo.svg
+	cp /home/$USER/funttastic/frontend/resources/assets/funttastic/logo/logo.svg branding/img/logo.svg
 
 	cat <<'CSS' > branding/custom.css
 html {
@@ -532,10 +534,10 @@ CSS
 
 	#--------------------------------------------------
 
-	source ~/.bashrc
+	source /home/$USER/.bashrc
 
-	mkdir -p ~/hummingbot/gateway
-	cd ~/hummingbot/gateway
+	mkdir -p /home/$USER/hummingbot/gateway
+	cd /home/$USER/hummingbot/gateway
 
 	git clone -b $HB_GATEWAY_REPOSITORY_BRANCH $HB_GATEWAY_REPOSITORY_URL .
 
@@ -554,10 +556,10 @@ CSS
 
 	#--------------------------------------------------
 
-	source ~/.bashrc
+	source /home/$USER/.bashrc
 
-	mkdir -p ~/hummingbot/client
-	cd ~/hummingbot/client
+	mkdir -p /home/$USER/hummingbot/client
+	cd /home/$USER/hummingbot/client
 
 	git clone -b $HB_CLIENT_REPOSITORY_BRANCH $HB_CLIENT_REPOSITORY_URL .
 
@@ -567,14 +569,14 @@ CSS
 		echo "The MINICONDA_ENVIRONMENT environment variable could not be defined."
 		exit 1
 	fi
-	echo "export MINICONDA_ENVIRONMENT=$MINICONDA_ENVIRONMENT" >> ~/.bashrc
+	echo "export MINICONDA_ENVIRONMENT=$MINICONDA_ENVIRONMENT" >> /home/$USER/.bashrc
 
 	conda env create -f setup/environment.yml
 	conda clean -tipy
-	rm -rf ~/.cache
+	rm -rf /home/$USER/.cache
 
-	echo "source ~/miniconda3/etc/profile.d/conda.sh && conda activate $MINICONDA_ENVIRONMENT" >> ~/.bashrc
-	~/miniconda3/envs/$MINICONDA_ENVIRONMENT/bin/python3 setup.py build_ext --inplace -j 8
+	echo "source /home/$USER/miniconda3/etc/profile.d/conda.sh && conda activate $MINICONDA_ENVIRONMENT" >> /home/$USER/.bashrc
+	/home/$USER/miniconda3/envs/$MINICONDA_ENVIRONMENT/bin/python3 setup.py build_ext --inplace -j 8
 	rm -rf build/
 	find . -type f -name "*.cpp" -delete
 
@@ -590,31 +592,31 @@ CSS
 
 	#--------------------------------------------------
 
-	source ~/.bashrc
+	source /home/$USER/.bashrc
 
 	conda activate funttastic
 
-	sed -i -e "/server:/,/port: [0-9]*/ s/port: [0-9]*/port: $FUN_CLIENT_PORT/" ~/funttastic/client/resources/configuration/production.yml
-	sed -i -e '/logging:/,/use_telegram:/ s/use_telegram:.*/use_telegram: false/' -e '/telegram:/,/enabled:/ s/enabled:.*/enabled: false/' -e '/telegram:/,/listen_commands:/ s/listen_commands:.*/listen_commands: false/' ~/funttastic/client/resources/configuration/production.yml
-	sed -i -e '/telegram:/,/enabled:/ s/enabled:.*/enabled: false/' -e '/telegram:/,/listen_commands:/ s/listen_commands:.*/listen_commands: false/' ~/funttastic/client/resources/configuration/common.yml
+	sed -i -e "/server:/,/port: [0-9]*/ s/port: [0-9]*/port: $FUN_CLIENT_PORT/" /home/$USER/funttastic/client/resources/configuration/production.yml
+	sed -i -e '/logging:/,/use_telegram:/ s/use_telegram:.*/use_telegram: false/' -e '/telegram:/,/enabled:/ s/enabled:.*/enabled: false/' -e '/telegram:/,/listen_commands:/ s/listen_commands:.*/listen_commands: false/' /home/$USER/funttastic/client/resources/configuration/production.yml
+	sed -i -e '/telegram:/,/enabled:/ s/enabled:.*/enabled: false/' -e '/telegram:/,/listen_commands:/ s/listen_commands:.*/listen_commands: false/' /home/$USER/funttastic/client/resources/configuration/common.yml
 
 	#--------------------------------------------------
 
-	mkdir -p ~/shared/logs/tmux
-  ln -s ~/funttastic/client/resources/logs ~/shared/logs/fun-client
-  ln -s ~/hummingbot/gateway/logs ~/shared/logs/hb-gateway
-  ln -s ~/hummingbot/client/logs ~/shared/logs/hb-client
+	mkdir -p /home/$USER/shared/logs/tmux
+  ln -s /home/$USER/funttastic/client/resources/logs /home/$USER/shared/logs/fun-client
+  ln -s /home/$USER/hummingbot/gateway/logs /home/$USER/shared/logs/hb-gateway
+  ln -s /home/$USER/hummingbot/client/logs /home/$USER/shared/logs/hb-client
 
-  mkdir -p ~/shared/scripts
+  mkdir -p /home/$USER/shared/scripts
 
-  cat <<'SCRIPT' > ~/shared/scripts/functions.sh
+  cat <<'SCRIPT' > /home/$USER/shared/scripts/functions.sh
 #!/bin/bash
 
 start_nginx() {
 	local session="nginx"
 
 	if [ "$(is_session_running "$session")" = "FALSE" ]; then
-		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> ~/shared/logs/tmux/$session.log"
+		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> /home/$USER/shared/logs/tmux/$session.log"
 
 		tmux send-keys -t "$session" "nginx -g \"daemon off;\"" C-m
 	fi
@@ -624,9 +626,9 @@ start_fun_frontend() {
 	local session="fun-frontend"
 
 	if [ "$(is_session_running "$session")" = "FALSE" ]; then
-		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> ~/shared/logs/tmux/$session.log"
+		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> /home/$USER/shared/logs/tmux/$session.log"
 
-		tmux send-keys -t "$session" "cd ~/funttastic/frontend" C-m
+		tmux send-keys -t "$session" "cd /home/$USER/funttastic/frontend" C-m
 		tmux send-keys -t "$session" "$FUN_FRONTEND_COMMAND" C-m
 	fi
 }
@@ -635,9 +637,9 @@ start_filebrowser() {
 	local session="filebrowser"
 
 	if [ "$(is_session_running "$session")" = "FALSE" ]; then
-		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> ~/shared/logs/tmux/$session.log"
+		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> /home/$USER/shared/logs/tmux/$session.log"
 
-		tmux send-keys -t "$session" "cd ~/filebrowser" C-m
+		tmux send-keys -t "$session" "cd /home/$USER/filebrowser" C-m
 		tmux send-keys -t "$session" "$FILEBROWSER_COMMAND" C-m
 	fi
 }
@@ -647,13 +649,13 @@ start_fun_client() {
 	local session="fun-client"
 
 	if [ "$(is_session_running "$session")" = "FALSE" ]; then
-		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> ~/shared/logs/tmux/$session.log"
+		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> /home/$USER/shared/logs/tmux/$session.log"
 
 #		tmux set-environment -t "$session" PASSWORD "$password"
 #		tmux send-keys -t "$session" "export PASSWORD=\"$(tmux show-environment PASSWORD | cut -d= -f2)\"" C-m
 		tmux send-keys -t "$session" "export PASSWORD=\"$password\"" C-m
 		tmux send-keys -t "$session" "conda activate funttastic" C-m
-		tmux send-keys -t "$session" "cd ~/funttastic/client" C-m
+		tmux send-keys -t "$session" "cd /home/$USER/funttastic/client" C-m
 		tmux send-keys -t "$session" "$FUN_CLIENT_COMMAND" C-m
 #		tmux set-environment -t "$session" -u PASSWORD
 	fi
@@ -664,11 +666,11 @@ start_hb_gateway() {
 	local session="hb-gateway"
 
 	if [ "$(is_session_running "$session")" = "FALSE" ]; then
-		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> ~/shared/logs/tmux/$session.log"
+		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> /home/$USER/shared/logs/tmux/$session.log"
 
 		tmux set-environment -t "$session" GATEWAY_PASSPHRASE "$password"
 		tmux send-keys -t "$session" "export GATEWAY_PASSPHRASE=\$(tmux show-environment -t $session GATEWAY_PASSPHRASE | cut -d= -f2)" C-m
-		tmux send-keys -t "$session" "cd ~/hummingbot/gateway" C-m
+		tmux send-keys -t "$session" "cd /home/$USER/hummingbot/gateway" C-m
 		tmux send-keys -t "$session" "$HB_GATEWAY_COMMAND" C-m
 		tmux set-environment -t "$session" -u GATEWAY_PASSPHRASE
 	fi
@@ -678,10 +680,10 @@ start_hb_client() {
 	local session="hb-client"
 
 	if [ "$(is_session_running "$session")" = "FALSE" ]; then
-		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> ~/shared/logs/tmux/$session.log"
+		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> /home/$USER/shared/logs/tmux/$session.log"
 
 		tmux send-keys -t "$session" "conda activate hummingbot" C-m
-		tmux send-keys -t "$session" "cd ~/hummingbot/client" C-m
+		tmux send-keys -t "$session" "cd /home/$USER/hummingbot/client" C-m
 		tmux send-keys -t "$session" "$HB_CLIENT_COMMAND" C-m
 	fi
 }
@@ -725,20 +727,20 @@ start() {
 		fi
 	done
 
-	source ~/.bashrc
+	source /home/$USER/.bashrc
 
 	if [[ -n "$username" && -n "$password"  ]]; then
 		credentials=$(authenticate "$username" "$password")
-	elif [ -f "~/.temp_credentials" ]; then
+	elif [ -f "/home/$USER/.temp_credentials" ]; then
 		# This condition is only for the first start.
 
-		username=$(grep "username" "~/.temp_credentials" | cut -d'=' -f2)
-		password=$(grep "password" "~/.temp_credentials" | cut -d'=' -f2)
+		username=$(grep "username" "/home/$USER/.temp_credentials" | cut -d'=' -f2)
+		password=$(grep "password" "/home/$USER/.temp_credentials" | cut -d'=' -f2)
 
 		credentials=$(authenticate "$username" "$password")
 
 		if [ -n "$credentials" ]; then
-			rm -f ~/.temp_credentials
+			rm -f /home/$USER/.temp_credentials
 		fi
 	else
 		credentials=$(authenticate)
@@ -878,7 +880,7 @@ stop_all() {
 }
 
 stop() {
-	source ~/.bashrc
+	source /home/$USER/.bashrc
 
 	if [[ $# -eq 0 ]]; then
 		stop_all
@@ -946,7 +948,7 @@ encrypt_message() {
 	local message=$1
 
 	# After encryption, it is converted to base64 format to avoid failures in transfers between variables and programs
-	local encrypted_message_base64=$(echo "$message" | openssl pkeyutl -encrypt -pubin -inkey ~/.ssh/id_rsa_openssl.pub.pem -pkeyopt rsa_padding_mode:oaep | base64)
+	local encrypted_message_base64=$(echo "$message" | openssl pkeyutl -encrypt -pubin -inkey /home/$USER/.ssh/id_rsa_openssl.pub.pem -pkeyopt rsa_padding_mode:oaep | base64)
 
 	echo "$encrypted_message_base64"
 }
@@ -955,7 +957,7 @@ decrypt_message() {
 	local encrypted_message_base64=$1
 
 	# Decode the Base64 encrypted message and decrypt it directly
-	local decrypted_message=$(echo "$encrypted_message_base64" | base64 --decode | openssl pkeyutl -decrypt -inkey ~/.ssh/id_rsa -pkeyopt rsa_padding_mode:oaep)
+	local decrypted_message=$(echo "$encrypted_message_base64" | base64 --decode | openssl pkeyutl -decrypt -inkey /home/$USER/.ssh/id_rsa -pkeyopt rsa_padding_mode:oaep)
 
 	echo "$decrypted_message"
 }
@@ -977,7 +979,7 @@ escape_string() {
 
 	for ((i=0; i<${#string}; i++)); do
 		character="${string:i:1}"
-		if [[ $symbols =~ "$character" ]]; then
+		if [[ $symbols =/home/$USER "$character" ]]; then
 #			ord=$(printf '%d' "'$character")
 #			escaped_string+="\\$ord"
 			escaped_string+="\\$character"
@@ -1020,7 +1022,7 @@ authenticate() {
 	local username="$1"
 	local password="$2"
 
-	if [ ! -f "~/.ssh/id_rsa" ] || { [[ -n "$username" ]] && [[ -n "$password" ]]; }; then
+	if [ ! -f "/home/$USER/.ssh/id_rsa" ] || { [[ -n "$username" ]] && [[ -n "$password" ]]; }; then
 		if [ -n "$NON_ENCRYPTED_CREDENTIALS_SHA256SUM" ]; then
 			local non_encrypted_informed_credentials_json
 			local non_encrypted_informed_credentials_json_sha256sum
@@ -1059,13 +1061,13 @@ authenticate() {
 
 log_all () {
 	tail -f \
-		~/shared/logs/tmux/fun-frontend.log \
-		~/shared/logs/tmux/filebrowser.log \
-		~/shared/logs/tmux/fun-client.log \
-		~/shared/logs/tmux/hb-gateway.log \
-		~/shared/logs/fun-client/all.log \
-		~/shared/logs/hb-gateway/* \
-		~/shared/logs/hb-client/*
+		/home/$USER/shared/logs/tmux/fun-frontend.log \
+		/home/$USER/shared/logs/tmux/filebrowser.log \
+		/home/$USER/shared/logs/tmux/fun-client.log \
+		/home/$USER/shared/logs/tmux/hb-gateway.log \
+		/home/$USER/shared/logs/fun-client/all.log \
+		/home/$USER/shared/logs/hb-gateway/* \
+		/home/$USER/shared/logs/hb-client/*
 }
 
 quick_deploy_fun_hb_client () {
@@ -1073,9 +1075,9 @@ quick_deploy_fun_hb_client () {
 
 	local branch="$1"
 
-	cd ~/funttastic/client || { echo "Failed to open the repository folder..."; return 1; }
+	cd /home/$USER/funttastic/client || { echo "Failed to open the repository folder..."; return 1; }
 
-	unlink ~/funttastic/client/resources
+	unlink /home/$USER/funttastic/client/resources
 
 	git reset
 
@@ -1092,52 +1094,52 @@ quick_deploy_fun_hb_client () {
 	git fetch --all
 	git pull
 
-	rm -rf ~/funttastic/client/resources
+	rm -rf /home/$USER/funttastic/client/resources
 
-	ln -s ~/shared/funttastic/client/resources ~/funttastic/client/resources
+	ln -s /home/$USER/shared/funttastic/client/resources /home/$USER/funttastic/client/resources
 
 	git stash apply
 
-	cd ~ || return
+	cd /home/$USER || return
 
 	set +ex
 }
 
 SCRIPT
 
-	chmod +x ~/shared/scripts/functions.sh
+	chmod +x /home/$USER/shared/scripts/functions.sh
 
-	cat <<'SCRIPT' > ~/shared/scripts/initialize.sh
+	cat <<'SCRIPT' > /home/$USER/shared/scripts/initialize.sh
 #!/bin/bash
 
-source ~/shared/scripts/functions.sh
+source /home/$USER/shared/scripts/functions.sh
 
 SCRIPT
 
-	echo "source ~/shared/scripts/initialize.sh" >> ~/.bashrc
+	echo "source /home/$USER/shared/scripts/initialize.sh" >> /home/$USER/.bashrc
 
-	source ~/.bashrc
+	source /home/$USER/.bashrc
 
 	#--------------------------------------------------
 
 	set +x
 
-	source ~/.bashrc
+	source /home/$USER/.bashrc
 
 	# Certificates
 	#--------------------------------------------------
-	mkdir -p ~/shared/common/certificates
+	mkdir -p /home/$USER/shared/common/certificates
 
 	if [ "$USE_VALID_SSL_CERTIFICATES" = "TRUE" ]; then
 		certbot --nginx --non-interactive --agree-tos -m $ADMIN_EMAIL -d $DOMAIN
 #		certbot certonly --standalone -d $DOMAIN --non-interactive --agree-tos -m $ADMIN_EMAIL
 
-		ln -s "/etc/letsencrypt/live/$DOMAIN/chain.pem" ~/shared/common/certificates/ca_cert.pem
-		ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" ~/shared/common/certificates/ca_key.pem
-		ln -s "/etc/letsencrypt/live/$DOMAIN/cert.pem" ~/shared/common/certificates/client_cert.pem
-		ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" ~/shared/common/certificates/client_key.pem
-		ln -s "/etc/letsencrypt/live/$DOMAIN/cert.pem" ~/shared/common/certificates/server_cert.pem
-		ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" ~/shared/common/certificates/server_key.pem
+		ln -s "/etc/letsencrypt/live/$DOMAIN/chain.pem" /home/$USER/shared/common/certificates/ca_cert.pem
+		ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /home/$USER/shared/common/certificates/ca_key.pem
+		ln -s "/etc/letsencrypt/live/$DOMAIN/cert.pem" /home/$USER/shared/common/certificates/client_cert.pem
+		ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /home/$USER/shared/common/certificates/client_key.pem
+		ln -s "/etc/letsencrypt/live/$DOMAIN/cert.pem" /home/$USER/shared/common/certificates/server_cert.pem
+		ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /home/$USER/shared/common/certificates/server_key.pem
 
 		(crontab -l 2>/dev/null; echo "0 0 */30 * * /usr/bin/certbot renew --quiet") | crontab -
 
@@ -1145,25 +1147,25 @@ SCRIPT
   else
   	# For using a self signed certificate
   	conda activate funttastic
-		python ~/funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $ADMIN_PASSWORD --cert-path ~/shared/common/certificates
+		python /home/$USER/funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $ADMIN_PASSWORD --cert-path /home/$USER/shared/common/certificates
   fi
 
 	# HB Client
 	conda activate hummingbot
-	python ~/funttastic/client/resources/scripts/generate_hb_client_password_verification_file.py -p "$ADMIN_PASSWORD" -d ~/hummingbot/client/conf
+	python /home/$USER/funttastic/client/resources/scripts/generate_hb_client_password_verification_file.py -p "$ADMIN_PASSWORD" -d /home/$USER/hummingbot/client/conf
 
 	# Fun Client
 
 	# Fun Frontend
 
 	# Filebrowser
-	cd ~/filebrowser
+	cd /home/$USER/filebrowser
 	filebrowser users add $ADMIN_USERNAME $ADMIN_PASSWORD --perm.admin
 #	filebrowser users update $ADMIN_USERNAME --commands="ls,git,tree,curl,rm,mkdir,pwd,cp,mv,cat,less,find,touch,echo,chmod,chown,df,du,ps,kill"
 
-	mkdir -p ~/.ssh
-	chmod 0700 ~/.ssh
-	cd ~/.ssh/
+	mkdir -p /home/$USER/.ssh
+	chmod 0700 /home/$USER/.ssh
+	cd /home/$USER/.ssh/
 
 	# Generate a new pair of RSA keys using OpenSSL
 	openssl genpkey -algorithm RSA -out id_rsa_openssl.pem -pkeyopt rsa_keygen_bits:4096 > /dev/null 2>&1
@@ -1189,19 +1191,19 @@ SCRIPT
 	# Necessary because the cipher generated with OpenSSL is not always the same
 	NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM=$(generate_sha256sum "$credentials_json")
 
-	echo "# Credentials Section - Begin" >> ~/.bashrc
-	echo "export ENCRYPTED_CREDENTIALS=\"$ENCRYPTED_CREDENTIALS_BASE64\"" >> ~/.bashrc
-	echo "export NON_ENCRYPTED_CREDENTIALS_SHA256SUM=\"$NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM\"" >> ~/.bashrc
-	echo "# Credentials Section - End" >> ~/.bashrc
+	echo "# Credentials Section - Begin" >> /home/$USER/.bashrc
+	echo "export ENCRYPTED_CREDENTIALS=\"$ENCRYPTED_CREDENTIALS_BASE64\"" >> /home/$USER/.bashrc
+	echo "export NON_ENCRYPTED_CREDENTIALS_SHA256SUM=\"$NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM\"" >> /home/$USER/.bashrc
+	echo "# Credentials Section - End" >> /home/$USER/.bashrc
 
 	# Necessary because the CMD instruction does not work with variables of type ARG, only of type ENV
 	# We cannot convert the ADMIN_USERNAME and ADMIN_PASSWORD variables to ENV for security reasons
-	echo "username=$ADMIN_USERNAME" > ~/.temp_credentials
-	echo "password=$ADMIN_PASSWORD" >> ~/.temp_credentials
+	echo "username=$ADMIN_USERNAME" > /home/$USER/.temp_credentials
+	echo "password=$ADMIN_PASSWORD" >> /home/$USER/.temp_credentials
 
 	if [ ! "$AUTO_SIGN_IN" == "TRUE" ]; then
-		rm -f ~/.ssh/id_rsa
-		rm -f ~/.ssh/id_rsa_openssl.pem
+		rm -f /home/$USER/.ssh/id_rsa
+		rm -f /home/$USER/.ssh/id_rsa_openssl.pem
 	fi
 
   set -x
@@ -1209,38 +1211,38 @@ SCRIPT
 	#--------------------------------------------------
 
 	mkdir -p \
-  		~/shared/common \
-  		~/shared/funttastic/client \
-  		~/shared/hummingbot/client \
-  		~/shared/hummingbot/gateway
+  		/home/$USER/shared/common \
+  		/home/$USER/shared/funttastic/client \
+  		/home/$USER/shared/hummingbot/client \
+  		/home/$USER/shared/hummingbot/gateway
 
-	rm -rf ~/funttastic/client/resources/certificates
-	rm -rf ~/hummingbot/client/certs
-	rm -rf ~/hummingbot/gateway/certs
-	ln -s ~/shared/common/certificates ~/funttastic/client/resources/certificates
-	ln -s ~/shared/common/certificates ~/hummingbot/gateway/certs
-	ln -s ~/shared/common/certificates ~/hummingbot/client/certs
+	rm -rf /home/$USER/funttastic/client/resources/certificates
+	rm -rf /home/$USER/hummingbot/client/certs
+	rm -rf /home/$USER/hummingbot/gateway/certs
+	ln -s /home/$USER/shared/common/certificates /home/$USER/funttastic/client/resources/certificates
+	ln -s /home/$USER/shared/common/certificates /home/$USER/hummingbot/gateway/certs
+	ln -s /home/$USER/shared/common/certificates /home/$USER/hummingbot/client/certs
 
-	mv ~/funttastic/client/resources ~/shared/funttastic/client/
-	ln -s ~/shared/funttastic/client/resources ~/funttastic/client/resources
+	mv /home/$USER/funttastic/client/resources /home/$USER/shared/funttastic/client/
+	ln -s /home/$USER/shared/funttastic/client/resources /home/$USER/funttastic/client/resources
 
-	mv ~/hummingbot/gateway/db ~/shared/hummingbot/gateway/
-	mv ~/hummingbot/gateway/conf ~/shared/hummingbot/gateway/
-	mv ~/hummingbot/gateway/logs ~/shared/hummingbot/gateway/
-	ln -s ~/shared/hummingbot/gateway/db ~/hummingbot/gateway/db
-	ln -s ~/shared/hummingbot/gateway/conf ~/hummingbot/gateway/conf
-	ln -s ~/shared/hummingbot/gateway/logs ~/hummingbot/gateway/logs
+	mv /home/$USER/hummingbot/gateway/db /home/$USER/shared/hummingbot/gateway/
+	mv /home/$USER/hummingbot/gateway/conf /home/$USER/shared/hummingbot/gateway/
+	mv /home/$USER/hummingbot/gateway/logs /home/$USER/shared/hummingbot/gateway/
+	ln -s /home/$USER/shared/hummingbot/gateway/db /home/$USER/hummingbot/gateway/db
+	ln -s /home/$USER/shared/hummingbot/gateway/conf /home/$USER/hummingbot/gateway/conf
+	ln -s /home/$USER/shared/hummingbot/gateway/logs /home/$USER/hummingbot/gateway/logs
 
-	mv ~/hummingbot/client/conf ~/shared/hummingbot/client/
-	mv ~/hummingbot/client/logs ~/shared/hummingbot/client/
-	mv ~/hummingbot/client/data ~/shared/hummingbot/client/
-	mv ~/hummingbot/client/scripts ~/shared/hummingbot/client/
-	mv ~/hummingbot/client/pmm_scripts ~/shared/hummingbot/client/
-	ln -s ~/shared/hummingbot/client/conf ~/hummingbot/client/conf
-	ln -s ~/shared/hummingbot/client/logs ~/hummingbot/client/logs
-	ln -s ~/shared/hummingbot/client/data ~/hummingbot/client/data
-	ln -s ~/shared/hummingbot/client/scripts ~/hummingbot/client/scripts
-	ln -s ~/shared/hummingbot/client/pmm_scripts ~/hummingbot/client/pmm_scripts
+	mv /home/$USER/hummingbot/client/conf /home/$USER/shared/hummingbot/client/
+	mv /home/$USER/hummingbot/client/logs /home/$USER/shared/hummingbot/client/
+	mv /home/$USER/hummingbot/client/data /home/$USER/shared/hummingbot/client/
+	mv /home/$USER/hummingbot/client/scripts /home/$USER/shared/hummingbot/client/
+	mv /home/$USER/hummingbot/client/pmm_scripts /home/$USER/shared/hummingbot/client/
+	ln -s /home/$USER/shared/hummingbot/client/conf /home/$USER/hummingbot/client/conf
+	ln -s /home/$USER/shared/hummingbot/client/logs /home/$USER/hummingbot/client/logs
+	ln -s /home/$USER/shared/hummingbot/client/data /home/$USER/hummingbot/client/data
+	ln -s /home/$USER/shared/hummingbot/client/scripts /home/$USER/hummingbot/client/scripts
+	ln -s /home/$USER/shared/hummingbot/client/pmm_scripts /home/$USER/hummingbot/client/pmm_scripts
 }
 
 post_install() {
@@ -1260,5 +1262,5 @@ post_install() {
 
 	#--------------------------------------------------
 
-	source ~/.bashrc && start && keep
+	source /home/$USER/.bashrc && start && keep
 }
