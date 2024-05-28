@@ -270,7 +270,6 @@ RUN <<-EOF
 	conda create --name funttastic python=3.11
 	conda activate funttastic
 	conda install pip -y
-
 	pip install -r requirements.txt
 
 	mkdir -p resources/certificates
