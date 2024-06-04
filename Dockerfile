@@ -67,6 +67,7 @@ RUN <<-EOF
 		tmux \
 		jq \
 		multitail
+#		gnutls-bin
 
 	set +ex
 EOF
@@ -236,6 +237,8 @@ RUN <<-EOF
 
 	source /root/.bashrc
 
+#	git config --global http.postBuffer 524288000
+#	git config --global https.postBuffer 524288000
 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 
 	export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
@@ -265,6 +268,8 @@ RUN <<-EOF
 	mkdir -p funttastic/client
 	cd funttastic/client
 
+#  git config --global http.postBuffer 524288000
+#  git config --global https.postBuffer 524288000
 	git clone -b $FUN_CLIENT_REPOSITORY_BRANCH $FUN_CLIENT_REPOSITORY_URL .
 
   conda env create -f environment.yml --solver=classic
@@ -284,6 +289,8 @@ RUN <<-EOF
 	mkdir -p funttastic/frontend
 	cd funttastic/frontend
 
+#	git config --global http.postBuffer 524288000
+# git config --global https.postBuffer 524288000
 	git clone -b $FUN_FRONTEND_REPOSITORY_BRANCH $FUN_FRONTEND_REPOSITORY_URL .
 
 	yarn install
@@ -331,6 +338,9 @@ RUN <<-EOF
 
 	source /root/.bashrc
 
+
+#	git config --global http.postBuffer 524288000
+#	git config --global https.postBuffer 524288000
 	mkdir -p hummingbot/gateway
 	cd hummingbot/gateway
 
@@ -360,6 +370,8 @@ RUN <<-EOF
 	mkdir -p hummingbot/client
 	cd hummingbot/client
 
+#	git config --global http.postBuffer 524288000
+# git config --global https.postBuffer 524288000
 	git clone -b $HB_CLIENT_REPOSITORY_BRANCH $HB_CLIENT_REPOSITORY_URL .
 
 	MINICONDA_ENVIRONMENT=$(head -1 setup/environment.yml | cut -d' ' -f2)
@@ -857,6 +869,68 @@ log_all () {
 		~/shared/logs/fun-client/all.log \
 		~/shared/logs/hb-gateway/* \
 		~/shared/logs/hb-client/*
+}
+
+log_filebrowser () {
+  tail -f ~/shared/logs/tmux/filebrowser.log
+}
+
+log_front_filebrowser () {
+  tail -f ~/shared/logs/tmux/filebrowser.log
+}
+
+log_back_filebrowser () {
+  tail -f /dev/null
+}
+
+log_hb_gateway () {
+  tail -f ~/shared/logs/hb-gateway/* \
+    ~/shared/logs/tmux/hb-gateway.log
+}
+
+log_front_hb_gateway () {
+  tail -f ~/shared/logs/tmux/hb-gateway.log
+}
+
+log_back_hb_gateway () {
+  tail -f ~/shared/logs/hb-gateway/*
+}
+
+log_hb_client () {
+  tail -f ~/shared/logs/hb-client/*
+}
+
+log_front_hb_client () {
+  tail -f /dev/null
+}
+
+log_back_hb_client () {
+  tail -f ~/shared/logs/hb-client/*
+}
+
+log_fun_frontend () {
+  tail -f ~/shared/logs/tmux/fun-frontend.log
+}
+
+log_front_fun_frontend () {
+  tail -f ~/shared/logs/tmux/fun-frontend.log
+}
+
+log_back_fun_frontend () {
+  tail -f /dev/null
+}
+
+log_fun_client () {
+  tail -f ~/shared/logs/fun-client/all.log \
+    ~/shared/logs/tmux/fun-client.log
+}
+
+log_front_fun_client () {
+  tail -f ~/shared/logs/tmux/fun-client.log
+}
+
+log_back_fun_client () {
+  tail -f ~/shared/logs/fun-client/all.log
 }
 
 quick_deploy_fun_hb_client () {
