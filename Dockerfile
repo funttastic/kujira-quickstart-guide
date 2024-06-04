@@ -55,6 +55,7 @@ RUN <<-EOF
 		python3 \
 		python3-pip \
 		python3-dev \
+		libarchive-dev \
 		libusb-1.0 \
 		libssl-dev \
 		pkg-config \
@@ -266,11 +267,7 @@ RUN <<-EOF
 
 	git clone -b $FUN_CLIENT_REPOSITORY_BRANCH $FUN_CLIENT_REPOSITORY_URL .
 
-#  conda env create -f environment.yml
-	conda create --name funttastic python=3.11
-	conda activate funttastic
-	conda install pip -y
-	pip install -r requirements.txt
+  conda env create -f environment.yml --solver=classic
 
 	mkdir -p resources/certificates
 	cp resources/configuration/production.example.yml resources/configuration/production.yml
@@ -373,7 +370,7 @@ RUN <<-EOF
 	fi
 	echo "export MINICONDA_ENVIRONMENT=$MINICONDA_ENVIRONMENT" >> /root/.bashrc
 
-	conda env create -f setup/environment.yml
+	conda env create -f setup/environment.yml --solver=classic
 	conda clean -tipy
 	rm -rf /root/.cache
 
