@@ -43,7 +43,7 @@ standalone_install() {
 	sudo -u $USER -i <<USER
 		env
 		source /home/$USER/.bashrc
-		source /root/temporary/standalone_install.sh
+		source /tmp/standalone_install.sh
 		# Forward the arguments to the install function
 		install "${args[@]}"
 USER
@@ -188,7 +188,7 @@ pre_install() {
 
 	ADMIN_EMAIL=${ADMIN_EMAIL:-"noreply@example.com"}
 
-	USER=${USER:-"user"}
+	export USER=${USER:-"user"}
 
 	if [ -z "$DOMAIN" ]; then
     USE_VALID_SSL_CERTIFICATES="FALSE"
@@ -234,6 +234,7 @@ pre_install() {
 		curl \
 		gcc \
 		git \
+		gnutls-bin \
 		jq \
 		less \
 		multitail \
@@ -250,6 +251,7 @@ pre_install() {
 		python3-certbot-nginx \
 		python3-dev \
 		python3-pip \
+		sudo \
 		tmux \
 		tree \
 		vim
@@ -423,10 +425,13 @@ install() {
 			;;
 	esac
 
+	MINICONDA_EXTENSION=$FILE_EXTENSION
+
 	echo "export ARCHITECTURE=$ARCHITECTURE" >> /home/$USER/.bashrc
 	echo "export OS=$OS" >> /home/$USER/.bashrc
 	echo "export FILE_EXTENSION=$FILE_EXTENSION" >> /home/$USER/.bashrc
 	echo "export IS_RASPBERRY=$IS_RASPBERRY" >> /home/$USER/.bashrc
+	echo "export MINICONDA_EXTENSION=$MINICONDA_EXTENSION" >> /home/$USER/.bashrc
 
 	if [ "$ARCHITECTURE" == "aarch64" ]
 	then
@@ -458,6 +463,8 @@ install() {
 
 	source /home/$USER/.bashrc
 
+	git config --global http.postBuffer 524288000
+  git config --global https.postBuffer 524288000
 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 
 	export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
@@ -483,7 +490,7 @@ install() {
 
 	git clone -b $FUN_CLIENT_REPOSITORY_BRANCH $FUN_CLIENT_REPOSITORY_URL .
 
-	conda env create -f environment.yml
+	conda env create -f environment.yml --solver=classic
 
 	conda activate funttastic
 
@@ -571,7 +578,7 @@ CSS
 	fi
 	echo "export MINICONDA_ENVIRONMENT=$MINICONDA_ENVIRONMENT" >> /home/$USER/.bashrc
 
-	conda env create -f setup/environment.yml
+	conda env create -f setup/environment.yml --solver=classic
 	conda clean -tipy
 	rm -rf /home/$USER/.cache
 
@@ -1112,7 +1119,7 @@ SCRIPT
 	cat <<'SCRIPT' > /home/$USER/shared/scripts/initialize.sh
 #!/bin/bash
 
-source /home/$USER/shared/scripts/functions.sh
+	source /home/$USER/shared/scripts/functions.sh
 
 SCRIPT
 
