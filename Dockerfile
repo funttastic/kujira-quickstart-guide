@@ -874,6 +874,24 @@ log_all () {
 		~/shared/logs/hb-client/*
 }
 
+log_front_all () {
+  tail -f \
+    ~/shared/logs/tmux/fun-frontend.log \
+    ~/shared/logs/tmux/filebrowser.log \
+    ~/shared/logs/tmux/fun-client.log \
+    ~/shared/logs/tmux/hb-gateway.log
+}
+
+log_back_all () {
+  tail -f \
+    ~/shared/logs/fun-client/info.log \
+    ~/shared/logs/fun-client/warning.log \
+    ~/shared/logs/fun-client/error.log \
+    ~/shared/logs/fun-client/critical.log \
+    ~/shared/logs/hb-gateway/* \
+    ~/shared/logs/hb-client/*
+}
+
 log_filebrowser () {
   tail -f ~/shared/logs/tmux/filebrowser.log
 }
