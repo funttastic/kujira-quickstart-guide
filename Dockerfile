@@ -861,7 +861,7 @@ authenticate() {
 }
 
 log_all () {
-	tail -f \
+	tail -n 0 -f \
 		~/shared/logs/tmux/fun-frontend.log \
 		~/shared/logs/tmux/filebrowser.log \
 		~/shared/logs/tmux/fun-client.log \
@@ -875,7 +875,7 @@ log_all () {
 }
 
 log_front_all () {
-  tail -f \
+  tail -n 0 -f \
     ~/shared/logs/tmux/fun-frontend.log \
     ~/shared/logs/tmux/filebrowser.log \
     ~/shared/logs/tmux/fun-client.log \
@@ -883,7 +883,7 @@ log_front_all () {
 }
 
 log_back_all () {
-  tail -f \
+  tail -n 0 -f \
     ~/shared/logs/fun-client/info.log \
     ~/shared/logs/fun-client/warning.log \
     ~/shared/logs/fun-client/error.log \
@@ -893,57 +893,57 @@ log_back_all () {
 }
 
 log_filebrowser () {
-  tail -f ~/shared/logs/tmux/filebrowser.log
+  tail -n 0 -f ~/shared/logs/tmux/filebrowser.log
 }
 
 log_front_filebrowser () {
-  tail -f ~/shared/logs/tmux/filebrowser.log
+  tail -n 0 -f ~/shared/logs/tmux/filebrowser.log
 }
 
 log_back_filebrowser () {
-  tail -f /dev/null
+  tail -n 0 -f /dev/null
 }
 
 log_hb_gateway () {
-  tail -f \
+  tail -n 0 -f \
     ~/shared/logs/tmux/hb-gateway.log \
     ~/shared/logs/hb-gateway/*
 }
 
 log_front_hb_gateway () {
-  tail -f ~/shared/logs/tmux/hb-gateway.log
+  tail -n 0 -f ~/shared/logs/tmux/hb-gateway.log
 }
 
 log_back_hb_gateway () {
-  tail -f ~/shared/logs/hb-gateway/*
+  tail -n 0 -f ~/shared/logs/hb-gateway/*
 }
 
 log_hb_client () {
-  tail -f ~/shared/logs/hb-client/*
+  tail -n 0 -f ~/shared/logs/hb-client/*
 }
 
 log_front_hb_client () {
-  tail -f /dev/null
+  tail -n 0 -f /dev/null
 }
 
 log_back_hb_client () {
-  tail -f ~/shared/logs/hb-client/*
+  tail -n 0 -f ~/shared/logs/hb-client/*
 }
 
 log_fun_frontend () {
-  tail -f ~/shared/logs/tmux/fun-frontend.log
+  tail -n 0 -f ~/shared/logs/tmux/fun-frontend.log
 }
 
 log_front_fun_frontend () {
-  tail -f ~/shared/logs/tmux/fun-frontend.log
+  tail -n 0 -f ~/shared/logs/tmux/fun-frontend.log
 }
 
 log_back_fun_frontend () {
-  tail -f /dev/null
+  tail -n 0 -f /dev/null
 }
 
 log_fun_client () {
-  tail -f \
+  tail -n 0 -f \
     ~/shared/logs/tmux/fun-client.log \
     ~/shared/logs/fun-client/info.log \
     ~/shared/logs/fun-client/warning.log \
@@ -952,11 +952,11 @@ log_fun_client () {
 }
 
 log_front_fun_client () {
-  tail -f ~/shared/logs/tmux/fun-client.log
+  tail -n 0 -f ~/shared/logs/tmux/fun-client.log
 }
 
 log_back_fun_client () {
-  tail -f \
+  tail -n 0 -f \
     ~/shared/logs/fun-client/info.log \
     ~/shared/logs/fun-client/warning.log \
     ~/shared/logs/fun-client/error.log \
