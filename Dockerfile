@@ -866,7 +866,10 @@ log_all () {
 		~/shared/logs/tmux/filebrowser.log \
 		~/shared/logs/tmux/fun-client.log \
 		~/shared/logs/tmux/hb-gateway.log \
-		~/shared/logs/fun-client/all.log \
+		~/shared/logs/fun-client/info.log \
+		~/shared/logs/fun-client/warning.log \
+		~/shared/logs/fun-client/error.log \
+		~/shared/logs/fun-client/critical.log \
 		~/shared/logs/hb-gateway/* \
 		~/shared/logs/hb-client/*
 }
@@ -884,8 +887,9 @@ log_back_filebrowser () {
 }
 
 log_hb_gateway () {
-  tail -f ~/shared/logs/hb-gateway/* \
-    ~/shared/logs/tmux/hb-gateway.log
+  tail -f \
+    ~/shared/logs/tmux/hb-gateway.log \
+    ~/shared/logs/hb-gateway/*
 }
 
 log_front_hb_gateway () {
@@ -921,8 +925,12 @@ log_back_fun_frontend () {
 }
 
 log_fun_client () {
-  tail -f ~/shared/logs/fun-client/all.log \
-    ~/shared/logs/tmux/fun-client.log
+  tail -f \
+    ~/shared/logs/tmux/fun-client.log \
+    ~/shared/logs/fun-client/info.log \
+    ~/shared/logs/fun-client/warning.log \
+    ~/shared/logs/fun-client/error.log \
+    ~/shared/logs/fun-client/critical.log
 }
 
 log_front_fun_client () {
@@ -930,7 +938,11 @@ log_front_fun_client () {
 }
 
 log_back_fun_client () {
-  tail -f ~/shared/logs/fun-client/all.log
+  tail -f \
+    ~/shared/logs/fun-client/info.log \
+    ~/shared/logs/fun-client/warning.log \
+    ~/shared/logs/fun-client/error.log \
+    ~/shared/logs/fun-client/critical.log
 }
 
 quick_deploy_fun_hb_client () {
