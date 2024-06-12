@@ -986,7 +986,7 @@ escape_string() {
 
 	for ((i=0; i<${#string}; i++)); do
 		character="${string:i:1}"
-		if [[ $symbols =/home/$USER "$character" ]]; then
+		if [[ $symbols =~ "$character" ]]; then
 #			ord=$(printf '%d' "'$character")
 #			escaped_string+="\\$ord"
 			escaped_string+="\\$character"
