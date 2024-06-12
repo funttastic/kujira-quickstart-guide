@@ -6,34 +6,32 @@
 
 # To test it, you can create a docker ubuntu container as following:
 
-#!/bin/bash
-
-image_name=ubuntu
-#image_name=test
-container_name=standalone-fun-kuji-hb
-
-#./scripts/utils/destroy-all-containers-and-images.sh
-docker rm -f $container_name
-
-docker run \
-	-dit \
-	--log-opt max-size=10m \
-	--log-opt max-file=5 \
-	--name $container_name \
-	--network "bridge" \
-	--mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
-	-p "50000":"50000" \
-	-p "50001":"50001" \
-	-p "50002":"50002" \
-	-p "15888":"15888" \
-	-p "50022":"22" \
-	$image_name:latest \
-	tail -f /dev/null
-
-docker cp ./scripts/standalone_install.sh $container_name:/tmp/standalone_install.sh
-docker exec -it $container_name chmod +x /tmp/standalone_install.sh
-docker exec -it $container_name chmod 777 /tmp/standalone_install.sh
-docker exec -it $container_name bash -c "source /tmp/standalone_install.sh && fun_standalone_install --username=<username> --password=<password> --auto-sign-in=TRUE --lock-apt=FALSE"
+#image_name=ubuntu
+##image_name=test
+#container_name=standalone-fun-kuji-hb
+#
+##./scripts/utils/destroy-all-containers-and-images.sh
+#docker rm -f $container_name
+#
+#docker run \
+#	-dit \
+#	--log-opt max-size=10m \
+#	--log-opt max-file=5 \
+#	--name $container_name \
+#	--network "bridge" \
+#	--mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
+#	-p "50000":"50000" \
+#	-p "50001":"50001" \
+#	-p "50002":"50002" \
+#	-p "15888":"15888" \
+#	-p "50022":"22" \
+#	$image_name:latest \
+#	tail -f /dev/null
+#
+#docker cp ./scripts/standalone_install.sh $container_name:/tmp/standalone_install.sh
+#docker exec -it $container_name chmod +x /tmp/standalone_install.sh
+#docker exec -it $container_name chmod 777 /tmp/standalone_install.sh
+#docker exec -it $container_name bash -c "source /tmp/standalone_install.sh && fun_standalone_install --username=<username> --password=<password> --auto-sign-in=TRUE --lock-apt=FALSE"
 
 
 fun_standalone_install() {
