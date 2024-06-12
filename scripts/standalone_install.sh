@@ -6,53 +6,58 @@
 
 # To test it, you can create a docker ubuntu container as following:
 
-#image_name=ubuntu
-#container_name=standalone-fun-kuji-hb
-#
-#docker rm -f $container_name
-#
-#docker run \
-#
-#	-dit \
-#	--log-opt max-size=10m \
-#	--log-opt max-file=5 \
-#	--name $container_name \
-#	--network "bridge" \
-#	--mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
-#	-p "50000":"50000" \
-#	-p "50001":"50001" \
-#	-p "50002":"50002" \
-#	-p "15888":"15888" \
-#	-p "50022":"22" \
-#	$image_name:latest \
-#	tail -f /dev/null
-#
-#docker exec -it $container_name mkdir /home/$USER/temporary
-#docker cp ./scripts/standalone_install.sh $container_name:/home/$USER/temporary/standalone_install.sh
-#docker exec -it $container_name chmod +x /home/$USER/temporary/standalone_install.sh
-#docker exec -it $container_name chmod 777 /home/$USER/temporary/standalone_install.sh
-#docker exec -it $container_name bash -c "source /home/$USER/temporary/standalone_install.sh && standalone_install --username=<username> --password=<password> --auto-sign-in=TRUE --lock-apt=FALSE"
+#!/bin/bash
 
-standalone_install() {
+image_name=ubuntu
+#image_name=test
+container_name=standalone-fun-kuji-hb
+
+#./scripts/utils/destroy-all-containers-and-images.sh
+docker rm -f $container_name
+
+docker run \
+	-dit \
+	--log-opt max-size=10m \
+	--log-opt max-file=5 \
+	--name $container_name \
+	--network "bridge" \
+	--mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
+	-p "50000":"50000" \
+	-p "50001":"50001" \
+	-p "50002":"50002" \
+	-p "15888":"15888" \
+	-p "50022":"22" \
+	$image_name:latest \
+	tail -f /dev/null
+
+docker cp ./scripts/standalone_install.sh $container_name:/tmp/standalone_install.sh
+docker exec -it $container_name chmod +x /tmp/standalone_install.sh
+docker exec -it $container_name chmod 777 /tmp/standalone_install.sh
+docker exec -it $container_name bash -c "source /tmp/standalone_install.sh && fun_standalone_install --username=<username> --password=<password> --auto-sign-in=TRUE --lock-apt=FALSE"
+
+
+fun_standalone_install() {
 	set -ex
 
 	args=("$@")
 
-	pre_install "${args[@]}"
+	fun_pre_install "${args[@]}"
+
+	exit
 
 	sudo -u $USER -i <<USER
 		env
 		source /home/$USER/.bashrc
 		source /tmp/standalone_install.sh
 		# Forward the arguments to the install function
-		install "${args[@]}"
+		fun_install "${args[@]}"
 USER
 
-	post_install "${args[@]}"
+	fun_post_install "${args[@]}"
 }
 
 
-pre_install() {
+fun_pre_install() {
 	set -ex
 
 	chsh -s /bin/bash
@@ -385,7 +390,7 @@ pre_install() {
 NGINX
 }
 
-install() {
+fun_install() {
 	set -ex
 
 	cd /home/$USER
@@ -1252,7 +1257,7 @@ SCRIPT
 	ln -s /home/$USER/shared/hummingbot/client/pmm_scripts /home/$USER/hummingbot/client/pmm_scripts
 }
 
-post_install() {
+fun_post_install() {
 	if [ "$LOCK_APT" == "TRUE" ]
 	then
 		apt autoremove -y
