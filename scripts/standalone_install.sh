@@ -6,6 +6,8 @@
 
 # To test it, you can create a docker ubuntu container as following:
 
+#!/bin/bash
+
 #image_name=ubuntu
 ##image_name=test
 #container_name=standalone-fun-kuji-hb
@@ -37,152 +39,155 @@
 fun_standalone_install() {
 	set -ex
 
-	args=("$@")
+	local arguments=$*
 
-	fun_pre_install "${args[@]}"
+	fun_export_variables $arguments
 
-	exit
+	fun_pre_install $arguments
 
 	sudo -u $USER -i <<USER
-		env
+		set -ex
 		source /home/$USER/.bashrc
 		source /tmp/standalone_install.sh
-		# Forward the arguments to the install function
-		fun_install "${args[@]}"
+		fun_install $arguments
+		set +ex
 USER
 
-	fun_post_install "${args[@]}"
+	fun_post_install $arguments
 }
 
+fun_export_variables() {
+	ADMIN_USERNAME=""
+	ADMIN_PASSWORD=""
+	ADMIN_EMAIL=""
+
+	DOMAIN=""
+
+	AUTO_SIGN_IN=""
+	LOCK_APT=""
+
+	FUN_FRONTEND_REPOSITORY_URL=""
+	FUN_FRONTEND_REPOSITORY_BRANCH=""
+	FUN_FRONTEND_COMMAND=""
+	FUN_FRONTEND_PORT=""
+
+	FUN_CLIENT_REPOSITORY_URL=""
+	FUN_CLIENT_REPOSITORY_BRANCH=""
+	FUN_CLIENT_COMMAND=""
+	FUN_CLIENT_PORT=""
+
+	HB_GATEWAY_REPOSITORY_URL=""
+	HB_GATEWAY_REPOSITORY_BRANCH=""
+	HB_GATEWAY_COMMAND=""
+	HB_GATEWAY_PORT=""
+
+	HB_CLIENT_REPOSITORY_URL=""
+	HB_CLIENT_REPOSITORY_BRANCH=""
+	HB_CLIENT_COMMAND=""
+
+	FILEBROWSER_COMMAND=""
+	FILEBROWSER_PORT=""
+
+	USE_VALID_SSL_CERTIFICATES="FALSE"
+
+	#--------------------------------------------------
+	while [[ $# -gt 0 ]]; do
+		case "$1" in
+			--username=*)
+				set +x
+				export ADMIN_USERNAME="${1#*=}"
+				set -x
+				;;
+			--password=*)
+				set +x
+				export ADMIN_PASSWORD="${1#*=}"
+				export PASSWORD="${1#*=}"
+				set -x
+				;;
+			--email=*)
+				export ADMIN_EMAIL="${1#*=}"
+				;;
+			--user=*)
+				export USER="${1#*=}"
+				;;
+			--domain=*)
+				export DOMAIN="${1#*=}"
+				;;
+			--auto-sign-in=*)
+				export AUTO_SIGN_IN="${1#*=}"
+				;;
+			--lock-apt=*)
+				export LOCK_APT="${1#*=}"
+				;;
+			--fun-frontend-repository-url=*)
+				export FUN_FRONTEND_REPOSITORY_URL="${1#*=}"
+				;;
+			--fun-frontend-repository-branch=*)
+				export FUN_FRONTEND_REPOSITORY_BRANCH="${1#*=}"
+				;;
+			--fun-frontend-command=*)
+				export FUN_FRONTEND_COMMAND="${1#*=}"
+				;;
+			--fun-frontend-port=*)
+				export FUN_FRONTEND_PORT="${1#*=}"
+				;;
+			--fun-client-repository-url=*)
+				export FUN_CLIENT_REPOSITORY_URL="${1#*=}"
+				;;
+			--fun-client-repository-branch=*)
+				export FUN_CLIENT_REPOSITORY_BRANCH="${1#*=}"
+				;;
+			--fun-client-command=*)
+				export FUN_CLIENT_COMMAND="${1#*=}"
+				;;
+			--fun-client-port=*)
+				export FUN_CLIENT_PORT="${1#*=}"
+				;;
+			--hb-gateway-repository-url=*)
+				export HB_GATEWAY_REPOSITORY_URL="${1#*=}"
+				;;
+			--hb-gateway-repository-branch=*)
+				export HB_GATEWAY_REPOSITORY_BRANCH="${1#*=}"
+				;;
+			--hb-gateway-command=*)
+				export HB_GATEWAY_COMMAND="${1#*=}"
+				;;
+			--hb-gateway-port=*)
+				export HB_GATEWAY_PORT="${1#*=}"
+				;;
+			--hb-client-repository-url=*)
+				export HB_CLIENT_REPOSITORY_URL="${1#*=}"
+				;;
+			--hb-client-repository-branch=*)
+				export HB_CLIENT_REPOSITORY_BRANCH="${1#*=}"
+				;;
+			--hb-client-command=*)
+				export HB_CLIENT_COMMAND="${1#*=}"
+				;;
+			--filebrowser-command=*)
+				export FILEBROWSER_COMMAND="${1#*=}"
+				;;
+			--filebrowser-port=*)
+				export FILEBROWSER_PORT="${1#*=}"
+				;;
+			*)
+		esac
+		shift
+	done
+	export USER=${ADMIN_USERNAME:-"user"}
+}
 
 fun_pre_install() {
 	set -ex
+
+	source /root/.bashrc
 
 	chsh -s /bin/bash
 	rm /usr/bin/sh
 	ln -s /bin/bash /usr/bin/sh
 
 	sed -i 's/^\([[:space:]]*\[ -z "\$PS1" \] && return\)/#\1/' ~/.bashrc
-
-	#--------------------------------------------------
-
-	local ADMIN_USERNAME=""
-	local ADMIN_PASSWORD=""
-	local ADMIN_EMAIL=""
-
-	local DOMAIN=""
-
-	local AUTO_SIGN_IN=""
-	local LOCK_APT=""
-
-	local FUN_FRONTEND_REPOSITORY_URL=""
-	local FUN_FRONTEND_REPOSITORY_BRANCH=""
-	local FUN_FRONTEND_COMMAND=""
-	local FUN_FRONTEND_PORT=""
-
-	local FUN_CLIENT_REPOSITORY_URL=""
-	local FUN_CLIENT_REPOSITORY_BRANCH=""
-	local FUN_CLIENT_COMMAND=""
-	local FUN_CLIENT_PORT=""
-
-	local HB_GATEWAY_REPOSITORY_URL=""
-	local HB_GATEWAY_REPOSITORY_BRANCH=""
-	local HB_GATEWAY_COMMAND=""
-	local HB_GATEWAY_PORT=""
-
-	local HB_CLIENT_REPOSITORY_URL=""
-	local HB_CLIENT_REPOSITORY_BRANCH=""
-	local HB_CLIENT_COMMAND=""
-
-	local FILEBROWSER_COMMAND=""
-	local FILEBROWSER_PORT=""
-
-	local USE_VALID_SSL_CERTIFICATES="FALSE"
-
-	#--------------------------------------------------
-
-	while [[ $# -gt 0 ]]; do
-		case "$1" in
-			--username=*)
-				set +x
-				ADMIN_USERNAME="${1#*=}"
-				set -x
-				;;
-			--password=*)
-				set +x
-				ADMIN_PASSWORD="${1#*=}"
-				set -x
-				;;
-			--email=*)
-				ADMIN_EMAIL="${1#*=}"
-				;;
-			--user=*)
-				USER="${1#*=}"
-				;;
-			--domain=*)
-				DOMAIN="${1#*=}"
-				;;
-			--auto-sign-in=*)
-				AUTO_SIGN_IN="${1#*=}"
-				;;
-			--lock-apt=*)
-				LOCK_APT="${1#*=}"
-				;;
-			--fun-frontend-repository-url=*)
-				FUN_FRONTEND_REPOSITORY_URL="${1#*=}"
-				;;
-			--fun-frontend-repository-branch=*)
-				FUN_FRONTEND_REPOSITORY_BRANCH="${1#*=}"
-				;;
-			--fun-frontend-command=*)
-				FUN_FRONTEND_COMMAND="${1#*=}"
-				;;
-			--fun-frontend-port=*)
-				FUN_FRONTEND_PORT="${1#*=}"
-				;;
-			--fun-client-repository-url=*)
-				FUN_CLIENT_REPOSITORY_URL="${1#*=}"
-				;;
-			--fun-client-repository-branch=*)
-				FUN_CLIENT_REPOSITORY_BRANCH="${1#*=}"
-				;;
-			--fun-client-command=*)
-				FUN_CLIENT_COMMAND="${1#*=}"
-				;;
-			--fun-client-port=*)
-				FUN_CLIENT_PORT="${1#*=}"
-				;;
-			--hb-gateway-repository-url=*)
-				HB_GATEWAY_REPOSITORY_URL="${1#*=}"
-				;;
-			--hb-gateway-repository-branch=*)
-				HB_GATEWAY_REPOSITORY_BRANCH="${1#*=}"
-				;;
-			--hb-gateway-command=*)
-				HB_GATEWAY_COMMAND="${1#*=}"
-				;;
-			--hb-gateway-port=*)
-				HB_GATEWAY_PORT="${1#*=}"
-				;;
-			--hb-client-repository-url=*)
-				HB_CLIENT_REPOSITORY_URL="${1#*=}"
-				;;
-			--hb-client-repository-branch=*)
-				HB_CLIENT_REPOSITORY_BRANCH="${1#*=}"
-				;;
-			--hb-client-command=*)
-				HB_CLIENT_COMMAND="${1#*=}"
-				;;
-			--filebrowser-command=*)
-				FILEBROWSER_COMMAND="${1#*=}"
-				;;
-			--filebrowser-port=*)
-				FILEBROWSER_PORT="${1#*=}"
-				;;
-			*)
-		esac
-		shift
-	done
+	sed -i '/case \$- in/,/esac/s/^/#/' ~/.bashrc
 
 	#--------------------------------------------------
 
@@ -259,11 +264,13 @@ fun_pre_install() {
 		tree \
 		vim
 
-	#--------------------------------------------------
 
+	#--------------------------------------------------
 	adduser --gecos "" --disabled-password --home "/home/$USER" $USER
-	echo "$USER:$ADMIN_PASSWORD" | chpasswd
 	usermod -aG sudo $USER
+	set +x
+	echo "$USER:$ADMIN_PASSWORD" | sudo chpasswd
+	set -x
 
 	cp /etc/skel/.bashrc "/home/$USER"
 	chown $USER:$USER "/home/$USER/.bashrc"
@@ -384,6 +391,11 @@ fun_pre_install() {
 
 	#--------------------------------------------------
 
+	curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
+	rm -f get.sh
+
+	#--------------------------------------------------
+
 	cat <<'NGINX' > "/etc/nginx/sites-available/funttastic"
 NGINX
 }
@@ -391,9 +403,13 @@ NGINX
 fun_install() {
 	set -ex
 
+#	local arguments=$@
+#	fun_export_variables $arguments
+
 	cd /home/$USER
 
 	sed -i 's/^\([[:space:]]*\[ -z "\$PS1" \] && return\)/#\1/' /home/$USER/.bashrc
+	sed -i '/case \$- in/,/esac/s/^/#/' ~/.bashrc
 
 	source /home/$USER/.bashrc
 
@@ -452,8 +468,8 @@ fun_install() {
 	rm "/home/$USER/miniconda.$MINICONDA_EXTENSION"
 
 	echo 'export PATH=/home/$USER/miniconda3/bin:$PATH' >> /home/$USER/.bashrc
-	source /home/$USER/.bashrc
 
+	. /home/$USER/.bashrc
 	conda update -n base -c conda-forge conda -y
 	conda clean -tipy
 
@@ -468,6 +484,10 @@ fun_install() {
 
 	git config --global http.postBuffer 524288000
   git config --global https.postBuffer 524288000
+  git config --global core.compression 0
+  git config --global http.lowSpeedLimit 0
+  git config --global http.lowSpeedTime 999999
+  git config --global http.version HTTP/1.1
 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 
 	export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
@@ -491,7 +511,7 @@ fun_install() {
 	mkdir -p /home/$USER/funttastic/client
 	cd /home/$USER/funttastic/client
 
-	git clone -b $FUN_CLIENT_REPOSITORY_BRANCH $FUN_CLIENT_REPOSITORY_URL .
+	git clone --depth 1 --no-single-branch -b $FUN_CLIENT_REPOSITORY_BRANCH $FUN_CLIENT_REPOSITORY_URL .
 
 	conda env create -f environment.yml --solver=classic
 
@@ -507,14 +527,15 @@ fun_install() {
 	mkdir -p /home/$USER/funttastic/frontend
 	cd /home/$USER/funttastic/frontend
 
-	git clone -b $FUN_FRONTEND_REPOSITORY_BRANCH $FUN_FRONTEND_REPOSITORY_URL .
+	git clone --depth 1 --no-single-branch -b $FUN_FRONTEND_REPOSITORY_BRANCH $FUN_FRONTEND_REPOSITORY_URL .
 
 	yarn install
+	git rm -r --cached .
 
 	#--------------------------------------------------
 
-	curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
-	rm -f get.sh
+	#curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
+	#rm -f get.sh
 
 	mkdir -p /home/$USER/filebrowser/branding/img
 	cd /home/$USER/filebrowser
@@ -549,7 +570,7 @@ CSS
 	mkdir -p /home/$USER/hummingbot/gateway
 	cd /home/$USER/hummingbot/gateway
 
-	git clone -b $HB_GATEWAY_REPOSITORY_BRANCH $HB_GATEWAY_REPOSITORY_URL .
+	git clone --depth 1 --no-single-branch -b $HB_GATEWAY_REPOSITORY_BRANCH $HB_GATEWAY_REPOSITORY_URL .
 
 	mkdir -p \
 		certs \
@@ -571,7 +592,7 @@ CSS
 	mkdir -p /home/$USER/hummingbot/client
 	cd /home/$USER/hummingbot/client
 
-	git clone -b $HB_CLIENT_REPOSITORY_BRANCH $HB_CLIENT_REPOSITORY_URL .
+	git clone --depth 1 --no-single-branch -b $HB_CLIENT_REPOSITORY_BRANCH $HB_CLIENT_REPOSITORY_URL .
 
 	MINICONDA_ENVIRONMENT=$(head -1 setup/environment.yml | cut -d' ' -f2)
 	if [ -z "$MINICONDA_ENVIRONMENT" ]
@@ -605,6 +626,8 @@ CSS
 	source /home/$USER/.bashrc
 
 	conda activate funttastic
+	cd /home/user/funttastic/client
+	pip install -r requirements.txt
 
 	sed -i -e "/server:/,/port: [0-9]*/ s/port: [0-9]*/port: $FUN_CLIENT_PORT/" /home/$USER/funttastic/client/resources/configuration/production.yml
 	sed -i -e '/logging:/,/use_telegram:/ s/use_telegram:.*/use_telegram: false/' -e '/telegram:/,/enabled:/ s/enabled:.*/enabled: false/' -e '/telegram:/,/listen_commands:/ s/listen_commands:.*/listen_commands: false/' /home/$USER/funttastic/client/resources/configuration/production.yml
@@ -666,7 +689,8 @@ start_fun_client() {
 		tmux send-keys -t "$session" "export PASSWORD=\"$password\"" C-m
 		tmux send-keys -t "$session" "conda activate funttastic" C-m
 		tmux send-keys -t "$session" "cd /home/$USER/funttastic/client" C-m
-		tmux send-keys -t "$session" "$FUN_CLIENT_COMMAND" C-m
+		tmux send-keys -t "$session" "$FUN_CLIENT_COMMAND" ^m
+		tmux send-keys -t "$session"  Enter
 #		tmux set-environment -t "$session" -u PASSWORD
 	fi
 }
@@ -678,8 +702,9 @@ start_hb_gateway() {
 	if [ "$(is_session_running "$session")" = "FALSE" ]; then
 		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> /home/$USER/shared/logs/tmux/$session.log"
 
-		tmux set-environment -t "$session" GATEWAY_PASSPHRASE "$password"
-		tmux send-keys -t "$session" "export GATEWAY_PASSPHRASE=\$(tmux show-environment -t $session GATEWAY_PASSPHRASE | cut -d= -f2)" C-m
+#		tmux set-environment -t "$session" GATEWAY_PASSPHRASE "$password"
+#		tmux send-keys -t "$session" "export GATEWAY_PASSPHRASE=\"$(tmux show-environment GATEWAY_PASSPHRASE | cut -d= -f2)\"" C-m
+		tmux send-keys -t "$session" "export GATEWAY_PASSPHRASE=\"$password\"" C-m
 		tmux send-keys -t "$session" "cd /home/$USER/hummingbot/gateway" C-m
 		tmux send-keys -t "$session" "$HB_GATEWAY_COMMAND" C-m
 		tmux set-environment -t "$session" -u GATEWAY_PASSPHRASE
@@ -1122,7 +1147,7 @@ SCRIPT
 	cat <<'SCRIPT' > /home/$USER/shared/scripts/initialize.sh
 #!/bin/bash
 
-	source /home/$USER/shared/scripts/functions.sh
+source /home/$USER/shared/scripts/functions.sh
 
 SCRIPT
 
@@ -1130,9 +1155,11 @@ SCRIPT
 
 	source /home/$USER/.bashrc
 
+
 	#--------------------------------------------------
 
-	set +x
+	local arguments=$@
+	fun_export_variables $arguments
 
 	source /home/$USER/.bashrc
 
@@ -1270,7 +1297,7 @@ fun_post_install() {
 			/var/tmp/*
 	fi
 
-	#--------------------------------------------------
+	echo "Instalation Finished!"
 
 	source /home/$USER/.bashrc && start && keep
 }
