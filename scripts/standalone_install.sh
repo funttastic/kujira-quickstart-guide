@@ -46,14 +46,16 @@ fun_standalone_install() {
 	fun_pre_install $arguments
 
 	sudo -u $USER -i <<USER
-		set -ex
 		source /home/$USER/.bashrc
 		source /tmp/standalone_install.sh
 		fun_install $arguments
-		set +ex
 USER
 
 	fun_post_install $arguments
+
+	sudo -u $USER -i <<USER
+		fun_start
+USER
 }
 
 fun_export_variables() {
@@ -1297,7 +1299,13 @@ fun_post_install() {
 			/var/tmp/*
 	fi
 
-	echo "Instalation Finished!"
+	echo "Installation Finished!"
+}
 
-	source /home/$USER/.bashrc && start && keep
+fun_start() {
+	set -ex
+	source /home/$USER/.bashrc
+	start
+	keep
+	set +ex
 }
