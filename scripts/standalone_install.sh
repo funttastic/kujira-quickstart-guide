@@ -1299,6 +1299,20 @@ fun_post_install() {
 			/var/tmp/*
 	fi
 
+	cat <<'SCRIPT' > /root/shared/scripts/entrypoint.sh
+#!/bin/bash
+
+if [ "$IS_FIRST_RUN" == "TRUE" ]
+then
+	change_user_and_password $ADMIN_USERNAME $ADMIN_PASSWORD
+fi
+
+sudo -u $ADMIN_USERNAME -i <<USER
+	source ~/.bashrc
+	start && keep
+USER
+SCRIPT
+
 	echo "Installation Finished!"
 }
 

@@ -50,6 +50,8 @@ RUN <<-EOF
 
   fun_standalone_install --username=$ADMIN_USERNAME --password=$ADMIN_PASSWORD --email=$ADMIN_EMAIL --domain=$DOMAIN --auto-sign-in=$AUTO_SIGN_IN --lock-apt=$LOCK_APT
 
+  export IS_FIRST_RUN=TRUE
+
 	set +ex
 EOF
 
