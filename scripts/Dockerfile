@@ -52,9 +52,17 @@ RUN <<-EOF
 
   export IS_FIRST_RUN=TRUE
 
+  echo "\n\n\n"
+  env
+  echo "\n\n\n"
+
 	set +ex
 EOF
 
-ENTRYPOINT ["/root/shared/scripts/entrypoint.sh"]
+EXPOSE $FUN_FRONTEND_PORT
+EXPOSE $FILEBROWSER_PORT
 
-CMD ["start && keep"]
+#ENTRYPOINT ["/root/shared/scripts/functions.sh"]
+#CMD ["start_and_keep"]
+
+CMD ["tail -f /dev/null"]

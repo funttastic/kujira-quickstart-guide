@@ -52,10 +52,6 @@ fun_standalone_install() {
 USER
 
 	fun_post_install $arguments
-
-	sudo -u $USER -i <<USER
-		fun_start
-USER
 }
 
 fun_export_variables() {
@@ -837,6 +833,11 @@ start() {
 	done
 }
 
+start_and_keep() {
+	start
+	keep
+}
+
 is_session_running() {
 	local session="$1"
 
@@ -1299,27 +1300,110 @@ fun_post_install() {
 			/var/tmp/*
 	fi
 
-	cat <<'SCRIPT' > /root/shared/scripts/entrypoint.sh
+	cat <<'SCRIPT' > /root/shared/scripts/functions.sh
 #!/bin/bash
+
+change_user_and_password() {
+    set -ex
+
+    local username=$1
+    local password=$2
+    local original_username="user"
+
+    usermod -l $username $original_username
+    groupmod -n $username $original_username
+    usermod -m -d /home/$username $username
+    echo "$username:$password" | sudo -i chpasswd
+
+    sed -i "s|/home/$username|~|g" ~/.bashrc
+
+    sudo -u $ADMIN_USERNAME -i <<USER
+			set -ex
+
+			source ~/.bashrc
+
+			# Updating crendentials for authentication
+
+			escaped_admin_username=$(escape_string "${ADMIN_USERNAME}")
+			escaped_admin_password=$(escape_string "${ADMIN_PASSWORD}")
+
+			credentials_json="{\"username\":\"$escaped_admin_username\",\"password\":\"$escaped_admin_password\"}"
+
+			ENCRYPTED_CREDENTIALS_BASE64=$(encrypt_message "$credentials_json")
+
+			# Necessary because the cipher generated with OpenSSL is not always the same
+			NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM=$(generate_sha256sum "$credentials_json")
+
+			sed -i "s|export ENCRYPTED_CREDENTIALS=\".*\"|export ENCRYPTED_CREDENTIALS=\"$ENCRYPTED_CREDENTIALS_BASE64\"|" ~/.bashrc
+			sed -i "s|export NON_ENCRYPTED_CREDENTIALS_SHA256SUM=\".*\"|export NON_ENCRYPTED_CREDENTIALS_SHA256SUM=\"$NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM\"|" ~/.bashrc
+
+			# Updating FileBrowser credentials
+
+			filebrowser users update $original_username --password $ADMIN_PASSWORD --username $username
+
+			# Updating certificates
+			conda activate funttastic
+			python ~/funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $ADMIN_PASSWORD --cert-path ~/shared/common/certificates
+
+			# Updating Hummingbot Client credentials
+
+			python ~/funttastic/client/resources/scripts/generate_hb_client_password_verification_file.py -p "$ADMIN_PASSWORD" -d ~/hummingbot/client/conf
+
+			set +ex
+		USER
+		set +ex
+}
+
+generate_valid_ssl_certificates() {
+	set -ex
+
+	certbot --nginx --non-interactive --agree-tos -m $ADMIN_EMAIL -d $DOMAIN
+#	certbot certonly --standalone -d $DOMAIN --non-interactive --agree-tos -m $ADMIN_EMAIL
+
+	ln -s "/etc/letsencrypt/live/$DOMAIN/chain.pem" /home/$ADMIN_USERNAME/shared/common/certificates/ca_cert.pem
+	ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /home/$ADMIN_USERNAME/shared/common/certificates/ca_key.pem
+	ln -s "/etc/letsencrypt/live/$DOMAIN/cert.pem" /home/$ADMIN_USERNAME/shared/common/certificates/client_cert.pem
+	ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /home/$ADMIN_USERNAME/shared/common/certificates/client_key.pem
+	ln -s "/etc/letsencrypt/live/$DOMAIN/cert.pem" /home/$ADMIN_USERNAME/shared/common/certificates/server_cert.pem
+	ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /home/$ADMIN_USERNAME/shared/common/certificates/server_key.pem
+
+	(crontab -l 2>/dev/null; echo "0 0 */30 * * /usr/bin/certbot renew --quiet") | crontab -
+
+	service cron start
+
+	set +ex
+}
+
+start_and_keep() {
+	set -ex
+	sudo -u $ADMIN_USERNAME -i <<USER
+		set -ex
+  	source ~/.bashrc
+  	start_and_keep
+  	set +ex
+  USER
+  set +ex
+}
+
+set -ex
 
 if [ "$IS_FIRST_RUN" == "TRUE" ]
 then
 	change_user_and_password $ADMIN_USERNAME $ADMIN_PASSWORD
+
+	if [ "$USE_VALID_SSL_CERTIFICATES" = "TRUE" ]; then
+		generate_valid_ssl_certificates
+	fi
 fi
 
-sudo -u $ADMIN_USERNAME -i <<USER
-	source ~/.bashrc
-	start && keep
-USER
+if [ "$1" == "start_and_keep" ]
+then
+	start_and_keep
+fi
+
+set +ex
+
 SCRIPT
 
 	echo "Installation Finished!"
-}
-
-fun_start() {
-	set -ex
-	source /home/$USER/.bashrc
-	start
-	keep
-	set +ex
 }
