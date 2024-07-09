@@ -278,7 +278,7 @@ fun_pre_install() {
 	echo -e "\n" >> /home/$USER/.bashrc
 
 	echo "export ADMIN_EMAIL=\"$ADMIN_EMAIL\"" >> /home/$USER/.bashrc
-	echo "export USER=\"$USER\"" >> /home/$USER/.bashrc
+#	echo "export USER=\"$USER\"" >> /home/$USER/.bashrc
 	echo "export DOMAIN=\"$DOMAIN\"" >> /home/$USER/.bashrc
 	echo "export USE_VALID_SSL_CERTIFICATES=\"$USE_VALID_SSL_CERTIFICATES\"" >> /home/$USER/.bashrc
 
@@ -1300,6 +1300,8 @@ fun_post_install() {
 			/var/tmp/*
 	fi
 
+	mkdir -p /root/shared/scripts
+
 	cat <<'SCRIPT' > /root/shared/scripts/functions.sh
 #!/bin/bash
 
@@ -1308,21 +1310,25 @@ change_user_and_password() {
 
     local username=$1
     local password=$2
-    local original_username="user"
+    local default_username="user"
 
-    usermod -l $username $original_username
-    groupmod -n $username $original_username
-    usermod -m -d /home/$username $username
-    echo "$username:$password" | sudo -i chpasswd
+#    usermod -l $username $default_username
+#    groupmod -n $username $default_username
+#    usermod -m -d /home/$username $username
+#		echo "$username:$password" | sudo -i chpasswd
+#		sed -i "s|/home/$default_username|~|g" /home/$username/.bashrc
 
-    sed -i "s|/home/$username|~|g" ~/.bashrc
+    echo "$default_username:$password" | sudo -i chpasswd
 
-    sudo -u $ADMIN_USERNAME -i <<USER
+    sed -i "s|/home/$default_username|~|g" /home/$default_username/.bashrc
+
+#		sudo -u $username -i env ADMIN_USERNAME=$username ADMIN_PASSWORD=$password bash <<'USER'
+    sudo -u $default_username -i env ADMIN_USERNAME=$username ADMIN_PASSWORD=$password bash <<'USER'
 			set -ex
 
 			source ~/.bashrc
 
-			# Updating crendentials for authentication
+			# Updating credentials for authentication
 
 			escaped_admin_username=$(escape_string "${ADMIN_USERNAME}")
 			escaped_admin_password=$(escape_string "${ADMIN_PASSWORD}")
@@ -1350,7 +1356,7 @@ change_user_and_password() {
 			python ~/funttastic/client/resources/scripts/generate_hb_client_password_verification_file.py -p "$ADMIN_PASSWORD" -d ~/hummingbot/client/conf
 
 			set +ex
-		USER
+USER
 		set +ex
 }
 
@@ -1381,7 +1387,7 @@ start_and_keep() {
   	source ~/.bashrc
   	start_and_keep
   	set +ex
-  USER
+USER
   set +ex
 }
 
