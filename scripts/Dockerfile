@@ -39,10 +39,12 @@ RUN :> /root/.bashrc
 
 RUN rm /usr/bin/sh && ln -s /bin/bash /usr/bin/sh
 
+COPY ./standalone_install.sh /tmp/standalone_install.sh
+
 RUN <<-EOF
 	set -ex
 
-  curl -o /tmp/standalone_install.sh https://raw.githubusercontent.com/funttastic/kujira-quickstart-guide/production/scripts/standalone_install.sh
+#  curl -o /tmp/standalone_install.sh https://raw.githubusercontent.com/funttastic/kujira-quickstart-guide/production/scripts/standalone_install.sh
 
   chmod +x /tmp/standalone_install.sh
 
