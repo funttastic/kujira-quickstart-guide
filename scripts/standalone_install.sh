@@ -52,6 +52,10 @@ fun_standalone_install() {
 USER
 
 	fun_post_install $arguments
+
+#	sudo -u $USER -i <<USER
+#		fun_start
+#USER
 }
 
 fun_export_variables() {
@@ -265,9 +269,8 @@ fun_pre_install() {
 
 	#--------------------------------------------------
 	adduser --gecos "" --disabled-password --home "/home/$USER" $USER
-	usermod -aG sudo $USER
 	set +x
-	echo "$USER:$ADMIN_PASSWORD" | sudo chpasswd
+	echo "$USER:$ADMIN_PASSWORD" | chpasswd
 	set -x
 
 	cp /etc/skel/.bashrc "/home/$USER"
@@ -278,7 +281,6 @@ fun_pre_install() {
 	echo -e "\n" >> /home/$USER/.bashrc
 
 	echo "export ADMIN_EMAIL=\"$ADMIN_EMAIL\"" >> /home/$USER/.bashrc
-#	echo "export USER=\"$USER\"" >> /home/$USER/.bashrc
 	echo "export DOMAIN=\"$DOMAIN\"" >> /home/$USER/.bashrc
 	echo "export USE_VALID_SSL_CERTIFICATES=\"$USE_VALID_SSL_CERTIFICATES\"" >> /home/$USER/.bashrc
 
@@ -1302,96 +1304,97 @@ fun_post_install() {
 
 	mkdir -p /root/shared/scripts
 
-	cat <<'SCRIPT' > /root/shared/scripts/functions.sh
+	cat <<'SCRIPT' > /root/shared/scripts/initialize.sh
 #!/bin/bash
 
-change_user_and_password() {
-    set -ex
+source /root/shared/scripts/functions.sh
+SCRIPT
 
+	chmod +x /root/shared/scripts/initialize.sh
+
+	cat <<'SCRIPT' > /root/shared/scripts/functions.sh
+#!/bin/bash
+change_user_and_password() {
     local username=$1
     local password=$2
-    local default_username="user"
+    local current_username="user"
+    local current_password=${3:-asdf}
 
-#    usermod -l $username $default_username
-#    groupmod -n $username $default_username
-#    usermod -m -d /home/$username $username
-#		echo "$username:$password" | sudo -i chpasswd
-#		sed -i "s|/home/$default_username|~|g" /home/$username/.bashrc
+		cd /home/user
+    sudo -u $current_username -i env ADMIN_USERNAME=$username ADMIN_PASSWORD=$password ADMIN_CURRENT_PASSWORD=$current_password bash <<'USER'
+      source ~/.bashrc
 
-    echo "$default_username:$password" | sudo -i chpasswd
+      escaped_admin_username=$(escape_string "${ADMIN_USERNAME}")
+      escaped_admin_password=$(escape_string "${ADMIN_PASSWORD}")
 
-    sed -i "s|/home/$default_username|~|g" /home/$default_username/.bashrc
+      # Changing user password
+      echo -e "$ADMIN_CURRENT_PASSWORD\n$escaped_admin_password\n$escaped_admin_password" | passwd
 
-#		sudo -u $username -i env ADMIN_USERNAME=$username ADMIN_PASSWORD=$password bash <<'USER'
-    sudo -u $default_username -i env ADMIN_USERNAME=$username ADMIN_PASSWORD=$password bash <<'USER'
-			set -ex
+      # Updating credentials
+      credentials_json="{\"username\":\"$escaped_admin_username\",\"password\":\"$escaped_admin_password\"}"
 
-			source ~/.bashrc
+      ENCRYPTED_CREDENTIALS_BASE64=$(encrypt_message "$credentials_json")
+      NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM=$(generate_sha256sum "$credentials_json")
+      sed -i "/export ENCRYPTED_CREDENTIALS=/,/^\s*$/d" ~/.bashrc
+      sed -i "/export NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM=/,/^\s*$/d" ~/.bashrc
+      echo "export ENCRYPTED_CREDENTIALS=\"$ENCRYPTED_CREDENTIALS_BASE64\"" >> /home/$USER/.bashrc
+      echo "export NON_ENCRYPTED_CREDENTIALS_SHA256SUM=\"$NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM\"" >> /home/$USER/.bashrc
 
-			# Updating credentials for authentication
+      # Updating filebrowser credentials
+      filebrowser users update user --username $escaped_admin_username --password $escaped_admin_password -d /home/user/filebrowser/filebrowser.db
 
-			escaped_admin_username=$(escape_string "${ADMIN_USERNAME}")
-			escaped_admin_password=$(escape_string "${ADMIN_PASSWORD}")
+      # Updating certificates
+      conda activate funttastic
+      python ~/funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $escaped_admin_password --cert-path ~/shared/common/certificates
 
-			credentials_json="{\"username\":\"$escaped_admin_username\",\"password\":\"$escaped_admin_password\"}"
-
-			ENCRYPTED_CREDENTIALS_BASE64=$(encrypt_message "$credentials_json")
-
-			# Necessary because the cipher generated with OpenSSL is not always the same
-			NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM=$(generate_sha256sum "$credentials_json")
-
-			sed -i "s|export ENCRYPTED_CREDENTIALS=\".*\"|export ENCRYPTED_CREDENTIALS=\"$ENCRYPTED_CREDENTIALS_BASE64\"|" ~/.bashrc
-			sed -i "s|export NON_ENCRYPTED_CREDENTIALS_SHA256SUM=\".*\"|export NON_ENCRYPTED_CREDENTIALS_SHA256SUM=\"$NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM\"|" ~/.bashrc
-
-			# Updating FileBrowser credentials
-
-			filebrowser users update $original_username --password $ADMIN_PASSWORD --username $username
-
-			# Updating certificates
-			conda activate funttastic
-			python ~/funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $ADMIN_PASSWORD --cert-path ~/shared/common/certificates
-
-			# Updating Hummingbot Client credentials
-
-			python ~/funttastic/client/resources/scripts/generate_hb_client_password_verification_file.py -p "$ADMIN_PASSWORD" -d ~/hummingbot/client/conf
-
-			set +ex
+      # Updating Hummingbot Client credentials
+      conda activate hummingbot
+      python /home/$USER/funttastic/client/resources/scripts/generate_hb_client_password_verification_file.py -p "$escaped_admin_password" -d /home/$USER/hummingbot/client/conf
 USER
-		set +ex
 }
 
 generate_valid_ssl_certificates() {
 	set -ex
 
+  apt remove certbot -y
+  apt install python3.12-venv -y
+  python3 -m venv /opt/certbot/
+  /opt/certbot/bin/pip install --upgrade pip
+  /opt/certbot/bin/pip install certbot certbot-nginx
+  ln -s /opt/certbot/bin/certbot /usr/bin/certbot
+cat <<'NGINX' > "/etc/nginx/sites-available/funttastic"
+server {
+  listen 80;
+  server_name development.daniloaraujosilva.com www.development.daniloaraujosilva.com;
+}
+NGINX
 	certbot --nginx --non-interactive --agree-tos -m $ADMIN_EMAIL -d $DOMAIN
 #	certbot certonly --standalone -d $DOMAIN --non-interactive --agree-tos -m $ADMIN_EMAIL
 
-	ln -s "/etc/letsencrypt/live/$DOMAIN/chain.pem" /home/$ADMIN_USERNAME/shared/common/certificates/ca_cert.pem
-	ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /home/$ADMIN_USERNAME/shared/common/certificates/ca_key.pem
-	ln -s "/etc/letsencrypt/live/$DOMAIN/cert.pem" /home/$ADMIN_USERNAME/shared/common/certificates/client_cert.pem
-	ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /home/$ADMIN_USERNAME/shared/common/certificates/client_key.pem
-	ln -s "/etc/letsencrypt/live/$DOMAIN/cert.pem" /home/$ADMIN_USERNAME/shared/common/certificates/server_cert.pem
-	ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /home/$ADMIN_USERNAME/shared/common/certificates/server_key.pem
+#	ln -s "/etc/letsencrypt/live/$DOMAIN/chain.pem" /home/$ADMIN_USERNAME/shared/common/certificates/ca_cert.pem
+#	ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /home/$ADMIN_USERNAME/shared/common/certificates/ca_key.pem
+#	ln -s "/etc/letsencrypt/live/$DOMAIN/cert.pem" /home/$ADMIN_USERNAME/shared/common/certificates/client_cert.pem
+#	ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /home/$ADMIN_USERNAME/shared/common/certificates/client_key.pem
+#	ln -s "/etc/letsencrypt/live/$DOMAIN/cert.pem" /home/$ADMIN_USERNAME/shared/common/certificates/server_cert.pem
+#	ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /home/$ADMIN_USERNAME/shared/common/certificates/server_key.pem
+  ln -s "/etc/letsencrypt/live/$DOMAIN/chain.pem" /home/user/shared/common/certificates/ca_cert.pem
+	ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /home/user/shared/common/certificates/ca_key.pem
+	ln -s "/etc/letsencrypt/live/$DOMAIN/cert.pem" /home/user/shared/common/certificates/client_cert.pem
+	ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /home/user/shared/common/certificates/client_key.pem
+	ln -s "/etc/letsencrypt/live/$DOMAIN/cert.pem" /home/user/shared/common/certificates/server_cert.pem
+	ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /home/user/shared/common/certificates/server_key.pem
 
 	(crontab -l 2>/dev/null; echo "0 0 */30 * * /usr/bin/certbot renew --quiet") | crontab -
 
 	service cron start
-
-	set +ex
 }
 
 start_and_keep() {
-	set -ex
-	sudo -u $ADMIN_USERNAME -i <<USER
-		set -ex
+	sudo -u user -i <<USER
   	source ~/.bashrc
   	start_and_keep
-  	set +ex
 USER
-  set +ex
 }
-
-set -ex
 
 if [ "$IS_FIRST_RUN" == "TRUE" ]
 then
@@ -1406,10 +1409,7 @@ if [ "$1" == "start_and_keep" ]
 then
 	start_and_keep
 fi
-
-set +ex
-
 SCRIPT
 
-	echo "Installation Finished!"
+	chmod +x /root/shared/scripts/functions.sh
 }

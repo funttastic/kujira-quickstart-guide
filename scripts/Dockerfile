@@ -60,7 +60,6 @@ EOF
 EXPOSE $FUN_FRONTEND_PORT
 EXPOSE $FILEBROWSER_PORT
 
-#ENTRYPOINT ["/root/shared/scripts/functions.sh"]
-#CMD ["start_and_keep"]
+ENTRYPOINT ["/root/shared/scripts/initialize.sh"]
 
-CMD ["tail", "-f", "/dev/null"]
+CMD ["start_and_keep"]
