@@ -240,7 +240,6 @@ fun_pre_install() {
 	apt-get install --no-install-recommends -y \
 		build-essential \
 		ca-certificates \
-		certbot \
 		curl \
 		gcc \
 		git \
@@ -252,13 +251,12 @@ fun_pre_install() {
 		libsecret-1-0 \
 		libssl-dev \
 		libusb-1.0 \
+		nano \
+		openssh-server \
 		pkg-config \
 		psmisc \
-		openssh-server \
 		postgresql-server-dev-all \
 		python3 \
-		python3-certbot-apache \
-		python3-certbot-nginx \
 		python3-dev \
 		python3-pip \
 		sudo \
