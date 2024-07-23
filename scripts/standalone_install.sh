@@ -506,6 +506,16 @@ fun_install() {
 
 	#--------------------------------------------------
 
+	source /home/$USER/.bashrc
+
+	conda create -n certbot python=3.11 -y
+	conda activate certbot
+	conda install pip -y
+	pip install --upgrade pip
+	pip install certbot certbot-nginx
+
+	#--------------------------------------------------
+
 	mkdir -p /home/$USER/funttastic/client
 	cd /home/$USER/funttastic/client
 
@@ -1362,28 +1372,16 @@ generate_valid_ssl_certificates() {
 
   set -ex
 
+  conda activate certbot
+
   sed -i "/export ADMIN_EMAIL=/,/^.*\"$/d" /home/$current_username/.bashrc
   sed -i "/export DOMAIN=/,/^.*\"$/d" /home/$current_username/.bashrc
   echo "export ADMIN_EMAIL=\"$email\"" >> /home/$current_username/.bashrc
   echo "export DOMAIN=\"$domain\"" >> /home/$current_username/.bashrc
 
-  sudo -u $current_username -i env ADMIN_EMAIL=$email DOMAIN=$domain bash <<'USER'
-    source ~/.bashrc
-
-    set -ex
-
-    conda create -n certbot python=3.11 -y
-    conda activate certbot
-    conda install pip -y
-    pip install --upgrade pip
-    pip install certbot certbot-nginx
-
-    set +ex
-USER
-
   ln -s /home/$current_username/miniconda3/envs/certbot/bin/certbot /usr/bin/certbot
 
-	# certbot certonly --nginx --non-interactive --agree-tos -m $ADMIN_EMAIL -d $DOMAIN
+	certbot certonly --nginx --non-interactive --agree-tos -m $ADMIN_EMAIL -d $DOMAIN
 
   mkdir -p /home/$current_username/shared/common/backup
   mv /home/$current_username/shared/common/certificates /home/$current_username/shared/common/backup/
@@ -1412,22 +1410,45 @@ server {
 }
 
 server {
-  listen 443;
+	listen 443 ssl;
 
-  server_name $domain www.$domain;
+	server_name $domain www.$domain;
 
-  ssl_certificate /home/$current_username/shared/common/certificates/ca_cert.pem; # Path to your fullchain.pem
-  ssl_certificate_key /home/$current_username/shared/common/certificates/server_key.pem; # Path to your privkey.pem
+	ssl_certificate /etc/nginx/certs/$domain/fullchain1.pem; # Path to your fullchain.pem
+	ssl_certificate_key /etc/nginx/certs/$domain/privkey1.pem; # Path to your privkey.pem
 
-  location / {
-    proxy_pass http://localhost:50000;
-    proxy_set_header Host \$host;
-    proxy_set_header X-Real-IP \$remote_addr;
-    #enable websocket
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade \$http_upgrade;
-    proxy_set_header Connection "upgrade";
-  }
+	location /api/ {
+		rewrite ^/api/(.*)$ /$1 break;
+		proxy_pass https://$domain:50001;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $scheme;
+		proxy_set_header X-SSL-CERT $ssl_client_escaped_cert;
+	}
+
+	location /ws/ {
+#		rewrite ^/ws/(.*)$ /ws/$1 break;
+		proxy_pass https://$domain:50001;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $scheme;
+		proxy_http_version 1.1;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection "upgrade";
+		proxy_set_header X-SSL-CERT $ssl_client_escaped_cert;
+	}
+
+	location / {
+		proxy_pass http://$domain:50000;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		#include /etc/nginx/proxy_params;
+		proxy_http_version 1.1;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection "upgrade";
+	}
 }
 NGINX
 
