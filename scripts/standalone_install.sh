@@ -1307,7 +1307,11 @@ fun_post_install() {
 	cat <<'SCRIPT' > /root/shared/scripts/initialize.sh
 #!/bin/bash
 
-source /root/shared/scripts/functions.sh
+arguments=$*
+
+echo $arguments
+
+source /root/shared/scripts/functions.sh $arguments
 SCRIPT
 
 	chmod +x /root/shared/scripts/initialize.sh
@@ -1320,7 +1324,7 @@ change_user_and_password() {
     local current_username="user"
     local current_password=${3:-asdf}
 
-		cd /home/user
+		cd /home/$current_username
     sudo -u $current_username -i env ADMIN_USERNAME=$username ADMIN_PASSWORD=$password ADMIN_CURRENT_PASSWORD=$current_password bash <<'USER'
       source ~/.bashrc
 
@@ -1335,8 +1339,8 @@ change_user_and_password() {
 
       ENCRYPTED_CREDENTIALS_BASE64=$(encrypt_message "$credentials_json")
       NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM=$(generate_sha256sum "$credentials_json")
-      sed -i "/export ENCRYPTED_CREDENTIALS=/,/^\s*$/d" ~/.bashrc
-      sed -i "/export NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM=/,/^\s*$/d" ~/.bashrc
+      sed -i "/export ENCRYPTED_CREDENTIALS=/,/^.*\"$/d" ~/.bashrc
+      sed -i "/export NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM=/,/^.*\"$/d" ~/.bashrc
       echo "export ENCRYPTED_CREDENTIALS=\"$ENCRYPTED_CREDENTIALS_BASE64\"" >> /home/$USER/.bashrc
       echo "export NON_ENCRYPTED_CREDENTIALS_SHA256SUM=\"$NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM\"" >> /home/$USER/.bashrc
 
@@ -1354,39 +1358,82 @@ USER
 }
 
 generate_valid_ssl_certificates() {
-	set -ex
+  local current_username="user"
+  local email=$1
+  local domain=$2
 
-  apt remove certbot -y
-  apt install python3.12-venv -y
-  python3 -m venv /opt/certbot/
-  /opt/certbot/bin/pip install --upgrade pip
-  /opt/certbot/bin/pip install certbot certbot-nginx
-  ln -s /opt/certbot/bin/certbot /usr/bin/certbot
-cat <<'NGINX' > "/etc/nginx/sites-available/funttastic"
+  set -ex
+
+  sed -i "/export ADMIN_EMAIL=/,/^.*\"$/d" /home/$current_username/.bashrc
+  sed -i "/export DOMAIN=/,/^.*\"$/d" /home/$current_username/.bashrc
+  echo "export ADMIN_EMAIL=\"$email\"" >> /home/$current_username/.bashrc
+  echo "export DOMAIN=\"$domain\"" >> /home/$current_username/.bashrc
+
+  sudo -u $current_username -i env ADMIN_EMAIL=$email DOMAIN=$domain bash <<'USER'
+    source ~/.bashrc
+
+    set -ex
+
+    conda create -n certbot python=3.11 -y
+    conda activate certbot
+    conda install pip -y
+    pip install --upgrade pip
+    pip install certbot certbot-nginx
+
+    set +ex
+USER
+
+  ln -s /home/$current_username/miniconda3/envs/certbot/bin/certbot /usr/bin/certbot
+
+	# certbot certonly --nginx --non-interactive --agree-tos -m $ADMIN_EMAIL -d $DOMAIN
+
+  mkdir -p /home/$current_username/shared/common/backup
+  mv /home/$current_username/shared/common/certificates /home/$current_username/shared/common/backup/
+
+  mkdir -p /home/$current_username/shared/common/certificates
+  mkdir -p /etc/letsencrypt/live/$DOMAIN
+  chown $current_username:$current_username /home/$current_username/shared/common/certificates
+
+  ln -s "/etc/letsencrypt/archive/$DOMAIN/fullchain1.pem" /home/$current_username/shared/common/certificates/ca_cert.pem
+  ln -s "/etc/letsencrypt/archive/$DOMAIN/privkey1.pem" /home/$current_username/shared/common/certificates/ca_key.pem
+  ln -s "/etc/letsencrypt/archive/$DOMAIN/cert1.pem" /home/$current_username/shared/common/certificates/client_cert.pem
+  ln -s "/etc/letsencrypt/archive/$DOMAIN/privkey1.pem" /home/$current_username/shared/common/certificates/client_key.pem
+  ln -s "/etc/letsencrypt/archive/$DOMAIN/cert1.pem" /home/$current_username/shared/common/certificates/server_cert.pem
+  ln -s "/etc/letsencrypt/archive/$DOMAIN/privkey1.pem" /home/$current_username/shared/common/certificates/server_key.pem
+  ln -s "/etc/letsencrypt/archive/$DOMAIN/fullchain1.pem" /etc/letsencrypt/live/$DOMAIN/chain.pem
+  ln -s "/etc/letsencrypt/archive/$DOMAIN/privkey1.pem" /etc/letsencrypt/live/$DOMAIN/privkey.pem
+  ln -s "/etc/letsencrypt/archive/$DOMAIN/cert1.pem" /etc/letsencrypt/live/$DOMAIN/cert.pem
+
+  cat << NGINX > "/etc/nginx/conf.d/$domain.conf"
 server {
-  listen 80;
-  server_name development.daniloaraujosilva.com www.development.daniloaraujosilva.com;
+    listen 80;
+    server_name $domain www.$domain;
+
+    # Redirect all HTTP requests to HTTPS with a 301 Moved Permanently response.
+    return 301 https://$host$request_uri;
+}
+
+server {
+  listen 443;
+
+  server_name $domain www.$domain;
+
+  ssl_certificate /home/$current_username/shared/common/certificates/ca_cert.pem; # Path to your fullchain.pem
+  ssl_certificate_key /home/$current_username/shared/common/certificates/server_key.pem; # Path to your privkey.pem
+
+  location / {
+    proxy_pass http://localhost:50000;
+    proxy_set_header Host \$host;
+    proxy_set_header X-Real-IP \$remote_addr;
+    #enable websocket
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade \$http_upgrade;
+    proxy_set_header Connection "upgrade";
+  }
 }
 NGINX
-	certbot --nginx --non-interactive --agree-tos -m $ADMIN_EMAIL -d $DOMAIN
-#	certbot certonly --standalone -d $DOMAIN --non-interactive --agree-tos -m $ADMIN_EMAIL
 
-#	ln -s "/etc/letsencrypt/live/$DOMAIN/chain.pem" /home/$ADMIN_USERNAME/shared/common/certificates/ca_cert.pem
-#	ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /home/$ADMIN_USERNAME/shared/common/certificates/ca_key.pem
-#	ln -s "/etc/letsencrypt/live/$DOMAIN/cert.pem" /home/$ADMIN_USERNAME/shared/common/certificates/client_cert.pem
-#	ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /home/$ADMIN_USERNAME/shared/common/certificates/client_key.pem
-#	ln -s "/etc/letsencrypt/live/$DOMAIN/cert.pem" /home/$ADMIN_USERNAME/shared/common/certificates/server_cert.pem
-#	ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /home/$ADMIN_USERNAME/shared/common/certificates/server_key.pem
-  ln -s "/etc/letsencrypt/live/$DOMAIN/chain.pem" /home/user/shared/common/certificates/ca_cert.pem
-	ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /home/user/shared/common/certificates/ca_key.pem
-	ln -s "/etc/letsencrypt/live/$DOMAIN/cert.pem" /home/user/shared/common/certificates/client_cert.pem
-	ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /home/user/shared/common/certificates/client_key.pem
-	ln -s "/etc/letsencrypt/live/$DOMAIN/cert.pem" /home/user/shared/common/certificates/server_cert.pem
-	ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /home/user/shared/common/certificates/server_key.pem
-
-	(crontab -l 2>/dev/null; echo "0 0 */30 * * /usr/bin/certbot renew --quiet") | crontab -
-
-	service cron start
+  set +ex
 }
 
 start_and_keep() {
@@ -1401,12 +1448,13 @@ then
 	change_user_and_password $ADMIN_USERNAME $ADMIN_PASSWORD
 
 	if [ "$USE_VALID_SSL_CERTIFICATES" = "TRUE" ]; then
-		generate_valid_ssl_certificates
+		generate_valid_ssl_certificates $ADMIN_EMAIL $DOMAIN
 	fi
 fi
 
 if [ "$1" == "start_and_keep" ]
 then
+  stop
 	start_and_keep
 fi
 SCRIPT
