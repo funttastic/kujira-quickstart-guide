@@ -1178,27 +1178,11 @@ SCRIPT
 
 	# Certificates
 	#--------------------------------------------------
-	mkdir -p /home/$USER/shared/common/certificates
+	mkdir -p /home/$USER/shared/common/certificates/api
 
-	if [ "$USE_VALID_SSL_CERTIFICATES" = "TRUE" ]; then
-		certbot --nginx --non-interactive --agree-tos -m $ADMIN_EMAIL -d $DOMAIN
-#		certbot certonly --standalone -d $DOMAIN --non-interactive --agree-tos -m $ADMIN_EMAIL
-
-		ln -s "/etc/letsencrypt/live/$DOMAIN/chain.pem" /home/$USER/shared/common/certificates/ca_cert.pem
-		ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /home/$USER/shared/common/certificates/ca_key.pem
-		ln -s "/etc/letsencrypt/live/$DOMAIN/cert.pem" /home/$USER/shared/common/certificates/client_cert.pem
-		ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /home/$USER/shared/common/certificates/client_key.pem
-		ln -s "/etc/letsencrypt/live/$DOMAIN/cert.pem" /home/$USER/shared/common/certificates/server_cert.pem
-		ln -s "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /home/$USER/shared/common/certificates/server_key.pem
-
-		(crontab -l 2>/dev/null; echo "0 0 */30 * * /usr/bin/certbot renew --quiet") | crontab -
-
-		service cron start
-  else
-  	# For using a self signed certificate
-  	conda activate funttastic
-		python /home/$USER/funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $ADMIN_PASSWORD --cert-path /home/$USER/shared/common/certificates
-  fi
+  # For using a self signed certificate
+	conda activate funttastic
+	python /home/$USER/funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $ADMIN_PASSWORD --cert-path /home/$USER/shared/common/certificates/api
 
 	# HB Client
 	conda activate hummingbot
@@ -1269,9 +1253,9 @@ SCRIPT
 	rm -rf /home/$USER/funttastic/client/resources/certificates
 	rm -rf /home/$USER/hummingbot/client/certs
 	rm -rf /home/$USER/hummingbot/gateway/certs
-	ln -s /home/$USER/shared/common/certificates /home/$USER/funttastic/client/resources/certificates
-	ln -s /home/$USER/shared/common/certificates /home/$USER/hummingbot/gateway/certs
-	ln -s /home/$USER/shared/common/certificates /home/$USER/hummingbot/client/certs
+	ln -s /home/$USER/shared/common/certificates/api /home/$USER/funttastic/client/resources/certificates
+	ln -s /home/$USER/shared/common/certificates/api /home/$USER/hummingbot/gateway/certs
+	ln -s /home/$USER/shared/common/certificates/api /home/$USER/hummingbot/client/certs
 
 	mv /home/$USER/funttastic/client/resources /home/$USER/shared/funttastic/client/
 	ln -s /home/$USER/shared/funttastic/client/resources /home/$USER/funttastic/client/resources
@@ -1379,80 +1363,107 @@ generate_valid_ssl_certificates() {
   echo "export ADMIN_EMAIL=\"$email\"" >> /home/$current_username/.bashrc
   echo "export DOMAIN=\"$domain\"" >> /home/$current_username/.bashrc
 
-  ln -s /home/$current_username/miniconda3/envs/certbot/bin/certbot /usr/bin/certbot
+  ln -s "/home/$current_username/miniconda3/envs/certbot/bin/certbot" "/usr/bin/certbot"
 
-	certbot certonly --nginx --non-interactive --agree-tos -m $ADMIN_EMAIL -d $DOMAIN
+	certbot certonly --nginx --non-interactive --agree-tos -m $ADMIN_EMAIL -d $domain
 
-  mkdir -p /home/$current_username/shared/common/backup
-  mv /home/$current_username/shared/common/certificates /home/$current_username/shared/common/backup/
+  mkdir -p "/home/$current_username/shared/common/certificates/$domain"
 
-  mkdir -p /home/$current_username/shared/common/certificates
-  mkdir -p /etc/letsencrypt/live/$DOMAIN
-  chown $current_username:$current_username /home/$current_username/shared/common/certificates
+  ln -s "/etc/letsencrypt/archive/$domain/cert1.pem" "/home/$current_username/shared/common/certificates/$domain/cert1.pem"
+  ln -s "/etc/letsencrypt/archive/$domain/chain1.pem" "/home/$current_username/shared/common/certificates/$domain/chain1.pem"
+  ln -s "/etc/letsencrypt/archive/$domain/fullchain1.pem" "/home/$current_username/shared/common/certificates/$domain/fullchain1.pem"
+  ln -s "/etc/letsencrypt/archive/$domain/privkey1.pem" "/home/$current_username/shared/common/certificates/$domain/privkey1.pem"
 
-  ln -s "/etc/letsencrypt/archive/$DOMAIN/fullchain1.pem" /home/$current_username/shared/common/certificates/ca_cert.pem
-  ln -s "/etc/letsencrypt/archive/$DOMAIN/privkey1.pem" /home/$current_username/shared/common/certificates/ca_key.pem
-  ln -s "/etc/letsencrypt/archive/$DOMAIN/cert1.pem" /home/$current_username/shared/common/certificates/client_cert.pem
-  ln -s "/etc/letsencrypt/archive/$DOMAIN/privkey1.pem" /home/$current_username/shared/common/certificates/client_key.pem
-  ln -s "/etc/letsencrypt/archive/$DOMAIN/cert1.pem" /home/$current_username/shared/common/certificates/server_cert.pem
-  ln -s "/etc/letsencrypt/archive/$DOMAIN/privkey1.pem" /home/$current_username/shared/common/certificates/server_key.pem
-  ln -s "/etc/letsencrypt/archive/$DOMAIN/fullchain1.pem" /etc/letsencrypt/live/$DOMAIN/chain.pem
-  ln -s "/etc/letsencrypt/archive/$DOMAIN/privkey1.pem" /etc/letsencrypt/live/$DOMAIN/privkey.pem
-  ln -s "/etc/letsencrypt/archive/$DOMAIN/cert1.pem" /etc/letsencrypt/live/$DOMAIN/cert.pem
+	chown -R $current_username:$current_username "/etc/letsencrypt/archive/$domain"
+  chown -R $current_username:$current_username "/home/$current_username/shared/common/certificates"
 
-  cat << NGINX > "/etc/nginx/conf.d/$domain.conf"
+  cat <<NGINX > /etc/nginx/conf.d/$domain.conf
 server {
-    listen 80;
-    server_name $domain www.$domain;
+	listen 80;
+	server_name $domain www.$domain;
 
-    # Redirect all HTTP requests to HTTPS with a 301 Moved Permanently response.
-    return 301 https://$host$request_uri;
+	return 301 https://$host$request_uri;
 }
 
 server {
 	listen 443 ssl;
-
 	server_name $domain www.$domain;
 
-	ssl_certificate /etc/nginx/certs/$domain/fullchain1.pem; # Path to your fullchain.pem
-	ssl_certificate_key /etc/nginx/certs/$domain/privkey1.pem; # Path to your privkey.pem
-
-	location /api/ {
-		rewrite ^/api/(.*)$ /$1 break;
-		proxy_pass https://$domain:50001;
-		proxy_set_header Host $host;
-		proxy_set_header X-Real-IP $remote_addr;
-		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-		proxy_set_header X-Forwarded-Proto $scheme;
-		proxy_set_header X-SSL-CERT $ssl_client_escaped_cert;
-	}
-
-	location /ws/ {
-#		rewrite ^/ws/(.*)$ /ws/$1 break;
-		proxy_pass https://$domain:50001;
-		proxy_set_header Host $host;
-		proxy_set_header X-Real-IP $remote_addr;
-		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-		proxy_set_header X-Forwarded-Proto $scheme;
-		proxy_http_version 1.1;
-		proxy_set_header Upgrade $http_upgrade;
-		proxy_set_header Connection "upgrade";
-		proxy_set_header X-SSL-CERT $ssl_client_escaped_cert;
-	}
+	ssl_certificate /home/$current_username/shared/common/certificates/$domain/fullchain1.pem;
+	ssl_certificate_key /home/$current_username/shared/common/certificates/$domain/privkey1.pem;
+	ssl_client_certificate /home/$current_username/shared/common/certificates/$domain/chain1.pem;
 
 	location / {
-		proxy_pass http://$domain:50000;
+		proxy_pass http://localhost:50000;
+
 		proxy_set_header Host $host;
 		proxy_set_header X-Real-IP $remote_addr;
-		#include /etc/nginx/proxy_params;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $scheme;
+
+		proxy_ssl_certificate /home/$current_username/shared/common/certificates/api/client_cert.pem;
+		proxy_ssl_certificate_key /home/$current_username/shared/common/certificates/api/client_key.pem;
+		proxy_ssl_trusted_certificate /home/$current_username/shared/common/certificates/api/ca_cert.pem;
+	}
+
+	location /api {
+		rewrite ^/api/(.*)$ /$1 break;
+
+		proxy_pass https://localhost:50001;
+
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $scheme;
+
+		proxy_ssl_certificate /home/$current_username/shared/common/certificates/api/client_cert.pem;
+		proxy_ssl_certificate_key /home/$current_username/shared/common/certificates/api/client_key.pem;
+		proxy_ssl_trusted_certificate /home/$current_username/shared/common/certificates/api/ca_cert.pem;
+
+		proxy_ssl_protocols TLSv1.2 TLSv1.3;
+		proxy_ssl_ciphers HIGH:!aNULL:!MD5;
+
+		proxy_ssl_verify on;
+		proxy_ssl_verify_depth 3;
+		proxy_ssl_session_reuse on;
+	}
+
+	location /ws {
+		proxy_pass https://localhost:50001;
+
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $scheme;
+
 		proxy_http_version 1.1;
 		proxy_set_header Upgrade $http_upgrade;
-		proxy_set_header Connection "upgrade";
+		proxy_set_header Connection "Upgrade";
+
+		proxy_ssl_certificate /home/$current_username/shared/common/certificates/api/client_cert.pem;
+		proxy_ssl_certificate_key /home/$current_username/shared/common/certificates/api/client_key.pem;
+		proxy_ssl_trusted_certificate /home/$current_username/shared/common/certificates/api/ca_cert.pem;
+
+		proxy_ssl_protocols TLSv1.2 TLSv1.3;
+		proxy_ssl_ciphers HIGH:!aNULL:!MD5;
+
+		proxy_ssl_verify on;
+		proxy_ssl_verify_depth 3;
+		proxy_ssl_session_reuse on;
 	}
 }
 NGINX
 
+	service nginx start
+
   set +ex
+}
+
+stop() {
+	sudo -u user -i <<USER
+  	source ~/.bashrc
+  	stop
+USER
 }
 
 start_and_keep() {
@@ -1476,6 +1487,7 @@ then
   stop
 	start_and_keep
 fi
+
 SCRIPT
 
 	chmod +x /root/shared/scripts/functions.sh
