@@ -1352,20 +1352,32 @@ USER
 generate_valid_ssl_certificates() {
   local current_username="user"
   local email=$1
-  local domain=$2
+  local password=$2
+  local domain=$3
 
   set -ex
-
-  conda activate certbot
 
   sed -i "/export ADMIN_EMAIL=/,/^.*\"$/d" /home/$current_username/.bashrc
   sed -i "/export DOMAIN=/,/^.*\"$/d" /home/$current_username/.bashrc
   echo "export ADMIN_EMAIL=\"$email\"" >> /home/$current_username/.bashrc
   echo "export DOMAIN=\"$domain\"" >> /home/$current_username/.bashrc
 
+  sudo -u $current_username -i env current_username=$current_username password=$password bash <<'USER'
+    source ~/.bashrc
+
+    set -ex
+
+    conda activate funttastic
+    rm -rf /home/$current_username/shared/common/certificates/api
+		mkdir -p /home/$current_username/shared/common/certificates/api
+    python /home/$current_username/funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $password --cert-path /home/$current_username/shared/common/certificates/api
+
+    set +ex
+USER
+
   ln -s "/home/$current_username/miniconda3/envs/certbot/bin/certbot" "/usr/bin/certbot"
 
-	certbot certonly --nginx --non-interactive --agree-tos -m $ADMIN_EMAIL -d $domain
+	# certbot certonly --nginx --non-interactive --agree-tos -m $ADMIN_EMAIL -d $domain
 
   mkdir -p "/home/$current_username/shared/common/certificates/$domain"
 
@@ -1382,7 +1394,7 @@ server {
 	listen 80;
 	server_name $domain www.$domain;
 
-	return 301 https://$host$request_uri;
+	return 301 https://\$host\$request_uri;
 }
 
 server {
@@ -1396,10 +1408,10 @@ server {
 	location / {
 		proxy_pass http://localhost:50000;
 
-		proxy_set_header Host $host;
-		proxy_set_header X-Real-IP $remote_addr;
-		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-		proxy_set_header X-Forwarded-Proto $scheme;
+		proxy_set_header Host \$host;
+		proxy_set_header X-Real-IP \$remote_addr;
+		proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto \$scheme;
 
 		proxy_ssl_certificate /home/$current_username/shared/common/certificates/api/client_cert.pem;
 		proxy_ssl_certificate_key /home/$current_username/shared/common/certificates/api/client_key.pem;
@@ -1407,17 +1419,17 @@ server {
 	}
 
 	location /api/ws {
-		rewrite ^/api/ws/(.*)$ /ws/$1 break;
+		rewrite ^/api/ws/(.*)\$ /ws/\$1 break;
 
 		proxy_pass https://localhost:50001;
 
-		proxy_set_header Host $host;
-		proxy_set_header X-Real-IP $remote_addr;
-		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-		proxy_set_header X-Forwarded-Proto $scheme;
+		proxy_set_header Host \$host;
+		proxy_set_header X-Real-IP \$remote_addr;
+		proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto \$scheme;
 
 		proxy_http_version 1.1;
-		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Upgrade \$http_upgrade;
 		proxy_set_header Connection "Upgrade";
 
 		proxy_ssl_certificate /home/$current_username/shared/common/certificates/api/client_cert.pem;
@@ -1433,14 +1445,14 @@ server {
 	}
 
 	location /api {
-		rewrite ^/api/(.*)$ /$1 break;
+		rewrite ^/api/(.*)\$ /\$1 break;
 
 		proxy_pass https://localhost:50001;
 
-		proxy_set_header Host $host;
-		proxy_set_header X-Real-IP $remote_addr;
-		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-		proxy_set_header X-Forwarded-Proto $scheme;
+		proxy_set_header Host \$host;
+		proxy_set_header X-Real-IP \$remote_addr;
+		proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto \$scheme;
 
 		proxy_ssl_certificate /home/$current_username/shared/common/certificates/api/client_cert.pem;
 		proxy_ssl_certificate_key /home/$current_username/shared/common/certificates/api/client_key.pem;
@@ -1480,7 +1492,7 @@ then
 	change_user_and_password $ADMIN_USERNAME $ADMIN_PASSWORD
 
 	if [ "$USE_VALID_SSL_CERTIFICATES" = "TRUE" ]; then
-		generate_valid_ssl_certificates $ADMIN_EMAIL $DOMAIN
+		generate_valid_ssl_certificates $ADMIN_EMAIL $ADMIN_PASSWORD $DOMAIN
 	fi
 fi
 
