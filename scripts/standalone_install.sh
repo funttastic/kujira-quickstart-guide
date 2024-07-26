@@ -1406,8 +1406,8 @@ server {
 		proxy_ssl_trusted_certificate /home/$current_username/shared/common/certificates/api/ca_cert.pem;
 	}
 
-	location /api {
-		rewrite ^/api/(.*)$ /$1 break;
+	location /api/ws {
+		rewrite ^/api/ws/(.*)$ /ws/$1 break;
 
 		proxy_pass https://localhost:50001;
 
@@ -1415,6 +1415,10 @@ server {
 		proxy_set_header X-Real-IP $remote_addr;
 		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 		proxy_set_header X-Forwarded-Proto $scheme;
+
+		proxy_http_version 1.1;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection "Upgrade";
 
 		proxy_ssl_certificate /home/$current_username/shared/common/certificates/api/client_cert.pem;
 		proxy_ssl_certificate_key /home/$current_username/shared/common/certificates/api/client_key.pem;
@@ -1428,17 +1432,15 @@ server {
 		proxy_ssl_session_reuse on;
 	}
 
-	location /ws {
+	location /api {
+		rewrite ^/api/(.*)$ /$1 break;
+
 		proxy_pass https://localhost:50001;
 
 		proxy_set_header Host $host;
 		proxy_set_header X-Real-IP $remote_addr;
 		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 		proxy_set_header X-Forwarded-Proto $scheme;
-
-		proxy_http_version 1.1;
-		proxy_set_header Upgrade $http_upgrade;
-		proxy_set_header Connection "Upgrade";
 
 		proxy_ssl_certificate /home/$current_username/shared/common/certificates/api/client_cert.pem;
 		proxy_ssl_certificate_key /home/$current_username/shared/common/certificates/api/client_key.pem;
