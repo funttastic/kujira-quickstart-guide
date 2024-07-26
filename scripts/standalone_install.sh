@@ -287,6 +287,11 @@ fun_pre_install() {
 	echo "export FUN_FRONTEND_REPOSITORY_URL=\"$FUN_FRONTEND_REPOSITORY_URL\"" >> /home/$USER/.bashrc
 	echo "export FUN_FRONTEND_REPOSITORY_BRANCH=\"$FUN_FRONTEND_REPOSITORY_BRANCH\"" >> /home/$USER/.bashrc
 
+	echo "export FUN_CLIENT_PROTOCOL=\"https\"" >> /home/$USER/.bashrc
+	echo "export FUN_CLIENT_WEBSOCKET_PROTOCOL=\"wss\"" >> /home/$USER/.bashrc
+	echo "export FUN_CLIENT_HOST=\"$DOMAIN\"" >> /home/$USER/.bashrc
+	echo "export FUN_CLIENT_PORT=443" >> /home/$USER/.bashrc
+
 	if [ -z "$FUN_FRONTEND_PORT" ]
 	then
 		echo 'export FUN_FRONTEND_PORT=50000' >> /home/$USER/.bashrc
@@ -1320,32 +1325,34 @@ change_user_and_password() {
     sudo -u $current_username -i env ADMIN_USERNAME=$username ADMIN_PASSWORD=$password ADMIN_CURRENT_PASSWORD=$current_password bash <<'USER'
       source ~/.bashrc
 
-      escaped_admin_username=$(escape_string "${ADMIN_USERNAME}")
-      escaped_admin_password=$(escape_string "${ADMIN_PASSWORD}")
+			escaped_admin_username=$(escape_string "${ADMIN_USERNAME}")
+			escaped_admin_password=$(escape_string "${ADMIN_PASSWORD}")
 
-      # Changing user password
-      echo -e "$ADMIN_CURRENT_PASSWORD\n$escaped_admin_password\n$escaped_admin_password" | passwd
+			# Changing user password
+			echo -e "$ADMIN_CURRENT_PASSWORD\n$escaped_admin_password\n$escaped_admin_password" | passwd
 
-      # Updating credentials
-      credentials_json="{\"username\":\"$escaped_admin_username\",\"password\":\"$escaped_admin_password\"}"
+			# Updating credentials
+			credentials_json="{\"username\":\"$escaped_admin_username\",\"password\":\"$escaped_admin_password\"}"
 
-      ENCRYPTED_CREDENTIALS_BASE64=$(encrypt_message "$credentials_json")
-      NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM=$(generate_sha256sum "$credentials_json")
-      sed -i "/export ENCRYPTED_CREDENTIALS=/,/^.*\"$/d" ~/.bashrc
-      sed -i "/export NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM=/,/^.*\"$/d" ~/.bashrc
-      echo "export ENCRYPTED_CREDENTIALS=\"$ENCRYPTED_CREDENTIALS_BASE64\"" >> /home/$USER/.bashrc
-      echo "export NON_ENCRYPTED_CREDENTIALS_SHA256SUM=\"$NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM\"" >> /home/$USER/.bashrc
+			ENCRYPTED_CREDENTIALS_BASE64=$(encrypt_message "$credentials_json")
+			NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM=$(generate_sha256sum "$credentials_json")
+			sed -i "/export ENCRYPTED_CREDENTIALS=/,/^.*\"$/d" /home/$USER/.bashrc
+			sed -i "/export NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM=/,/^.*\"$/d" /home/$USER/.bashrc
+			echo "export ENCRYPTED_CREDENTIALS=\"$ENCRYPTED_CREDENTIALS_BASE64\"" >> /home/$USER/.bashrc
+			echo "export NON_ENCRYPTED_CREDENTIALS_SHA256SUM=\"$NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM\"" >> /home/$USER/.bashrc
 
-      # Updating filebrowser credentials
-      filebrowser users update user --username $escaped_admin_username --password $escaped_admin_password -d /home/user/filebrowser/filebrowser.db
+			# Updating filebrowser credentials
+			filebrowser users update user --username $escaped_admin_username --password $escaped_admin_password -d /home/$USER/filebrowser/filebrowser.db
 
-      # Updating certificates
-      conda activate funttastic
-      python ~/funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $escaped_admin_password --cert-path ~/shared/common/certificates
+			# Updating certificates
+			conda activate funttastic
+			rm -rf /home/$USER/shared/common/certificates/api
+			mkdir -p /home/$USER/shared/common/certificates/api
+			python /home/$USER/funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $escaped_admin_password --cert-path /home/$USER/shared/common/certificates/api
 
-      # Updating Hummingbot Client credentials
-      conda activate hummingbot
-      python /home/$USER/funttastic/client/resources/scripts/generate_hb_client_password_verification_file.py -p "$escaped_admin_password" -d /home/$USER/hummingbot/client/conf
+			# Updating Hummingbot Client credentials
+			conda activate hummingbot
+			python /home/$USER/funttastic/client/resources/scripts/generate_hb_client_password_verification_file.py -p "$escaped_admin_password" -d /home/$USER/hummingbot/client/conf
 USER
 }
 
@@ -1358,22 +1365,18 @@ generate_valid_ssl_certificates() {
   set -ex
 
   sed -i "/export ADMIN_EMAIL=/,/^.*\"$/d" /home/$current_username/.bashrc
-  sed -i "/export DOMAIN=/,/^.*\"$/d" /home/$current_username/.bashrc
-  echo "export ADMIN_EMAIL=\"$email\"" >> /home/$current_username/.bashrc
-  echo "export DOMAIN=\"$domain\"" >> /home/$current_username/.bashrc
+	sed -i "/export DOMAIN=/,/^.*\"$/d" /home/$current_username/.bashrc
+	sed -i "/export FUN_CLIENT_PROTOCOL=/,/^.*\"$/d" /home/$current_username/.bashrc
+	sed -i "/export FUN_CLIENT_WEBSOCKET_PROTOCOL=/,/^.*\"$/d" /home/$current_username/.bashrc
+	sed -i "/export FUN_CLIENT_HOST=/,/^.*\"$/d" /home/$current_username/.bashrc
+	sed -i "/export FUN_CLIENT_PORT=/,/^.*\"$/d" /home/$current_username/.bashrc
 
-  sudo -u $current_username -i env current_username=$current_username password=$password bash <<'USER'
-    source ~/.bashrc
-
-    set -ex
-
-    conda activate funttastic
-    rm -rf /home/$current_username/shared/common/certificates/api
-		mkdir -p /home/$current_username/shared/common/certificates/api
-    python /home/$current_username/funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $password --cert-path /home/$current_username/shared/common/certificates/api
-
-    set +ex
-USER
+	echo "export ADMIN_EMAIL=\"$email\"" >> /home/$current_username/.bashrc
+	echo "export DOMAIN=\"$domain\"" >> /home/$current_username/.bashrc
+	echo "export FUN_CLIENT_PROTOCOL=\"https\"" >> /home/$current_username/.bashrc
+	echo "export FUN_CLIENT_WEBSOCKET_PROTOCOL=\"wss\"" >> /home/$current_username/.bashrc
+	echo "export FUN_CLIENT_HOST=\"$domain\"" >> /home/$current_username/.bashrc
+	echo "export FUN_CLIENT_PORT=443" >> /home/$current_username/.bashrc
 
   ln -s "/home/$current_username/miniconda3/envs/certbot/bin/certbot" "/usr/bin/certbot"
 
