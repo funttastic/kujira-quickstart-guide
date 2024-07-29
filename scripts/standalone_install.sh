@@ -664,7 +664,7 @@ replace_in_file() {
 	local search_regex="$2"
 	local substitution_regex="$3"
 
-	 python functions.py "$function_name" "$file_path" "$search_regex" "$substitution_regex"
+	 python /home/user/shared/scripts/functions.py "$function_name" "$file_path" "$search_regex" "$substitution_regex"
 }
 
 replace_environment_variable() {
@@ -673,7 +673,7 @@ replace_environment_variable() {
 	local variable_name="$2"
 	local new_value="$3"
 
-	python functions.py "$function_name" "$file_path" "$variable_name" "$new_value"
+	python /home/user/shared/scripts/functions.py "$function_name" "$file_path" "$variable_name" "$new_value"
 }
 
 start_nginx() {
