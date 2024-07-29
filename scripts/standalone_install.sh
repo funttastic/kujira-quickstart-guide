@@ -658,6 +658,24 @@ CSS
   cat <<'SCRIPT' > /home/$USER/shared/scripts/functions.sh
 #!/bin/bash
 
+replace_in_file() {
+	local function_name="replace_in_file"
+	local file_path="$1"
+	local search_regex="$2"
+	local substitution_regex="$3"
+
+	 python functions.py "$function_name" "$file_path" "$search_regex" "$substitution_regex"
+}
+
+replace_environment_variable() {
+	local function_name="replace_environment_variable"
+	local file_path="$1"
+	local variable_name="$2"
+	local new_value="$3"
+
+	python functions.py "$function_name" "$file_path" "$variable_name" "$new_value"
+}
+
 start_nginx() {
 	local session="nginx"
 
@@ -1160,7 +1178,90 @@ quick_deploy_fun_hb_client () {
 
 SCRIPT
 
+cat <<'SCRIPT' > /home/$USER/shared/scripts/functions.py
+import sys
+import re
+
+
+def escape_shell_value(value):
+	"""Escape characters for shell variables."""
+	value = re.sub(r'(["\\])', r'\\\1', value)  # Escape quotes and backslashes
+	value = re.sub(r'\n', r'\\n', value)  # Escape newlines
+	return value
+
+
+def replace_in_file(file_path, search_regex, substitution_regex):
+	with open(file_path, 'r') as file:
+		content = file.read()
+
+	new_content = re.sub(search_regex, substitution_regex, content, flags=re.MULTILINE)
+
+	with open(file_path, 'w') as file:
+		file.write(new_content)
+
+
+def replace_environment_variable(file_path, variable_name, new_value):
+	"""
+	Replace or add the content of an environment variable in a file.
+
+	:param file_path: Path to the file to update.
+	:param variable_name: Name of the variable to replace.
+	:param new_value: New value to set for the variable.
+	"""
+	# Escape the new value
+	escaped_value = escape_shell_value(new_value)
+
+	# Prepare the regex pattern for matching the variable line
+	var_pattern = re.compile(
+		rf'^(export\s+{re.escape(variable_name)}=.*?)(?=\nexport|\Z)',  # Match until the next export or end of file
+		re.DOTALL | re.MULTILINE
+	)
+
+	# Replacement line
+	replacement_line = f'export {variable_name}="{escaped_value}"'
+
+	# Read the file
+	with open(file_path, 'r') as file:
+		content = file.read()
+
+	# Check if the variable exists and replace it
+	if var_pattern.search(content):
+		content = var_pattern.sub(replacement_line, content)
+	else:
+		# If variable not found, append it to the file
+		if content.strip() == "":
+			content = replacement_line
+		else:
+			content += '\n' + replacement_line
+
+	# Write the updated content back to the file
+	with open(file_path, 'w') as file:
+		file.write(content)
+
+
+if __name__ == "__main__":
+	if sys.argv[1] == "replace_environment_variable":
+		if len(sys.argv) != 5:
+			print("Usage: python functions.py function_name /path/to/file VARIABLE_NAME \"new_value\"")
+			sys.exit(1)
+
+		function_name = f"""{sys.argv[1]}"""
+		file_path = f"""{sys.argv[2]}"""
+		variable_name = f"""{sys.argv[3]}"""
+		new_value = f"""{sys.argv[4]}"""
+
+		module = sys.modules[__name__]
+		function = getattr(module, function_name)
+
+		result = function(file_path, variable_name, new_value)
+
+		print(result)
+	else:
+		raise ValueError(f"Function {sys.argv[1]} not found.")
+SCRIPT
+
 	chmod +x /home/$USER/shared/scripts/functions.sh
+	chmod +x /home/$USER/shared/scripts/functions.py
 
 	cat <<'SCRIPT' > /home/$USER/shared/scripts/initialize.sh
 #!/bin/bash
@@ -1315,6 +1416,25 @@ SCRIPT
 
 	cat <<'SCRIPT' > /root/shared/scripts/functions.sh
 #!/bin/bash
+
+replace_in_file() {
+	local function_name="replace_in_file"
+	local file_path="$1"
+	local search_regex="$2"
+	local substitution_regex="$3"
+
+	 python functions.py "$function_name" "$file_path" "$search_regex" "$substitution_regex"
+}
+
+replace_environment_variable() {
+	local function_name="replace_environment_variable"
+	local file_path="$1"
+	local variable_name="$2"
+	local new_value="$3"
+
+	python functions.py "$function_name" "$file_path" "$variable_name" "$new_value"
+}
+
 change_user_and_password() {
     local username=$1
     local password=$2
@@ -1336,10 +1456,8 @@ change_user_and_password() {
 
 			ENCRYPTED_CREDENTIALS_BASE64=$(encrypt_message "$credentials_json")
 			NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM=$(generate_sha256sum "$credentials_json")
-			sed -i "/export ENCRYPTED_CREDENTIALS=/,/^.*\"$/d" /home/$USER/.bashrc
-			sed -i "/export NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM=/,/^.*\"$/d" /home/$USER/.bashrc
-			echo "export ENCRYPTED_CREDENTIALS=\"$ENCRYPTED_CREDENTIALS_BASE64\"" >> /home/$USER/.bashrc
-			echo "export NON_ENCRYPTED_CREDENTIALS_SHA256SUM=\"$NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM\"" >> /home/$USER/.bashrc
+			replace_environment_variable /home/user/.bashrc ENCRYPTED_CREDENTIALS "$ENCRYPTED_CREDENTIALS_BASE64"
+			replace_environment_variable /home/user/.bashrc NON_ENCRYPTED_CREDENTIALS_SHA256SUM "$NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM"
 
 			# Updating filebrowser credentials
 			filebrowser users update user --username $escaped_admin_username --password $escaped_admin_password -d /home/$USER/filebrowser/filebrowser.db
@@ -1364,19 +1482,13 @@ generate_valid_ssl_certificates() {
 
   set -ex
 
-  sed -i "/export ADMIN_EMAIL=/,/^.*\"$/d" /home/$current_username/.bashrc
-	sed -i "/export DOMAIN=/,/^.*\"$/d" /home/$current_username/.bashrc
-	sed -i "/export FUN_CLIENT_PROTOCOL=/,/^.*\"$/d" /home/$current_username/.bashrc
-	sed -i "/export FUN_CLIENT_WEBSOCKET_PROTOCOL=/,/^.*\"$/d" /home/$current_username/.bashrc
-	sed -i "/export FUN_CLIENT_HOST=/,/^.*\"$/d" /home/$current_username/.bashrc
-	sed -i "/export FUN_CLIENT_PORT=/,/^.*\"$/d" /home/$current_username/.bashrc
+	replace_environment_variable /home/user/.bashrc ADMIN_EMAIL "$email"
+	replace_environment_variable /home/user/.bashrc DOMAIN "$domain"
+	replace_environment_variable /home/user/.bashrc FUN_CLIENT_PROTOCOL "https"
+	replace_environment_variable /home/user/.bashrc FUN_CLIENT_WEBSOCKET_PROTOCOL "wss"
+	replace_environment_variable /home/user/.bashrc FUN_CLIENT_HOST "$domain"
+	replace_environment_variable /home/user/.bashrc FUN_CLIENT_PORT "443"
 
-	echo "export ADMIN_EMAIL=\"$email\"" >> /home/$current_username/.bashrc
-	echo "export DOMAIN=\"$domain\"" >> /home/$current_username/.bashrc
-	echo "export FUN_CLIENT_PROTOCOL=\"https\"" >> /home/$current_username/.bashrc
-	echo "export FUN_CLIENT_WEBSOCKET_PROTOCOL=\"wss\"" >> /home/$current_username/.bashrc
-	echo "export FUN_CLIENT_HOST=\"$domain\"" >> /home/$current_username/.bashrc
-	echo "export FUN_CLIENT_PORT=443" >> /home/$current_username/.bashrc
 
   ln -s "/home/$current_username/miniconda3/envs/certbot/bin/certbot" "/usr/bin/certbot"
 
