@@ -11,6 +11,10 @@ ARG DOMAIN="$DOMAIN"
 ARG AUTO_SIGN_IN="$AUTO_SIGN_IN"
 ARG LOCK_APT="$LOCK_APT"
 
+ARG DEFAULT_BRANCH="${DEFAULT_BRANCH:-production}"
+
+ARG QUICK_START_GUIDE_BRANCH="${QUICK_START_GUIDE_BRANCH:-$DEFAULT_BRANCH}"
+
 ARG FUN_FRONTEND_REPOSITORY_URL="$FUN_FRONTEND_REPOSITORY_URL"
 ARG FUN_FRONTEND_REPOSITORY_BRANCH="$FUN_FRONTEND_REPOSITORY_BRANCH"
 ARG FUN_FRONTEND_COMMAND="$FUN_FRONTEND_COMMAND"
@@ -39,12 +43,13 @@ RUN :> /root/.bashrc
 
 RUN rm /usr/bin/sh && ln -s /bin/bash /usr/bin/sh
 
-COPY ./standalone_install.sh /tmp/standalone_install.sh
-
 RUN <<-EOF
 	set -ex
 
-#  curl -o /tmp/standalone_install.sh https://raw.githubusercontent.com/funttastic/kujira-quickstart-guide/production/scripts/standalone_install.sh
+	apt update
+	apt install curl -y
+
+  curl -o "/tmp/standalone_install.sh https://raw.githubusercontent.com/funttastic/kujira-quickstart-guide/$QUICK_START_GUIDE_BRANCH/scripts/standalone_install.sh"
 
   chmod +x /tmp/standalone_install.sh
 
@@ -81,8 +86,8 @@ RUN <<-EOF
 	set +ex
 EOF
 
-EXPOSE $FUN_FRONTEND_PORT
-EXPOSE $FILEBROWSER_PORT
+EXPOSE 80
+EXPOSE 443
 
 ENTRYPOINT ["/root/shared/scripts/initialize.sh"]
 
