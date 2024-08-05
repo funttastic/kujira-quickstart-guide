@@ -49,7 +49,7 @@ RUN <<-EOF
 	apt update
 	apt install curl -y
 
-  curl -o "/tmp/standalone_install.sh https://raw.githubusercontent.com/funttastic/kujira-quickstart-guide/$QUICK_START_GUIDE_BRANCH/scripts/standalone_install.sh"
+  curl -o /tmp/standalone_install.sh "https://raw.githubusercontent.com/funttastic/kujira-quickstart-guide/$QUICK_START_GUIDE_BRANCH/scripts/standalone_install.sh"
 
   chmod +x /tmp/standalone_install.sh
 
