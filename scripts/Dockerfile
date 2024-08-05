@@ -56,32 +56,30 @@ RUN <<-EOF
   source /tmp/standalone_install.sh
 
   fun_standalone_install \
-    --username=$ADMIN_USERNAME \
-    --password=$ADMIN_PASSWORD \
-    --email=$ADMIN_EMAIL \
-    --user=$USER \
-    --domain=$DOMAIN \
-    --auto-sign-in=$AUTO_SIGN_IN \
-    --lock-apt=$LOCK_APT \
-    --fun-frontend-repository-url=$FUN_FRONTEND_REPOSITORY_URL \
-    --fun-frontend-repository-branch=$FUN_FRONTEND_REPOSITORY_BRANCH \
-    --fun-frontend-command=$FUN_FRONTEND_COMMAND \
-    --fun-frontend-port=$FUN_FRONTEND_PORT \
-    --fun-client-repository-url=$FUN_CLIENT_REPOSITORY_URL \
-    --fun-client-repository-branch=$FUN_CLIENT_REPOSITORY_BRANCH \
-    --fun-client-command=$FUN_CLIENT_COMMAND \
-    --fun-client-port=$FUN_CLIENT_PORT \
-    --hb-gateway-repository-url=$HB_GATEWAY_REPOSITORY_URL \
-    --hb-gateway-repository-branch=$HB_GATEWAY_REPOSITORY_BRANCH \
-    --hb-gateway-command=$HB_GATEWAY_COMMAND \
-    --hb-gateway-port=$HB_GATEWAY_PORT \
-    --hb-client-repository-url=$HB_CLIENT_REPOSITORY_URL \
-    --hb-client-repository-branch=$HB_CLIENT_REPOSITORY_BRANCH \
-    --hb-client-command=$HB_CLIENT_COMMAND \
-    --filebrowser-command=$FILEBROWSER_COMMAND \
-    --filebrowser-port=$FILEBROWSER_PORT
-
-  export IS_FIRST_RUN=TRUE
+    --username="$ADMIN_USERNAME" \
+    --password="$ADMIN_PASSWORD" \
+    --email="$ADMIN_EMAIL" \
+    --user="$USER" \
+    --domain="$DOMAIN" \
+    --auto-sign-in="$AUTO_SIGN_IN" \
+    --lock-apt="$LOCK_APT" \
+    --fun-frontend-repository-url="$FUN_FRONTEND_REPOSITORY_URL" \
+    --fun-frontend-repository-branch="$FUN_FRONTEND_REPOSITORY_BRANCH" \
+    --fun-frontend-command="$FUN_FRONTEND_COMMAND" \
+    --fun-frontend-port="$FUN_FRONTEND_PORT" \
+    --fun-client-repository-url="$FUN_CLIENT_REPOSITORY_URL" \
+    --fun-client-repository-branch="$FUN_CLIENT_REPOSITORY_BRANCH" \
+    --fun-client-command="$FUN_CLIENT_COMMAND" \
+    --fun-client-port="$FUN_CLIENT_PORT" \
+    --hb-gateway-repository-url="$HB_GATEWAY_REPOSITORY_URL" \
+    --hb-gateway-repository-branch="$HB_GATEWAY_REPOSITORY_BRANCH" \
+    --hb-gateway-command="$HB_GATEWAY_COMMAND" \
+    --hb-gateway-port="$HB_GATEWAY_PORT" \
+    --hb-client-repository-url="$HB_CLIENT_REPOSITORY_URL" \
+    --hb-client-repository-branch="$HB_CLIENT_REPOSITORY_BRANCH" \
+    --hb-client-command="$HB_CLIENT_COMMAND" \
+    --filebrowser-command="$FILEBROWSER_COMMAND" \
+    --filebrowser-port="$FILEBROWSER_PORT"
 
 	set +ex
 EOF

@@ -16,10 +16,6 @@ fun_standalone_install() {
 USER
 
 	fun_post_install $arguments
-
-#	sudo -u user -i <<USER
-#		fun_start
-#USER
 }
 
 fun_export_variables() {
@@ -732,6 +728,8 @@ start_all() {
 }
 
 start() {
+	source /home/user/.bashrc
+
 	local credentials
 	local username="${1:-$ADMIN_USERNAME}"
 	local password="${2:-$ADMIN_PASSWORD}"
@@ -752,21 +750,19 @@ start() {
 		fi
 	done
 
-	source /home/user/.bashrc
-
 	if [[ -n "$username" && -n "$password"  ]]; then
 		credentials=$(authenticate "$username" "$password")
-	elif [ -f "/home/user/.temp_credentials" ]; then
-		# This condition is only for the first start.
-
-		username=$(grep "username" "/home/user/.temp_credentials" | cut -d'=' -f2)
-		password=$(grep "password" "/home/user/.temp_credentials" | cut -d'=' -f2)
-
-		credentials=$(authenticate "$username" "$password")
-
-		if [ -n "$credentials" ]; then
-			rm -f /home/user/.temp_credentials
-		fi
+#	elif [ -f "/home/user/.temp_credentials" ]; then
+#		# This condition is only for the first start.
+#
+#		username=$(grep "username" "/home/user/.temp_credentials" | cut -d'=' -f2)
+#		password=$(grep "password" "/home/user/.temp_credentials" | cut -d'=' -f2)
+#
+#		credentials=$(authenticate "$username" "$password")
+#
+#		if [ -n "$credentials" ]; then
+#			rm -f /home/user/.temp_credentials
+#		fi
 	else
 		credentials=$(authenticate)
 	fi
@@ -1395,18 +1391,25 @@ replace_environment_variable() {
 }
 
 change_user_and_password() {
-    local username=$1
-    local password=$2
+	local username=$1
+	local password=$2
 
-    source /home/user/shared/scripts/functions.sh
-    escaped_admin_username=$(escape_string "${username}")
-		escaped_admin_password=$(escape_string "${password}")
+	output=$(sudo -u user -i <<USER
+		source ~/shared/scripts/functions.sh
+		escaped_admin_username=\$(escape_string "$username")
+		escaped_admin_password=\$(escape_string "$password")
+		echo "\$escaped_admin_username:\$escaped_admin_password"
+USER
+	)
 
-		echo "user:$password" | sudo chpasswd
+	escaped_admin_username=$(echo "$output" | cut -d':' -f1)
+	escaped_admin_password=$(echo "$output" | cut -d':' -f2)
 
-		cd /home/user
-    sudo -u user -i env ADMIN_USERNAME=$escaped_admin_username ADMIN_PASSWORD=$escaped_admin_password bash <<'USER'
-      source ~/.bashrc
+	echo "user:$password" | sudo chpasswd
+
+	cd /home/user
+	sudo -u user -i env ADMIN_USERNAME=$escaped_admin_username ADMIN_PASSWORD=$escaped_admin_password bash <<'USER'
+	  source ~/.bashrc
 
 			# Updating credentials
 			credentials_json="{\"username\":\"$ADMIN_USERNAME\",\"password\":\"$ADMIN_PASSWORD\"}"
@@ -1546,6 +1549,7 @@ NGINX
 }
 
 stop() {
+	cd /home/user
 	sudo -u user -i <<USER
   	source ~/.bashrc
   	stop
@@ -1553,11 +1557,21 @@ USER
 }
 
 start_and_keep() {
+	cd /home/user
 	sudo -u user -i <<USER
   	source ~/.bashrc
   	start_and_keep
 USER
 }
+
+FIRST_RUN_LOCK="~/shared/scripts/first_run.lock"
+
+if [ ! -f "$FIRST_RUN_LOCK" ]; then
+	export IS_FIRST_RUN="TRUE"
+	rm -f "$FIRST_RUN_LOCK"
+else
+	export IS_FIRST_RUN="FALSE"
+fi
 
 if [ "$IS_FIRST_RUN" == "TRUE" ]
 then
@@ -1577,4 +1591,6 @@ fi
 SCRIPT
 
 	chmod +x /root/shared/scripts/functions.sh
+
+	touch ~/shared/scripts/first_run.lock
 }
