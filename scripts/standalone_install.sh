@@ -1451,7 +1451,11 @@ generate_valid_ssl_certificates() {
 
   ln -s "/home/$current_username/miniconda3/envs/certbot/bin/certbot" "/usr/bin/certbot"
 
-	# certbot certonly --nginx --non-interactive --agree-tos -m $ADMIN_EMAIL -d $domain
+  if [ -d "$dir" ]; then
+		if [ -z "$(ls -A "$dir")" ]; then
+			certbot certonly --nginx --non-interactive --agree-tos -m $email -d $domain
+		fi
+  fi
 
   mkdir -p "/home/$current_username/shared/common/certificates/$domain"
 
