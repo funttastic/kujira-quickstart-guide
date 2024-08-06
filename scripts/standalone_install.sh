@@ -356,6 +356,12 @@ fun_pre_install() {
 
 	curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
 	rm -f get.sh
+
+		#--------------------------------------------------
+
+	cat <<'SUDOERS' > /etc/sudoers.d/user
+user ALL=(ALL) NOPASSWD: /usr/sbin/service nginx start, /usr/sbin/service nginx reload, /usr/sbin/service nginx stop, /usr/sbin/service nginx status, /usr/sbin/nginx
+SUDOERS
 }
 
 fun_install() {
