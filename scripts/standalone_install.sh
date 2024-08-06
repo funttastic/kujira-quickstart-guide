@@ -357,7 +357,7 @@ fun_pre_install() {
 	curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
 	rm -f get.sh
 
-		#--------------------------------------------------
+	#--------------------------------------------------
 
 	cat <<'SUDOERS' > /etc/sudoers.d/user
 user ALL=(ALL) NOPASSWD: /usr/sbin/service nginx start, /usr/sbin/service nginx reload, /usr/sbin/service nginx stop, /usr/sbin/service nginx status, /usr/sbin/nginx
@@ -1456,9 +1456,11 @@ generate_valid_ssl_certificates() {
 	replace_environment_variable /home/user/.bashrc FUN_CLIENT_PORT "443"
 
 
-  ln -s "/home/$current_username/miniconda3/envs/certbot/bin/certbot" "/usr/bin/certbot"
+	[ ! -L "/usr/bin/certbot" ] && ln -s "/home/$current_username/miniconda3/envs/certbot/bin/certbot" "/usr/bin/certbot"
 
-	# certbot certonly --nginx --non-interactive --agree-tos -m $ADMIN_EMAIL -d $domain
+  if [ -d "/etc/letsencrypt/archive/$domain" ] && [ "$(ls -A /etc/letsencrypt/archive/$domain)" ]; then
+		certbot certonly --nginx --non-interactive --agree-tos -m $email -d $domain
+  fi
 
   mkdir -p "/home/$current_username/shared/common/certificates/$domain"
 
