@@ -1584,6 +1584,13 @@ fi
 
 if [ "$IS_FIRST_RUN" == "TRUE" ]
 then
+	DOMAIN_LOWER=$(echo "$DOMAIN" | tr '[:upper:]' '[:lower:]')
+  if [[ -n "$DOMAIN_LOWER" && "$DOMAIN_LOWER" != "localhost" && "$DOMAIN_LOWER" != "127.0.0.1" && "$DOMAIN_LOWER" != "::1" ]]; then
+		if [ -z "${USE_VALID_SSL_CERTIFICATES+x}" ]; then
+			export USE_VALID_SSL_CERTIFICATES="TRUE"
+		fi
+  fi
+
 	change_user_and_password $ADMIN_USERNAME $ADMIN_PASSWORD
 
 	if [ "$USE_VALID_SSL_CERTIFICATES" = "TRUE" ]; then
