@@ -1610,4 +1610,3 @@ SCRIPT
 
 	touch ~/shared/scripts/first_run.lock
 }
-a
