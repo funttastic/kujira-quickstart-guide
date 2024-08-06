@@ -643,7 +643,7 @@ start_nginx() {
 	if [ "$(is_session_running "$session")" = "FALSE" ]; then
 		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> /home/user/shared/logs/tmux/$session.log"
 
-		tmux send-keys -t "$session" "nginx -g \"daemon off;\"" C-m
+		tmux send-keys -t "$session" "/usr/sbin/nginx -g 'daemon off;'" C-m
 	fi
 }
 
