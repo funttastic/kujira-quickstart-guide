@@ -643,7 +643,7 @@ start_nginx() {
 	if [ "$(is_session_running "$session")" = "FALSE" ]; then
 		tmux new-session -d -s "$session" \; pipe-pane -o "cat >> /home/user/shared/logs/tmux/$session.log"
 
-		tmux send-keys -t "$session" "sudo /usr/sbin/nginx -g 'daemon off;'" C-m
+		tmux send-keys -t "$session" "sudo /usr/sbin/nginx -t && sudo /usr/sbin/nginx -g 'daemon off;'" C-m
 	fi
 }
 
@@ -1552,7 +1552,7 @@ server {
 }
 NGINX
 
-	service nginx start
+	echo "127.0.0.1       $domain" | sudo tee -a /etc/hosts > /dev/null
 
   set +ex
 }
