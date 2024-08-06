@@ -879,6 +879,7 @@ kill_processes_and_subprocesses() {
 }
 
 stop_nginx() {
+	sudo service nginx stop
 	tmux kill-session -t "nginx"
 }
 
@@ -1456,9 +1457,9 @@ generate_valid_ssl_certificates() {
 	replace_environment_variable /home/user/.bashrc FUN_CLIENT_PORT "443"
 
 
-	[ ! -L "/usr/bin/certbot" ] && ln -s "/home/$current_username/miniconda3/envs/certbot/bin/certbot" "/usr/bin/certbot"
+  [ ! -L "/usr/bin/certbot" ] && ln -s "/home/$current_username/miniconda3/envs/certbot/bin/certbot" "/usr/bin/certbot"
 
-  if [ -d "/etc/letsencrypt/archive/$domain" ] && [ "$(ls -A /etc/letsencrypt/archive/$domain)" ]; then
+  if [ ! -d "/etc/letsencrypt/archive/$domain" ] || [ -z "$(ls -A /etc/letsencrypt/archive/$domain 2>/dev/null)" ]; then
 		certbot certonly --nginx --non-interactive --agree-tos -m $email -d $domain
   fi
 
