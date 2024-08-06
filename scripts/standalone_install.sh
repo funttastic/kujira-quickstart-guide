@@ -161,10 +161,10 @@ fun_pre_install() {
 	export USER=${USER:-"user"}
 
 	if [ -z "$DOMAIN" ]; then
-    USE_VALID_SSL_CERTIFICATES="FALSE"
-  else
-    USE_VALID_SSL_CERTIFICATES="TRUE"
-  fi
+		USE_VALID_SSL_CERTIFICATES="FALSE"
+	else
+		USE_VALID_SSL_CERTIFICATES="TRUE"
+	fi
 
 	DOMAIN=${DOMAIN:-""}
 
@@ -346,7 +346,7 @@ fun_pre_install() {
 
 	echo -e "\n" >> /home/user/.bashrc
 
-  #--------------------------------------------------
+	#--------------------------------------------------
 
 	unlink /usr/bin/pip
 	ln -s /usr/bin/python3 /usr/bin/python
@@ -447,11 +447,11 @@ fun_install() {
 	source /home/user/.bashrc
 
 	git config --global http.postBuffer 524288000
-  git config --global https.postBuffer 524288000
-  git config --global core.compression 0
-  git config --global http.lowSpeedLimit 0
-  git config --global http.lowSpeedTime 999999
-  git config --global http.version HTTP/1.1
+	git config --global https.postBuffer 524288000
+	git config --global core.compression 0
+	git config --global http.lowSpeedLimit 0
+	git config --global http.lowSpeedTime 999999
+	git config --global http.version HTTP/1.1
 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 
 	export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
@@ -610,13 +610,13 @@ CSS
 	#--------------------------------------------------
 
 	mkdir -p /home/user/shared/logs/tmux
-  ln -s /home/user/funttastic/client/resources/logs /home/user/shared/logs/fun-client
-  ln -s /home/user/hummingbot/gateway/logs /home/user/shared/logs/hb-gateway
-  ln -s /home/user/hummingbot/client/logs /home/user/shared/logs/hb-client
+	ln -s /home/user/funttastic/client/resources/logs /home/user/shared/logs/fun-client
+	ln -s /home/user/hummingbot/gateway/logs /home/user/shared/logs/hb-gateway
+	ln -s /home/user/hummingbot/client/logs /home/user/shared/logs/hb-client
 
-  mkdir -p /home/user/shared/scripts
+	mkdir -p /home/user/shared/scripts
 
-  cat <<'SCRIPT' > /home/user/shared/scripts/functions.sh
+	cat <<'SCRIPT' > /home/user/shared/scripts/functions.sh
 #!/bin/bash
 
 replace_in_file() {
@@ -1248,7 +1248,7 @@ SCRIPT
 	#--------------------------------------------------
 	mkdir -p /home/user/shared/common/certificates/api
 
-  # For using a self signed certificate
+	# For using a self signed certificate
 	conda activate funttastic
 	python /home/user/funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $ADMIN_PASSWORD --cert-path /home/user/shared/common/certificates/api
 
@@ -1308,15 +1308,15 @@ SCRIPT
 		rm -f /home/user/.ssh/id_rsa_openssl.pem
 	fi
 
-  set -x
+	set -x
 
 	#--------------------------------------------------
 
 	mkdir -p \
-  		/home/user/shared/common \
-  		/home/user/shared/funttastic/client \
-  		/home/user/shared/hummingbot/client \
-  		/home/user/shared/hummingbot/gateway
+			/home/user/shared/common \
+			/home/user/shared/funttastic/client \
+			/home/user/shared/hummingbot/client \
+			/home/user/shared/hummingbot/gateway
 
 	rm -rf /home/user/funttastic/client/resources/certificates
 	rm -rf /home/user/hummingbot/client/certs
@@ -1416,7 +1416,7 @@ USER
 
 	cd /home/user
 	sudo -u user -i env ADMIN_USERNAME=$escaped_admin_username ADMIN_PASSWORD=$escaped_admin_password bash <<'USER'
-	  source ~/.bashrc
+		source ~/.bashrc
 
 			# Updating credentials
 			credentials_json="{\"username\":\"$ADMIN_USERNAME\",\"password\":\"$ADMIN_PASSWORD\"}"
@@ -1442,12 +1442,12 @@ USER
 }
 
 generate_valid_ssl_certificates() {
-  local current_username="user"
-  local email=$1
-  local password=$2
-  local domain=$3
+	local current_username="user"
+	local email=$1
+	local password=$2
+	local domain=$3
 
-  set -ex
+	set -ex
 
 	replace_environment_variable /home/user/.bashrc ADMIN_EMAIL "$email"
 	replace_environment_variable /home/user/.bashrc DOMAIN "$domain"
@@ -1457,23 +1457,23 @@ generate_valid_ssl_certificates() {
 	replace_environment_variable /home/user/.bashrc FUN_CLIENT_PORT "443"
 
 
-  [ ! -L "/usr/bin/certbot" ] && ln -s "/home/$current_username/miniconda3/envs/certbot/bin/certbot" "/usr/bin/certbot"
+	[ ! -L "/usr/bin/certbot" ] && ln -s "/home/$current_username/miniconda3/envs/certbot/bin/certbot" "/usr/bin/certbot"
 
-  if [ ! -d "/etc/letsencrypt/archive/$domain" ] || [ -z "$(ls -A /etc/letsencrypt/archive/$domain 2>/dev/null)" ]; then
+	if [ ! -d "/etc/letsencrypt/archive/$domain" ] || [ -z "$(ls -A /etc/letsencrypt/archive/$domain 2>/dev/null)" ]; then
 		certbot certonly --nginx --non-interactive --agree-tos -m $email -d $domain
-  fi
+	fi
 
-  mkdir -p "/home/$current_username/shared/common/certificates/$domain"
+	mkdir -p "/home/$current_username/shared/common/certificates/$domain"
 
-  ln -s "/etc/letsencrypt/archive/$domain/cert1.pem" "/home/$current_username/shared/common/certificates/$domain/cert1.pem"
-  ln -s "/etc/letsencrypt/archive/$domain/chain1.pem" "/home/$current_username/shared/common/certificates/$domain/chain1.pem"
-  ln -s "/etc/letsencrypt/archive/$domain/fullchain1.pem" "/home/$current_username/shared/common/certificates/$domain/fullchain1.pem"
-  ln -s "/etc/letsencrypt/archive/$domain/privkey1.pem" "/home/$current_username/shared/common/certificates/$domain/privkey1.pem"
+	ln -s "/etc/letsencrypt/archive/$domain/cert1.pem" "/home/$current_username/shared/common/certificates/$domain/cert1.pem"
+	ln -s "/etc/letsencrypt/archive/$domain/chain1.pem" "/home/$current_username/shared/common/certificates/$domain/chain1.pem"
+	ln -s "/etc/letsencrypt/archive/$domain/fullchain1.pem" "/home/$current_username/shared/common/certificates/$domain/fullchain1.pem"
+	ln -s "/etc/letsencrypt/archive/$domain/privkey1.pem" "/home/$current_username/shared/common/certificates/$domain/privkey1.pem"
 
 	chown -R $current_username:$current_username "/etc/letsencrypt/archive/$domain"
-  chown -R $current_username:$current_username "/home/$current_username/shared/common/certificates"
+	chown -R $current_username:$current_username "/home/$current_username/shared/common/certificates"
 
-  cat <<NGINX > /etc/nginx/conf.d/$domain.conf
+	cat <<NGINX > /etc/nginx/conf.d/$domain.conf
 server {
 	listen 80;
 	server_name $domain www.$domain;
@@ -1554,22 +1554,22 @@ NGINX
 
 	echo "127.0.0.1       $domain" | sudo tee -a /etc/hosts > /dev/null
 
-  set +ex
+	set +ex
 }
 
 stop() {
 	cd /home/user
 	sudo -u user -i <<USER
-  	source ~/.bashrc
-  	stop
+		source ~/.bashrc
+		stop
 USER
 }
 
 start_and_keep() {
 	cd /home/user
 	sudo -u user -i <<USER
-  	source ~/.bashrc
-  	start_and_keep
+		source ~/.bashrc
+		start_and_keep
 USER
 }
 
@@ -1585,11 +1585,11 @@ fi
 if [ "$IS_FIRST_RUN" == "TRUE" ]
 then
 	DOMAIN_LOWER=$(echo "$DOMAIN" | tr '[:upper:]' '[:lower:]')
-  if [[ -n "$DOMAIN_LOWER" && "$DOMAIN_LOWER" != "localhost" && "$DOMAIN_LOWER" != "127.0.0.1" && "$DOMAIN_LOWER" != "::1" ]]; then
+	if [[ -n "$DOMAIN_LOWER" && "$DOMAIN_LOWER" != "localhost" && "$DOMAIN_LOWER" != "127.0.0.1" && "$DOMAIN_LOWER" != "::1" ]]; then
 		if [ -z "${USE_VALID_SSL_CERTIFICATES+x}" ]; then
 			export USE_VALID_SSL_CERTIFICATES="TRUE"
 		fi
-  fi
+	fi
 
 	change_user_and_password $ADMIN_USERNAME $ADMIN_PASSWORD
 
@@ -1600,7 +1600,7 @@ fi
 
 if [ "$1" == "start_and_keep" ]
 then
-  stop
+	stop
 	start_and_keep
 fi
 
