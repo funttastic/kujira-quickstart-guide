@@ -1431,7 +1431,7 @@ USER
 		replace_environment_variable /home/user/.bashrc NON_ENCRYPTED_CREDENTIALS_SHA256SUM "$NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM"
 
 		# Updating filebrowser credentials
-		stop_filebrowser
+		stop_filebrowser 2>/dev/null || true
 		filebrowser users update $old_username --username $ADMIN_USERNAME --password $ADMIN_PASSWORD -d /home/user/filebrowser/filebrowser.db
 
 		# Updating certificates
@@ -1451,8 +1451,6 @@ generate_valid_ssl_certificates() {
 	local email=$1
 	local password=$2
 	local domain=$3
-
-	set -ex
 
 	replace_environment_variable /home/user/.bashrc ADMIN_EMAIL "$email"
 	replace_environment_variable /home/user/.bashrc DOMAIN "$domain"
@@ -1578,8 +1576,6 @@ server {
 NGINX
 
 	echo "127.0.0.1       $domain" | sudo tee -a /etc/hosts > /dev/null
-
-	set +ex
 }
 
 stop() {
@@ -1598,7 +1594,9 @@ start_and_keep() {
 USER
 }
 
-FIRST_RUN_LOCK="~/shared/scripts/first_run.lock"
+set -e
+
+FIRST_RUN_LOCK="/root/shared/scripts/first_run.lock"
 
 if [ -f "$FIRST_RUN_LOCK" ]; then
 	export IS_FIRST_RUN="TRUE"
@@ -1625,9 +1623,11 @@ fi
 
 if [ "$1" == "start_and_keep" ]
 then
-	stop
+	stop 2>/dev/null || true
 	start_and_keep
 fi
+
+set +e
 
 SCRIPT
 
