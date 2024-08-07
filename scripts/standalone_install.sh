@@ -190,7 +190,7 @@ fun_pre_install() {
 	HB_CLIENT_REPOSITORY_BRANCH=${HB_CLIENT_REPOSITORY_BRANCH:-production}
 	HB_CLIENT_COMMAND=${HB_CLIENT_COMMAND:-APP=hb-client python bin/hummingbot_quickstart.py; exit}
 
-	FILEBROWSER_COMMAND=${FILEBROWSER_COMMAND:-APP=filebrowser filebrowser --address=0.0.0.0 -p \$FILEBROWSER_PORT -r ../shared}
+	FILEBROWSER_COMMAND=${FILEBROWSER_COMMAND:-APP=filebrowser filebrowser --address=0.0.0.0 -p \$FILEBROWSER_PORT -r ../shared -b /filebrowser}
 	FILEBROWSER_PORT=${FILEBROWSER_PORT:-50002}
 
 	#--------------------------------------------------
@@ -278,7 +278,7 @@ fun_pre_install() {
 
 	if [ -z "$FILEBROWSER_COMMAND" ]
 	then
-		echo "export FILEBROWSER_COMMAND=\"APP=filebrowser filebrowser --address=0.0.0.0 -p \$FILEBROWSER_PORT -r ../shared\"" >> /home/user/.bashrc
+		echo "export FILEBROWSER_COMMAND=\"APP=filebrowser filebrowser --address=0.0.0.0 -p \$FILEBROWSER_PORT -r ../shared\" -b /filebrowser" >> /home/user/.bashrc
 	else
 		echo "export FILEBROWSER_COMMAND=\"$FILEBROWSER_COMMAND\"" >> /home/user/.bashrc
 	fi
@@ -1541,6 +1541,26 @@ server {
 		proxy_ssl_certificate /home/$current_username/shared/common/certificates/api/client_cert.pem;
 		proxy_ssl_certificate_key /home/$current_username/shared/common/certificates/api/client_key.pem;
 		proxy_ssl_trusted_certificate /home/$current_username/shared/common/certificates/api/ca_cert.pem;
+
+		proxy_ssl_protocols TLSv1.2 TLSv1.3;
+		proxy_ssl_ciphers HIGH:!aNULL:!MD5;
+
+		proxy_ssl_verify on;
+		proxy_ssl_verify_depth 3;
+		proxy_ssl_session_reuse on;
+	}
+
+	location /filebrowser {
+		proxy_pass http://localhost:50002/filebrowser;
+
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $scheme;
+
+		proxy_ssl_certificate /home/user/shared/common/certificates/api/client_cert.pem;
+		proxy_ssl_certificate_key /home/user/shared/common/certificates/api/client_key.pem;
+		proxy_ssl_trusted_certificate /home/user/shared/common/certificates/api/ca_cert.pem;
 
 		proxy_ssl_protocols TLSv1.2 TLSv1.3;
 		proxy_ssl_ciphers HIGH:!aNULL:!MD5;
