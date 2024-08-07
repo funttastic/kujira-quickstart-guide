@@ -1418,26 +1418,31 @@ USER
 	sudo -u user -i env ADMIN_USERNAME=$escaped_admin_username ADMIN_PASSWORD=$escaped_admin_password bash <<'USER'
 		source ~/.bashrc
 
-			# Updating credentials
-			credentials_json="{\"username\":\"$ADMIN_USERNAME\",\"password\":\"$ADMIN_PASSWORD\"}"
+		old_credentials=$(authenticate)
+		old_username=$(extract_from_json "username" "$old_credentials")
+		old_password=$(extract_from_json "password" "$old_credentials")
 
-			ENCRYPTED_CREDENTIALS_BASE64=$(encrypt_message "$credentials_json")
-			NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM=$(generate_sha256sum "$credentials_json")
-			replace_environment_variable /home/user/.bashrc ENCRYPTED_CREDENTIALS "$ENCRYPTED_CREDENTIALS_BASE64"
-			replace_environment_variable /home/user/.bashrc NON_ENCRYPTED_CREDENTIALS_SHA256SUM "$NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM"
+		# Updating credentials
+		credentials_json="{\"username\":\"$ADMIN_USERNAME\",\"password\":\"$ADMIN_PASSWORD\"}"
 
-			# Updating filebrowser credentials
-			filebrowser users update user --username $ADMIN_USERNAME --password $ADMIN_PASSWORD -d /home/user/filebrowser/filebrowser.db
+		ENCRYPTED_CREDENTIALS_BASE64=$(encrypt_message "$credentials_json")
+		NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM=$(generate_sha256sum "$credentials_json")
+		replace_environment_variable /home/user/.bashrc ENCRYPTED_CREDENTIALS "$ENCRYPTED_CREDENTIALS_BASE64"
+		replace_environment_variable /home/user/.bashrc NON_ENCRYPTED_CREDENTIALS_SHA256SUM "$NON_ENCRYPTED_CREDENTIALS_JSON_SHA256SUM"
 
-			# Updating certificates
-			conda activate funttastic
-			rm -rf /home/user/shared/common/certificates/api
-			mkdir -p /home/user/shared/common/certificates/api
-			python /home/user/funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $ADMIN_PASSWORD --cert-path /home/user/shared/common/certificates/api
+		# Updating filebrowser credentials
+		stop_filebrowser
+		filebrowser users update $old_username --username $ADMIN_USERNAME --password $ADMIN_PASSWORD -d /home/user/filebrowser/filebrowser.db
 
-			# Updating Hummingbot Client credentials
-			conda activate hummingbot
-			python /home/user/funttastic/client/resources/scripts/generate_hb_client_password_verification_file.py -p "$ADMIN_PASSWORD" -d /home/user/hummingbot/client/conf
+		# Updating certificates
+		conda activate funttastic
+		rm -rf /home/user/shared/common/certificates/api
+		mkdir -p /home/user/shared/common/certificates/api
+		python /home/user/funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $ADMIN_PASSWORD --cert-path /home/user/shared/common/certificates/api
+
+		# Updating Hummingbot Client credentials
+		conda activate hummingbot
+		python /home/user/funttastic/client/resources/scripts/generate_hb_client_password_verification_file.py -p "$ADMIN_PASSWORD" -d /home/user/hummingbot/client/conf
 USER
 }
 
