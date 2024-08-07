@@ -1556,10 +1556,10 @@ server {
 	location /filebrowser {
 		proxy_pass http://localhost:50002/filebrowser;
 
-		proxy_set_header Host $host;
-		proxy_set_header X-Real-IP $remote_addr;
-		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-		proxy_set_header X-Forwarded-Proto $scheme;
+		proxy_set_header Host \$host;
+		proxy_set_header X-Real-IP \$remote_addr;
+		proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto \$scheme;
 
 		proxy_ssl_certificate /home/user/shared/common/certificates/api/client_cert.pem;
 		proxy_ssl_certificate_key /home/user/shared/common/certificates/api/client_key.pem;
