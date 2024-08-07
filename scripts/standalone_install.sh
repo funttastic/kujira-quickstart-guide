@@ -1575,7 +1575,7 @@ USER
 
 FIRST_RUN_LOCK="~/shared/scripts/first_run.lock"
 
-if [ ! -f "$FIRST_RUN_LOCK" ]; then
+if [ -f "$FIRST_RUN_LOCK" ]; then
 	export IS_FIRST_RUN="TRUE"
 	rm -f "$FIRST_RUN_LOCK"
 else
