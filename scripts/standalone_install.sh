@@ -362,6 +362,109 @@ fun_pre_install() {
 	cat <<'SUDOERS' > /etc/sudoers.d/user
 user ALL=(ALL) NOPASSWD: /usr/sbin/service nginx start, /usr/sbin/service nginx reload, /usr/sbin/service nginx stop, /usr/sbin/service nginx status, /usr/sbin/nginx
 SUDOERS
+
+	#--------------------------------------------------
+
+	cat <<NGINX > /etc/nginx/conf.d/localhost.conf
+server {
+	listen 80;
+	listen [::]:80;
+	server_name localhost;
+
+	return 301 https://localhost\$request_uri;
+}
+
+server {
+	listen 443 ssl;
+	listen [::]:443 ssl;
+	server_name localhost;
+
+	ssl_certificate /home/user/shared/common/certificates/api/server_cert.pem;
+	ssl_certificate_key /home/user/shared/common/certificates/api/server_key.pem;
+	ssl_client_certificate /home/user/shared/common/certificates/api/ca_cert.pem;
+
+	location / {
+		proxy_pass http://localhost:50000;
+
+		proxy_set_header Host \$host;
+		proxy_set_header X-Real-IP \$remote_addr;
+		proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto \$scheme;
+
+		proxy_ssl_certificate /home/user/shared/common/certificates/api/client_cert.pem;
+		proxy_ssl_certificate_key /home/user/shared/common/certificates/api/client_key.pem;
+		proxy_ssl_trusted_certificate /home/user/shared/common/certificates/api/ca_cert.pem;
+	}
+
+	location /api/ws {
+		rewrite ^/api/ws/(.*)$ /ws/$1 break;
+
+		proxy_pass https://localhost:50001;
+
+		proxy_set_header Host \$host;
+		proxy_set_header X-Real-IP \$remote_addr;
+		proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto \$scheme;
+
+		proxy_http_version 1.1;
+		proxy_set_header Upgrade \$http_upgrade;
+		proxy_set_header Connection "Upgrade";
+
+		proxy_ssl_certificate /home/user/shared/common/certificates/api/client_cert.pem;
+		proxy_ssl_certificate_key /home/user/shared/common/certificates/api/client_key.pem;
+		proxy_ssl_trusted_certificate /home/user/shared/common/certificates/api/ca_cert.pem;
+
+		proxy_ssl_protocols TLSv1.2 TLSv1.3;
+		proxy_ssl_ciphers HIGH:!aNULL:!MD5;
+
+		proxy_ssl_verify on;
+		proxy_ssl_verify_depth 3;
+		proxy_ssl_session_reuse on;
+	}
+
+	location /api {
+		rewrite ^/api/(.*)$ /$1 break;
+
+		proxy_pass https://localhost:50001;
+
+		proxy_set_header Host \$host;
+		proxy_set_header X-Real-IP \$remote_addr;
+		proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto \$scheme;
+
+		proxy_ssl_certificate /home/user/shared/common/certificates/api/client_cert.pem;
+		proxy_ssl_certificate_key /home/user/shared/common/certificates/api/client_key.pem;
+		proxy_ssl_trusted_certificate /home/user/shared/common/certificates/api/ca_cert.pem;
+
+		proxy_ssl_protocols TLSv1.2 TLSv1.3;
+		proxy_ssl_ciphers HIGH:!aNULL:!MD5;
+
+		proxy_ssl_verify on;
+		proxy_ssl_verify_depth 3;
+		proxy_ssl_session_reuse on;
+	}
+
+	location /filebrowser {
+		proxy_pass http://localhost:50002/filebrowser;
+
+		proxy_set_header Host \$host;
+		proxy_set_header X-Real-IP \$remote_addr;
+		proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto \$scheme;
+
+		proxy_ssl_certificate /home/user/shared/common/certificates/api/client_cert.pem;
+		proxy_ssl_certificate_key /home/user/shared/common/certificates/api/client_key.pem;
+		proxy_ssl_trusted_certificate /home/user/shared/common/certificates/api/ca_cert.pem;
+
+		proxy_ssl_protocols TLSv1.2 TLSv1.3;
+		proxy_ssl_ciphers HIGH:!aNULL:!MD5;
+
+		proxy_ssl_verify on;
+		proxy_ssl_verify_depth 3;
+		proxy_ssl_session_reuse on;
+	}
+}
+NGINX
 }
 
 fun_install() {
