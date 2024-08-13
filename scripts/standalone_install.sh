@@ -1354,6 +1354,7 @@ SCRIPT
 	# For using a self signed certificate
 	conda activate funttastic
 	python /home/user/funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $ADMIN_PASSWORD --cert-path /home/user/shared/common/certificates/api
+	openssl rsa -in /home/user/shared/common/certificates/api/server_key.pem -out /home/user/shared/common/certificates/api/server_key_no_password.pem -passin pass:$ADMIN_PASSWORD
 
 	# HB Client
 	conda activate hummingbot
@@ -1542,6 +1543,7 @@ USER
 		rm -rf /home/user/shared/common/certificates/api
 		mkdir -p /home/user/shared/common/certificates/api
 		python /home/user/funttastic/client/resources/scripts/generate_ssl_certificates.py --passphrase $ADMIN_PASSWORD --cert-path /home/user/shared/common/certificates/api
+		openssl rsa -in /home/user/shared/common/certificates/api/server_key.pem -out /home/user/shared/common/certificates/api/server_key_no_password.pem -passin pass:$ADMIN_PASSWORD
 
 		# Updating Hummingbot Client credentials
 		conda activate hummingbot
