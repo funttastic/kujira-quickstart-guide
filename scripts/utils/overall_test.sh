@@ -6,7 +6,7 @@ source /home/user/.bashrc
 
 stop
 start
-sleep 2
+sleep 4
 
 export USERNAME=<username>
 export PASSWORD=<password>
