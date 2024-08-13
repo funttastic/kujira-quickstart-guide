@@ -250,7 +250,7 @@ fun_pre_install() {
 	echo "export FUN_CLIENT_PROTOCOL=\"https\"" >> /home/user/.bashrc
 	echo "export FUN_CLIENT_WEBSOCKET_PROTOCOL=\"wss\"" >> /home/user/.bashrc
 	echo "export FUN_CLIENT_HOST=\"$DOMAIN\"" >> /home/user/.bashrc
-	echo "export FUN_CLIENT_PORT=443" >> /home/user/.bashrc
+	echo "export FUN_CLIENT_PORT=50001" >> /home/user/.bashrc
 
 	if [ -z "$FUN_FRONTEND_PORT" ]
 	then
@@ -1562,7 +1562,7 @@ generate_valid_ssl_certificates() {
 	replace_environment_variable /home/user/.bashrc FUN_CLIENT_PROTOCOL "https"
 	replace_environment_variable /home/user/.bashrc FUN_CLIENT_WEBSOCKET_PROTOCOL "wss"
 	replace_environment_variable /home/user/.bashrc FUN_CLIENT_HOST "$domain"
-	replace_environment_variable /home/user/.bashrc FUN_CLIENT_PORT "443"
+	replace_environment_variable /home/user/.bashrc FUN_CLIENT_PORT "50001"
 
 
 	[ ! -L "/usr/bin/certbot" ] && ln -s "/home/$current_username/miniconda3/envs/certbot/bin/certbot" "/usr/bin/certbot"
