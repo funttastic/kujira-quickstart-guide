@@ -35,17 +35,21 @@ echo -e "\n"
 echo "--------------------------------------------------------------------------"
 echo "HTTP:"
 echo "--------------------------------------------------------------------------"
+set -ex
 curl \
 	--cacert "/home/user/funttastic/client/resources/certificates/ca_cert.pem" \
 	http://$DOMAIN/filebrowser
+set +ex
 
 echo -e "\n"
 echo "--------------------------------------------------------------------------"
 echo "HTTPS:"
 echo "--------------------------------------------------------------------------"
+set -ex
 curl \
 	--cacert "/home/user/funttastic/client/resources/certificates/ca_cert.pem" \
 	https://$DOMAIN/filebrowser
+set +ex
 
 echo -e "\n"
 echo "=========================================================================="
@@ -56,17 +60,21 @@ echo -e "\n"
 echo "--------------------------------------------------------------------------"
 echo "HTTP:"
 echo "--------------------------------------------------------------------------"
+set -ex
 curl \
 	--cacert "/home/user/funttastic/client/resources/certificates/ca_cert.pem" \
 	http://$DOMAIN
+set +ex
 
 echo -e "\n"
 echo "--------------------------------------------------------------------------"
 echo "HTTPS:"
 echo "--------------------------------------------------------------------------"
+set -ex
 curl \
 	--cacert "/home/user/funttastic/client/resources/certificates/ca_cert.pem" \
 	https://$DOMAIN
+set +ex
 
 echo -e "\n"
 echo "=========================================================================="
@@ -77,6 +85,7 @@ echo -e "\n"
 echo "--------------------------------------------------------------------------"
 echo "HTTP:"
 echo "--------------------------------------------------------------------------"
+set -ex
 curl -X "POST" \
 	--cert "/home/user/funttastic/client/resources/certificates/client_cert.pem" \
 	--key "/home/user/funttastic/client/resources/certificates/client_key.pem" \
@@ -84,11 +93,13 @@ curl -X "POST" \
 	--header "Content-Type: application/json" \
 	-d "{\"username\": \"$USERNAME\", \"password\": \"$PASSWORD\"}" \
 	"http://$DOMAIN/api/auth/signIn"
+set +ex
 
 echo -e "\n"
 echo "--------------------------------------------------------------------------"
 echo "HTTPS:"
 echo "--------------------------------------------------------------------------"
+set -ex
 curl -X "POST" \
 	--cert "/home/user/funttastic/client/resources/certificates/client_cert.pem" \
 	--key "/home/user/funttastic/client/resources/certificates/client_key.pem" \
@@ -96,6 +107,7 @@ curl -X "POST" \
 	--header "Content-Type: application/json" \
 	-d "{\"username\": \"$USERNAME\", \"password\": \"$PASSWORD\"}" \
 	"https://$DOMAIN/api/auth/signIn"
+set +ex
 
 echo -e "\n"
 echo "=========================================================================="
@@ -150,13 +162,17 @@ echo -e "\n"
 echo "--------------------------------------------------------------------------"
 echo "HTTP:"
 echo "--------------------------------------------------------------------------"
+set -ex
 curl http://$DOMAIN/filebrowser
+set +ex
 
 echo -e "\n"
 echo "--------------------------------------------------------------------------"
 echo "HTTPS:"
 echo "--------------------------------------------------------------------------"
+set -ex
 curl https://$DOMAIN/filebrowser
+set +ex
 
 echo -e "\n"
 echo "=========================================================================="
@@ -167,13 +183,17 @@ echo -e "\n"
 echo "--------------------------------------------------------------------------"
 echo "HTTP:"
 echo "--------------------------------------------------------------------------"
+set -ex
 curl http://$DOMAIN
+set +ex
 
 echo -e "\n"
 echo "--------------------------------------------------------------------------"
 echo "HTTPS:"
 echo "--------------------------------------------------------------------------"
+set -ex
 curl https://$DOMAIN
+set +ex
 
 echo -e "\n"
 echo "=========================================================================="
@@ -184,6 +204,7 @@ echo -e "\n"
 echo "--------------------------------------------------------------------------"
 echo "HTTP:"
 echo "--------------------------------------------------------------------------"
+set -ex
 curl -X "POST" \
 	--cert "/home/user/funttastic/client/resources/certificates/client_cert.pem" \
 	--key "/home/user/funttastic/client/resources/certificates/client_key.pem" \
@@ -191,11 +212,13 @@ curl -X "POST" \
 	--header "Content-Type: application/json" \
 	-d "{\"username\": \"$USERNAME\", \"password\": \"$PASSWORD\"}" \
 	"http://$DOMAIN/api/auth/signIn"
+set +ex
 
 echo -e "\n"
 echo "--------------------------------------------------------------------------"
 echo "HTTPS:"
 echo "--------------------------------------------------------------------------"
+set -ex
 curl -X "POST" \
 	--cert "/home/user/funttastic/client/resources/certificates/client_cert.pem" \
 	--key "/home/user/funttastic/client/resources/certificates/client_key.pem" \
@@ -203,6 +226,7 @@ curl -X "POST" \
 	--header "Content-Type: application/json" \
 	-d "{\"username\": \"$USERNAME\", \"password\": \"$PASSWORD\"}" \
 	"https://$DOMAIN/api/auth/signIn"
+set +ex
 
 echo -e "\n"
 echo "=========================================================================="

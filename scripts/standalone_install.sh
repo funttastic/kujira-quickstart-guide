@@ -380,7 +380,7 @@ server {
 	server_name localhost;
 
 	ssl_certificate /home/user/shared/common/certificates/api/server_cert.pem;
-	ssl_certificate_key /home/user/shared/common/certificates/api/server_key.pem;
+	ssl_certificate_key /home/user/shared/common/certificates/api/server_key_no_password.pem;
 	ssl_client_certificate /home/user/shared/common/certificates/api/ca_cert.pem;
 
 	location / {
@@ -397,7 +397,7 @@ server {
 	}
 
 	location /api/ws {
-		rewrite ^/api/ws/(.*)$ /ws/$1 break;
+		rewrite ^/api/ws/(.*)\$ /ws/\$1 break;
 
 		proxy_pass https://localhost:50001;
 
@@ -423,7 +423,7 @@ server {
 	}
 
 	location /api {
-		rewrite ^/api/(.*)$ /$1 break;
+		rewrite ^/api/(.*)\$ /\$1 break;
 
 		proxy_pass https://localhost:50001;
 
