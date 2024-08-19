@@ -1196,7 +1196,7 @@ authenticate() {
 }
 
 log_all () {
-	tail -f \
+	tail -n 0 -f \
 		/home/user/shared/logs/tmux/fun-frontend.log \
 		/home/user/shared/logs/tmux/filebrowser.log \
 		/home/user/shared/logs/tmux/fun-client.log \
