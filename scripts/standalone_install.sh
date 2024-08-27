@@ -662,7 +662,7 @@ CSS
 
 	cp -a src/templates/. conf
 
-	yarn
+	yarn 2>/dev/null
 	yarn prebuild
 	yarn build
 
