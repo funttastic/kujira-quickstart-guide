@@ -549,6 +549,8 @@ fun_install() {
 
 	source /home/user/.bashrc
 
+	mkdir -p /home/user/.ssh
+	touch /home/user/.ssh/known_hosts
 	ssh-keyscan github.com >> /home/user/.ssh/known_hosts
 
 	git config --global http.postBuffer 524288000
