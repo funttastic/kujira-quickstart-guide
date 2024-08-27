@@ -610,7 +610,7 @@ fun_install() {
 
 	git clone --depth 1 --no-single-branch -b $FUN_FRONTEND_REPOSITORY_BRANCH $FUN_FRONTEND_REPOSITORY_URL .
 
-	yarn install
+	yarn 2>/dev/null
 	git rm -r --cached .
 
 	#--------------------------------------------------
