@@ -549,6 +549,8 @@ fun_install() {
 
 	source /home/user/.bashrc
 
+	ssh-keyscan github.com >> /home/user/.ssh/known_hosts
+
 	git config --global http.postBuffer 524288000
 	git config --global https.postBuffer 524288000
 	git config --global core.compression 0
