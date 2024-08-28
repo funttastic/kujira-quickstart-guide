@@ -173,7 +173,7 @@ fun_pre_install() {
 
 	FUN_FRONTEND_REPOSITORY_URL="${FUN_FRONTEND_REPOSITORY_URL:-https://github.com/funttastic/fun-hb-frontend.git}"
 	FUN_FRONTEND_REPOSITORY_BRANCH="${FUN_FRONTEND_REPOSITORY_BRANCH:-production}"
-	FUN_FRONTEND_COMMAND="${FUN_FRONTEND_COMMAND:-APP=fun-frontend yarn start --host}"
+	FUN_FRONTEND_COMMAND="${FUN_FRONTEND_COMMAND:-APP=fun-frontend npm run start --host}"
 	FUN_FRONTEND_PORT="${FUN_FRONTEND_PORT:-50000}"
 
 	FUN_CLIENT_REPOSITORY_URL="${FUN_CLIENT_REPOSITORY_URL:-https://github.com/funttastic/fun-hb-client.git}"
@@ -183,7 +183,7 @@ fun_pre_install() {
 
 	HB_GATEWAY_REPOSITORY_URL=${HB_GATEWAY_REPOSITORY_URL:-https://github.com/Team-Kujira/gateway.git}
 	HB_GATEWAY_REPOSITORY_BRANCH=${HB_GATEWAY_REPOSITORY_BRANCH:-production}
-	HB_GATEWAY_COMMAND=${HB_GATEWAY_COMMAND:-APP=hb-gateway yarn start}
+	HB_GATEWAY_COMMAND=${HB_GATEWAY_COMMAND:-APP=hb-gateway npm run start}
 	HB_GATEWAY_PORT=${HB_GATEWAY_PORT:-15888}
 
 	HB_CLIENT_REPOSITORY_URL=${HB_CLIENT_REPOSITORY_URL:-https://github.com/Team-Kujira/hummingbot.git}
@@ -261,7 +261,7 @@ fun_pre_install() {
 
 	if [ -z "$FUN_FRONTEND_COMMAND" ]
 	then
-		echo "export FUN_FRONTEND_COMMAND=\"APP=fun-frontend yarn start --host\"" >> /home/user/.bashrc
+		echo "export FUN_FRONTEND_COMMAND=\"APP=fun-frontend npm run start --host\"" >> /home/user/.bashrc
 	else
 		echo "export FUN_FRONTEND_COMMAND=\"$FUN_FRONTEND_COMMAND\"" >> /home/user/.bashrc
 	fi
@@ -316,7 +316,7 @@ fun_pre_install() {
 
 	if [ -z "$HB_GATEWAY_COMMAND" ]
 	then
-		echo "export HB_GATEWAY_COMMAND=\"APP=hb-gateway yarn start\"" >> /home/user/.bashrc
+		echo "export HB_GATEWAY_COMMAND=\"APP=hb-gateway npm run start\"" >> /home/user/.bashrc
 	else
 		echo "export HB_GATEWAY_COMMAND=\"$HB_GATEWAY_COMMAND\"" >> /home/user/.bashrc
 	fi
@@ -610,7 +610,7 @@ fun_install() {
 
 	git clone --depth 1 --no-single-branch -b $FUN_FRONTEND_REPOSITORY_BRANCH $FUN_FRONTEND_REPOSITORY_URL .
 
-	yarn
+	npm install --legacy-peer-deps
 	git rm -r --cached .
 
 	#--------------------------------------------------
@@ -662,9 +662,9 @@ CSS
 
 	cp -a src/templates/. conf
 
-	yarn
-	yarn prebuild
-	yarn build
+	npm install --legacy-peer-deps
+	npm run prebuild
+	npm run build
 
 	#--------------------------------------------------
 
