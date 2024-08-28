@@ -1202,12 +1202,123 @@ authenticate() {
 log_all () {
 	tail -n 0 -f \
 		/home/user/shared/logs/tmux/fun-frontend.log \
-		/home/user/shared/logs/tmux/filebrowser.log \
 		/home/user/shared/logs/tmux/fun-client.log \
+		/home/user/shared/logs/tmux/filebrowser.log \
 		/home/user/shared/logs/tmux/hb-gateway.log \
-		/home/user/shared/logs/fun-client/all.log \
+		/home/user/shared/logs/tmux/nginx.log \
+		/home/user/shared/logs/fun-client/warning.log \
+		/home/user/shared/logs/fun-client/info.log \
+		/home/user/shared/logs/fun-client/error.log \
+		/home/user/shared/logs/fun-client/critical.log \
 		/home/user/shared/logs/hb-gateway/* \
-		/home/user/shared/logs/hb-client/*
+		/home/user/shared/logs/hb-client/* \
+		/var/log/nginx/*
+}
+
+log_front_all() {
+	tail -n 0 -f \
+		/home/user/shared/logs/tmux/fun-frontend.log \
+		/home/user/shared/logs/tmux/fun-client.log \
+		/home/user/shared/logs/tmux/filebrowser.log \
+		/home/user/shared/logs/tmux/hb-gateway.log \
+		/home/user/shared/logs/tmux/nginx.log
+}
+
+log_back_all() {
+	tail -n 0 -f \
+		/home/user/shared/logs/hb-gateway/* \
+		/home/user/shared/logs/hb-client/*  \
+		/home/user/shared/logs/fun-client/warning.log \
+		/home/user/shared/logs/fun-client/info.log \
+		/home/user/shared/logs/fun-client/error.log \
+		/home/user/shared/logs/fun-client/critical.log \
+		/var/log/nginx/*
+}
+
+log_fun_frontend() {
+	tail -n 0 -f /home/user/shared/logs/tmux/fun-frontend.log
+}
+
+log_front_fun_frontend() {
+	tail -n 0 -f /home/user/shared/logs/tmux/fun-frontend.log
+}
+
+log_back_fun_frontend() {
+	tail -n 0 -f /home/user/shared/logs/tmux/fun-frontend.log
+}
+
+log_fun_client() {
+	tail -n 0 -f \
+		/home/user/shared/logs/tmux/fun-client.log \
+		/home/user/shared/logs/fun-client/warning.log \
+		/home/user/shared/logs/fun-client/info.log \
+		/home/user/shared/logs/fun-client/error.log \
+		/home/user/shared/logs/fun-client/critical.log
+}
+
+log_front_fun_client() {
+	tail -n 0 -f /home/user/shared/logs/tmux/fun-client.log
+}
+
+log_back_fun_client() {
+	tail -n 0 -f \
+		/home/user/shared/logs/fun-client/warning.log \
+		/home/user/shared/logs/fun-client/info.log \
+		/home/user/shared/logs/fun-client/error.log \
+		/home/user/shared/logs/fun-client/critical.log
+}
+
+log_filebrowser() {
+	tail -n 0 -f /home/user/shared/logs/tmux/filebrowser.log
+
+}
+
+log_front_filebrowser() {
+	tail -n 0 -f /home/user/shared/logs/tmux/filebrowser.log
+}
+
+log_back_filebrowser() {
+	tail -n 0 -f /home/user/shared/logs/tmux/filebrowser.log
+}
+
+log_hb_gateway() {
+	tail -n 0 -f \
+		/home/user/shared/logs/tmux/hb-gateway.log \
+		/home/user/shared/logs/hb-gateway/*
+}
+
+log_front_hb_gateway() {
+	tail -n 0 -f /home/user/shared/logs/tmux/hb-gateway.log
+}
+
+log_back_hb_gateway() {
+	tail -n 0 -f /home/user/shared/logs/hb-gateway/*
+}
+
+log_hb_client() {
+	tail -n 0 -f /home/user/shared/logs/hb-client/*
+}
+
+log_front_hb_client() {
+	tail -n 0 -f /home/user/shared/logs/hb-client/*
+}
+
+log_back_hb_client() {
+	tail -n 0 -f /home/user/shared/logs/hb-client/*
+}
+
+log_nginx() {
+	tail -n 0 -f \
+		/home/user/shared/logs/tmux/nginx.log \
+		/var/log/nginx/*
+}
+
+log_front_nginx() {
+	tail -n 0 -f /home/user/shared/logs/tmux/nginx.log
+}
+
+log_back_nginx() {
+	tail -n 0 -f /var/log/nginx/*
 }
 
 quick_deploy_fun_hb_client () {
