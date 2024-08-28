@@ -610,7 +610,7 @@ fun_install() {
 
 	git clone --depth 1 --no-single-branch -b $FUN_FRONTEND_REPOSITORY_BRANCH $FUN_FRONTEND_REPOSITORY_URL .
 
-	yarn 2>/dev/null || true
+	yarn
 	git rm -r --cached .
 
 	#--------------------------------------------------
@@ -662,7 +662,7 @@ CSS
 
 	cp -a src/templates/. conf
 
-	yarn 2>/dev/null || true
+	yarn
 	yarn prebuild
 	yarn build
 
